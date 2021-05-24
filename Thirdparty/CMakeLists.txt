@@ -1,0 +1,35 @@
+cmake_minimum_required(VERSION 3.1)
+
+project(ThirdParty)
+
+# Set the language support level
+set(CMAKE_C_STANDARD 14)
+set(CMAKE_CXX_STANDARD 14)
+
+# Where intermediate builds end up
+set(BUILD_INSTALL_PREFIX ${ThirdParty_SOURCE_DIR}/../../Develop/${CMAKE_BUILD_TYPE})
+
+# Set common cmake arguments
+if (DEFINED CMAKE_TOOLCHAIN_FILE)
+	set(common_cmake_args "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE};-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE};-DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX}")
+else()
+	set(common_cmake_args "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE};-DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX}")
+endif()
+
+# Set up external project support
+include(ExternalProject)
+
+ExternalProject_Add(g2o
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/g2o/g2o-master
+	BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/g2o/g2o-master
+	INSTALL_DIR ${BUILD_INSTALL_PREFIX}
+    CMAKE_ARGS "${common_cmake_args};-DBUILD_SHARED_LIBS=NO;-DBUILD_WITH_MARCH_NATIVE=NO;-DG2O_BUILD_EXAMPLES=OFF"
+)
+
+ExternalProject_Add(g2o
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/g2o/g2o-master
+	BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/g2o/g2o-master
+	INSTALL_DIR ${BUILD_INSTALL_PREFIX}
+    CMAKE_ARGS "${common_cmake_args};-DBUILD_SHARED_LIBS=NO;-DBUILD_WITH_MARCH_NATIVE=NO;-DG2O_BUILD_EXAMPLES=OFF"
+)
+
