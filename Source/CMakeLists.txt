@@ -15,6 +15,7 @@ find_package(OpenCV 3.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(DBoW2 REQUIRED)
+find_package(DLib REQUIRED)
 find_package(g2o REQUIRED)
 
 add_subdirectory(Libraries)
