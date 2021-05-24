@@ -18,18 +18,33 @@
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// SJJ: rather than edit the base class, modified the subclass to include
+// the extra methods. Also use the DBoW2 class typedef which was set up
+// for ORB features.
 
 #ifndef ORBVOCABULARY_H
 #define ORBVOCABULARY_H
 
-#include"DBoW2/FORB.h"
-#include"DBoW2/TemplatedVocabulary.h"
+#include "DBoW2/FORB.h"
+#include "DBoW2/DBoW2.h"
 
 namespace ORB_SLAM2
 {
 
-typedef DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB>
-  ORBVocabulary;
+  class ORBVocabulary : public ::OrbVocabulary
+    {
+    public:
+        ORBVocabulary(int k = 10, int L = 5, 
+		      DBoW2::WeightingType weighting = DBoW2::TF_IDF, DBoW2::ScoringType scoring = DBoW2::L1_NORM);
+	  
+	bool loadFromTextFile(const std::string &filename);
+	
+	void saveToTextFile(const std::string &filename) const;
+
+    private:
+
+	using F = DBoW2::FORB;
+    };
 
 } //namespace ORB_SLAM
 

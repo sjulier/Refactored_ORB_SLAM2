@@ -20,6 +20,7 @@ src/LocalMapping.cc
 src/LoopClosing.cc
 src/ORBextractor.cc
 src/ORBmatcher.cc
+src/ORBVocabulary.cc
 src/FrameDrawer.cc
 src/Converter.cc
 src/MapPoint.cc

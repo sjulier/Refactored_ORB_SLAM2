@@ -65,8 +65,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
     mpVocabulary = new ORBVocabulary();
-    mpVocabulary->load(strVocFile);
-    if(mpVocabulary->empty())
+    
+    if(!mpVocabulary->loadFromTextFile(strVocFile))
     {
         cerr << "Wrong path to vocabulary. " << endl;
         cerr << "Falied to open at: " << strVocFile << endl;
