@@ -25,6 +25,9 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
+#include <chrono>
+
+using namespace ::std;
 
 namespace ORB_SLAM2
 {
@@ -62,8 +65,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
 
     mpVocabulary = new ORBVocabulary();
-    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
-    if(!bVocLoad)
+    mpVocabulary->load(strVocFile);
+    if(mpVocabulary->empty())
     {
         cerr << "Wrong path to vocabulary. " << endl;
         cerr << "Falied to open at: " << strVocFile << endl;
@@ -131,7 +134,8 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
             // Wait until Local Mapping has effectively stopped
             while(!mpLocalMapper->isStopped())
             {
-                usleep(1000);
+	        this_thread::sleep_for(chrono::microseconds(1000));
+		//                usleep(1000);
             }
 
             mpTracker->InformOnlyTracking(true);
@@ -182,7 +186,8 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
             // Wait until Local Mapping has effectively stopped
             while(!mpLocalMapper->isStopped())
             {
-                usleep(1000);
+	        this_thread::sleep_for(chrono::microseconds(1000));
+		//                usleep(1000);
             }
 
             mpTracker->InformOnlyTracking(true);
@@ -233,7 +238,8 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
             // Wait until Local Mapping has effectively stopped
             while(!mpLocalMapper->isStopped())
             {
-                usleep(1000);
+	        this_thread::sleep_for(chrono::microseconds(1000));
+                //usleep(1000);
             }
 
             mpTracker->InformOnlyTracking(true);
@@ -306,13 +312,15 @@ void System::Shutdown()
     {
         mpViewer->RequestFinish();
         while(!mpViewer->isFinished())
-            usleep(5000);
+	   this_thread::sleep_for(chrono::microseconds(5000));
+	//usleep(5000);
     }
 
     // Wait until all thread have effectively stopped
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
     {
-        usleep(5000);
+        this_thread::sleep_for(chrono::microseconds(5000));
+        //usleep(5000);
     }
 
     if(mpViewer)

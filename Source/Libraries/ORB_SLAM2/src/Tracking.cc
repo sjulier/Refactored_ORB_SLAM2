@@ -33,12 +33,12 @@
 #include"Optimizer.h"
 #include"PnPsolver.h"
 
-#include<iostream>
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <mutex>
 
-#include<mutex>
-
-
-using namespace std;
+using namespace ::std;
 
 namespace ORB_SLAM2
 {
@@ -1509,7 +1509,8 @@ void Tracking::Reset()
     {
         mpViewer->RequestStop();
         while(!mpViewer->isStopped())
-            usleep(3000);
+	    this_thread::sleep_for(chrono::microseconds(3000));
+	//usleep(3000);
     }
 
     // Reset Local Mapping

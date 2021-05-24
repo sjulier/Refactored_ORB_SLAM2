@@ -32,6 +32,8 @@
 #include<thread>
 
 
+using namespace ::std;
+
 namespace ORB_SLAM2
 {
 
@@ -81,7 +83,8 @@ void LoopClosing::Run()
         if(CheckFinish())
             break;
 
-        usleep(5000);
+	this_thread::sleep_for(chrono::microseconds(5000));
+	//usleep(5000);
     }
 
     SetFinish();
@@ -425,7 +428,8 @@ void LoopClosing::CorrectLoop()
     // Wait until Local Mapping has effectively stopped
     while(!mpLocalMapper->isStopped())
     {
-        usleep(1000);
+      this_thread::sleep_for(chrono::microseconds(1000));
+      ///usleep(1000);
     }
 
     // Ensure current keyframe is updated
@@ -627,7 +631,8 @@ void LoopClosing::RequestReset()
         if(!mbResetRequested)
             break;
         }
-        usleep(5000);
+	this_thread::sleep_for(chrono::microseconds(5000));
+	//usleep(5000);
     }
 }
 
@@ -667,7 +672,8 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
 
             while(!mpLocalMapper->isStopped() && !mpLocalMapper->isFinished())
             {
-                usleep(1000);
+	      this_thread::sleep_for(chrono::microseconds(1000));
+	      //usleep(1000);
             }
 
             // Get Map Mutex

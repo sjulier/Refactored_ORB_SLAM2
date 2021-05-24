@@ -31,6 +31,8 @@
 
 using namespace std;
 
+using namespace ::std;
+
 namespace ORB_SLAM2
 {
 

@@ -21,6 +21,8 @@
 
 #include "Converter.h"
 
+using namespace ::std;
+
 namespace ORB_SLAM2
 {
 
