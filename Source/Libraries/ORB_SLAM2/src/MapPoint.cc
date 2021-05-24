@@ -95,7 +95,7 @@ KeyFrame* MapPoint::GetReferenceKeyFrame()
     return mpRefKF;
 }
 
-void MapPoint::AddObservation(KeyFrame* pKF, size_t idx)
+void MapPoint::AddObservation(KeyFrame* pKF, std::size_t idx)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     if(mObservations.count(pKF))
@@ -136,7 +136,7 @@ void MapPoint::EraseObservation(KeyFrame* pKF)
         SetBadFlag();
 }
 
-map<KeyFrame*, size_t> MapPoint::GetObservations()
+map<KeyFrame*, std::size_t> MapPoint::GetObservations()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return mObservations;
@@ -150,7 +150,7 @@ int MapPoint::Observations()
 
 void MapPoint::SetBadFlag()
 {
-    map<KeyFrame*,size_t> obs;
+    map<KeyFrame*,std::size_t> obs;
     {
         unique_lock<mutex> lock1(mMutexFeatures);
         unique_lock<mutex> lock2(mMutexPos);
@@ -158,7 +158,7 @@ void MapPoint::SetBadFlag()
         obs = mObservations;
         mObservations.clear();
     }
-    for(map<KeyFrame*,size_t>::iterator mit=obs.begin(), mend=obs.end(); mit!=mend; mit++)
+    for(map<KeyFrame*,std::size_t>::iterator mit=obs.begin(), mend=obs.end(); mit!=mend; mit++)
     {
         KeyFrame* pKF = mit->first;
         pKF->EraseMapPointMatch(mit->second);
@@ -180,7 +180,7 @@ void MapPoint::Replace(MapPoint* pMP)
         return;
 
     int nvisible, nfound;
-    map<KeyFrame*,size_t> obs;
+    map<KeyFrame*,std::size_t> obs;
     {
         unique_lock<mutex> lock1(mMutexFeatures);
         unique_lock<mutex> lock2(mMutexPos);
@@ -192,7 +192,7 @@ void MapPoint::Replace(MapPoint* pMP)
         mpReplaced = pMP;
     }
 
-    for(map<KeyFrame*,size_t>::iterator mit=obs.begin(), mend=obs.end(); mit!=mend; mit++)
+    for(map<KeyFrame*,std::size_t>::iterator mit=obs.begin(), mend=obs.end(); mit!=mend; mit++)
     {
         // Replace measurement in keyframe
         KeyFrame* pKF = mit->first;
@@ -242,9 +242,9 @@ float MapPoint::GetFoundRatio()
 void MapPoint::ComputeDistinctiveDescriptors()
 {
     // Retrieve all observed descriptors
-    vector<cv::Mat> vDescriptors;
+    std::vector<cv::Mat> vDescriptors;
 
-    map<KeyFrame*,size_t> observations;
+    map<KeyFrame*,std::size_t> observations;
 
     {
         unique_lock<mutex> lock1(mMutexFeatures);
@@ -258,7 +258,7 @@ void MapPoint::ComputeDistinctiveDescriptors()
 
     vDescriptors.reserve(observations.size());
 
-    for(map<KeyFrame*,size_t>::iterator mit=observations.begin(), mend=observations.end(); mit!=mend; mit++)
+    for(map<KeyFrame*,std::size_t>::iterator mit=observations.begin(), mend=observations.end(); mit!=mend; mit++)
     {
         KeyFrame* pKF = mit->first;
 
@@ -270,13 +270,13 @@ void MapPoint::ComputeDistinctiveDescriptors()
         return;
 
     // Compute distances between them
-    const size_t N = vDescriptors.size();
+    const std::size_t N = vDescriptors.size();
 
     float Distances[N][N];
-    for(size_t i=0;i<N;i++)
+    for(std::size_t i=0;i<N;i++)
     {
         Distances[i][i]=0;
-        for(size_t j=i+1;j<N;j++)
+        for(std::size_t j=i+1;j<N;j++)
         {
             int distij = ORBmatcher::DescriptorDistance(vDescriptors[i],vDescriptors[j]);
             Distances[i][j]=distij;
@@ -287,9 +287,9 @@ void MapPoint::ComputeDistinctiveDescriptors()
     // Take the descriptor with least median distance to the rest
     int BestMedian = INT_MAX;
     int BestIdx = 0;
-    for(size_t i=0;i<N;i++)
+    for(std::size_t i=0;i<N;i++)
     {
-        vector<int> vDists(Distances[i],Distances[i]+N);
+        std::vector<int> vDists(Distances[i],Distances[i]+N);
         sort(vDists.begin(),vDists.end());
         int median = vDists[0.5*(N-1)];
 
@@ -329,7 +329,7 @@ bool MapPoint::IsInKeyFrame(KeyFrame *pKF)
 
 void MapPoint::UpdateNormalAndDepth()
 {
-    map<KeyFrame*,size_t> observations;
+    map<KeyFrame*,std::size_t> observations;
     KeyFrame* pRefKF;
     cv::Mat Pos;
     {
@@ -347,7 +347,7 @@ void MapPoint::UpdateNormalAndDepth()
 
     cv::Mat normal = cv::Mat::zeros(3,1,CV_32F);
     int n=0;
-    for(map<KeyFrame*,size_t>::iterator mit=observations.begin(), mend=observations.end(); mit!=mend; mit++)
+    for(map<KeyFrame*,std::size_t>::iterator mit=observations.begin(), mend=observations.end(); mit!=mend; mit++)
     {
         KeyFrame* pKF = mit->first;
         cv::Mat Owi = pKF->GetCameraCenter();

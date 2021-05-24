@@ -28,19 +28,19 @@
 #include "KeyFrame.h"
 #include "ORBmatcher.h"
 
-#include "DBoW2/DUtils/Random.h"
+#include "DUtils/Random.h"
 
 namespace ORB_SLAM2
 {
 
 
-Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> &vpMatched12, const bool bFixScale):
+Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const std::vector<MapPoint *> &vpMatched12, const bool bFixScale):
     mnIterations(0), mnBestInliers(0), mbFixScale(bFixScale)
 {
     mpKF1 = pKF1;
     mpKF2 = pKF2;
 
-    vector<MapPoint*> vpKeyFrameMP1 = pKF1->GetMapPointMatches();
+    std::vector<MapPoint*> vpKeyFrameMP1 = pKF1->GetMapPointMatches();
 
     mN1 = vpMatched12.size();
 
@@ -58,7 +58,7 @@ Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> 
 
     mvAllIndices.reserve(mN1);
 
-    size_t idx=0;
+    std::size_t idx=0;
     for(int i1=0; i1<mN1; i1++)
     {
         if(vpMatched12[i1])
@@ -137,10 +137,10 @@ void Sim3Solver::SetRansacParameters(double probability, int minInliers, int max
     mnIterations = 0;
 }
 
-cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers)
+cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, std::vector<bool> &vbInliers, int &nInliers)
 {
     bNoMore = false;
-    vbInliers = vector<bool>(mN1,false);
+    vbInliers = std::vector<bool>(mN1,false);
     nInliers=0;
 
     if(N<mRansacMinInliers)
@@ -149,7 +149,7 @@ cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInli
         return cv::Mat();
     }
 
-    vector<size_t> vAvailableIndices;
+    std::vector<std::size_t> vAvailableIndices;
 
     cv::Mat P3Dc1i(3,3,CV_32F);
     cv::Mat P3Dc2i(3,3,CV_32F);
@@ -206,7 +206,7 @@ cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInli
     return cv::Mat();
 }
 
-cv::Mat Sim3Solver::find(vector<bool> &vbInliers12, int &nInliers)
+cv::Mat Sim3Solver::find(std::vector<bool> &vbInliers12, int &nInliers)
 {
     bool bFlag;
     return iterate(mRansacMaxIts,bFlag,vbInliers12,nInliers);
@@ -339,13 +339,13 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
 void Sim3Solver::CheckInliers()
 {
-    vector<cv::Mat> vP1im2, vP2im1;
+    std::vector<cv::Mat> vP1im2, vP2im1;
     Project(mvX3Dc2,vP2im1,mT12i,mK1);
     Project(mvX3Dc1,vP1im2,mT21i,mK2);
 
     mnInliersi=0;
 
-    for(size_t i=0; i<mvP1im1.size(); i++)
+    for(std::size_t i=0; i<mvP1im1.size(); i++)
     {
         cv::Mat dist1 = mvP1im1[i]-vP2im1[i];
         cv::Mat dist2 = vP1im2[i]-mvP2im2[i];
@@ -379,7 +379,7 @@ float Sim3Solver::GetEstimatedScale()
     return mBestScale;
 }
 
-void Sim3Solver::Project(const vector<cv::Mat> &vP3Dw, vector<cv::Mat> &vP2D, cv::Mat Tcw, cv::Mat K)
+void Sim3Solver::Project(const std::vector<cv::Mat> &vP3Dw, std::vector<cv::Mat> &vP2D, cv::Mat Tcw, cv::Mat K)
 {
     cv::Mat Rcw = Tcw.rowRange(0,3).colRange(0,3);
     cv::Mat tcw = Tcw.rowRange(0,3).col(3);
@@ -391,7 +391,7 @@ void Sim3Solver::Project(const vector<cv::Mat> &vP3Dw, vector<cv::Mat> &vP2D, cv
     vP2D.clear();
     vP2D.reserve(vP3Dw.size());
 
-    for(size_t i=0, iend=vP3Dw.size(); i<iend; i++)
+    for(std::size_t i=0, iend=vP3Dw.size(); i<iend; i++)
     {
         cv::Mat P3Dc = Rcw*vP3Dw[i]+tcw;
         const float invz = 1/(P3Dc.at<float>(2));
@@ -402,7 +402,7 @@ void Sim3Solver::Project(const vector<cv::Mat> &vP3Dw, vector<cv::Mat> &vP2D, cv
     }
 }
 
-void Sim3Solver::FromCameraToImage(const vector<cv::Mat> &vP3Dc, vector<cv::Mat> &vP2D, cv::Mat K)
+void Sim3Solver::FromCameraToImage(const std::vector<cv::Mat> &vP3Dc, std::vector<cv::Mat> &vP2D, cv::Mat K)
 {
     const float &fx = K.at<float>(0,0);
     const float &fy = K.at<float>(1,1);
@@ -412,7 +412,7 @@ void Sim3Solver::FromCameraToImage(const vector<cv::Mat> &vP3Dc, vector<cv::Mat>
     vP2D.clear();
     vP2D.reserve(vP3Dc.size());
 
-    for(size_t i=0, iend=vP3Dc.size(); i<iend; i++)
+    for(std::size_t i=0, iend=vP3Dc.size(); i<iend; i++)
     {
         const float invz = 1/(vP3Dc[i].at<float>(2));
         const float x = vP3Dc[i].at<float>(0)*invz;

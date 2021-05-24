@@ -72,11 +72,11 @@ protected:
     std::vector<MapPoint*> mvpMapPoints1;
     std::vector<MapPoint*> mvpMapPoints2;
     std::vector<MapPoint*> mvpMatches12;
-    std::vector<size_t> mvnIndices1;
-    std::vector<size_t> mvSigmaSquare1;
-    std::vector<size_t> mvSigmaSquare2;
-    std::vector<size_t> mvnMaxError1;
-    std::vector<size_t> mvnMaxError2;
+    std::vector<std::size_t> mvnIndices1;
+    std::vector<std::size_t> mvSigmaSquare1;
+    std::vector<std::size_t> mvSigmaSquare2;
+    std::vector<std::size_t> mvnMaxError1;
+    std::vector<std::size_t> mvnMaxError2;
 
     int N;
     int mN1;
@@ -103,7 +103,7 @@ protected:
     bool mbFixScale;
 
     // Indices for random selection
-    std::vector<size_t> mvAllIndices;
+    std::vector<std::size_t> mvAllIndices;
 
     // Projections
     std::vector<cv::Mat> mvP1im1;
