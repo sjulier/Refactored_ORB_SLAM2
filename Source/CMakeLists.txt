@@ -12,18 +12,13 @@ set(CMAKE_C_STANDARD 14)
 set(CMAKE_CXX_STANDARD 14)
 
 # Find OpenCV 4.0; the fallback is OpenCV 3.0
- 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
 else()
-
-find_package(OpenCV 4.0)
-if(NOT OpenCV_FOUND)
-  find_package(OpenCV 3.0)
+  find_package(OpenCV 4.0)
   if(NOT OpenCV_FOUND)
-    message(FATAL_ERROR "OpenCV > 3.0 not found.")
+    find_package(OpenCV 3.0 REQUIRED)
   endif()
-endif()
 endif()
 message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
 
