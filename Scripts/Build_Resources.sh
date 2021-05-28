@@ -22,10 +22,10 @@ case "${unameOut}" in
     *)          num_jobs=2
 esac
 
-echo Build type ${build_type} using ${num_jobs} parallel jobs
+echo Resources: Build type ${build_type} using ${num_jobs} parallel jobs
 root_dir=`pwd`
-mkdir -p Build/${build_type}/Source
-pushd Build/${build_type}/Source > /dev/null
-cmake ${root_dir}/Source -DCMAKE_BUILD_TYPE=${build_type} -DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX} -DDEFAULT_VOC_FILE=${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.txt
-make -j${num_jobs}
+mkdir -p Build/${build_type}/Source/Resources
+pushd Build/${build_type}/Source/Resources > /dev/null
+cmake ${root_dir}/Source/Resources -DCMAKE_BUILD_TYPE=${build_type}
+make -j${num_jobs} install
 popd

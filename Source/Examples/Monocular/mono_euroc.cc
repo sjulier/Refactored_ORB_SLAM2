@@ -35,16 +35,16 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
 
 int main(int argc, char **argv)
 {
-    if(argc != 5)
+    if(argc != 4)
     {
-        cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_image_folder path_to_times_file" << endl;
+        cerr << endl << "Usage: ./mono_tum path_to_settings path_to_image_folder path_to_times_file" << endl;
         return 1;
     }
 
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
-    LoadImages(string(argv[3]), string(argv[4]), vstrImageFilenames, vTimestamps);
+    LoadImages(string(argv[2]), string(argv[3]), vstrImageFilenames, vTimestamps);
 
     int nImages = vstrImageFilenames.size();
 
@@ -55,7 +55,8 @@ int main(int argc, char **argv)
     }
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
+    string settingsFile = string(DEFAULT_SETTINGS_DIRECTORY) + string("/") + string(argv[1]);
+    ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,settingsFile,ORB_SLAM2::System::MONOCULAR,true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
