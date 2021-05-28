@@ -36,9 +36,9 @@ void LoadImages(const string &strPathLeft, const string &strPathRight, const str
 
 int main(int argc, char **argv)
 {
-    if(argc != 6)
+    if(argc != 5)
     {
-        cerr << endl << "Usage: ./stereo_euroc path_to_vocabulary path_to_settings path_to_left_folder path_to_right_folder path_to_times_file" << endl;
+        cerr << endl << "Usage: ./stereo_euroc path_to_settings path_to_left_folder path_to_right_folder path_to_times_file" << endl;
         return 1;
     }
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     vector<string> vstrImageLeft;
     vector<string> vstrImageRight;
     vector<double> vTimeStamp;
-    LoadImages(string(argv[3]), string(argv[4]), string(argv[5]), vstrImageLeft, vstrImageRight, vTimeStamp);
+    LoadImages(string(argv[2]), string(argv[3]), string(argv[4]), vstrImageLeft, vstrImageRight, vTimeStamp);
 
     if(vstrImageLeft.empty() || vstrImageRight.empty())
     {
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     }
 
     // Read rectification parameters
-    cv::FileStorage fsSettings(argv[2], cv::FileStorage::READ);
+    cv::FileStorage fsSettings(argv[1], cv::FileStorage::READ);
     if(!fsSettings.isOpened())
     {
         cerr << "ERROR: Wrong path to settings" << endl;
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     const int nImages = vstrImageLeft.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::STEREO,true);
+    ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,argv[1],ORB_SLAM2::System::STEREO,true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;

@@ -13,6 +13,13 @@ list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
 set(CMAKE_C_STANDARD 14)
 set(CMAKE_CXX_STANDARD 14)
 
+# The default vocabulary
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+   add_compile_definitions(DEFAULT_ORB_VOCABULARY="${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.txt")
+else()
+   add_definitions(-DDEFAULT_ORB_VOCABULARY="${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.txt")
+endif()
+
 # Sort out the OpenGL warning
 if (POLICY CMP0072)
    set(OpenGL_GL_PREFERENCE LEGACY)
