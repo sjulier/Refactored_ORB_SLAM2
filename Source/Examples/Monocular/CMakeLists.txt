@@ -6,3 +6,5 @@ target_link_libraries(mono_euroc ORB_SLAM2)
 
 add_executable(mono_kitti mono_kitti.cc)
 target_link_libraries(mono_kitti ORB_SLAM2)
+
+install(TARGETS mono_tum mono_euroc mono_kitti RUNTIME DESTINATION ${BUILD_INSTALL_PREFIX}/bin)

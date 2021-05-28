@@ -61,6 +61,9 @@ int main(int argc, char **argv)
     cout << "Images in the sequence: " << nImages << endl << endl;
 
     // Main loop
+    int main_error = 0;
+    std::thread runthread([&]() {  // Start in new thread
+
     cv::Mat im;
     for(int ni=0; ni<nImages; ni++)
     {
@@ -72,7 +75,8 @@ int main(int argc, char **argv)
         {
             cerr << endl << "Failed to load image at: "
                  << string(argv[3]) << "/" << vstrImageFilenames[ni] << endl;
-            return 1;
+            main_error = 1;
+            return;
         }
 
         chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
@@ -97,10 +101,21 @@ int main(int argc, char **argv)
 	  this_thread::sleep_for(chrono::duration<double>(T-ttrack));
 	//usleep((T-ttrack)*1e6);
     }
+       });
+
+    // Start the visualization thread
+    SLAM.StartViewer();
+    
+    cout << "Viewer started, waiting for thread." << endl;
+    runthread.join();
+    if (main_error != 0)
+        return main_error;
+    cout << "Tracking thread joined..." << endl;
 
     // Stop all threads
     SLAM.Shutdown();
-
+    cout << "System Shutdown" << endl;
+    
     // Tracking time statistics
     sort(vTimesTrack.begin(),vTimesTrack.end());
     float totaltime = 0;

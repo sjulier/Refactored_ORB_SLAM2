@@ -67,9 +67,17 @@ if(BUILD_DVision)
   endif(Boost_FOUND)
 endif(BUILD_DVision)
 
-
 if(BUILD_DUtilsCV OR BUILD_DVision)
-  find_package(OpenCV REQUIRED)
+  # Find OpenCV 4.0; the fallback is OpenCV 3.0
+  find_package(OpenCV 4.0)
+  if(NOT OpenCV_FOUND)
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
+    else()
+      find_package(OpenCV 3.0 REQUIRED)
+    endif()
+  endif()
+  message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
 endif(BUILD_DUtilsCV OR BUILD_DVision)
 
 if(BUILD_SHARED_LIBS AND NOT WIN32)
