@@ -4,5 +4,4 @@ This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-
 
 You should be able to build by running:
 
-./Build_ThirdParty.sh
 ./Build.sh
