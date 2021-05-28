@@ -14,6 +14,6 @@ then
   exit 1
 fi
 
-./Build_ThirdParty.sh ${build_type}
-./Build_Source.sh ${build_type}
+./Scripts/Build_ThirdParty.sh ${build_type}
+./Scripts/Build_Source.sh ${build_type}
 

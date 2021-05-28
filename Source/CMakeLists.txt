@@ -4,6 +4,8 @@ project(ORB_SLAM2)
 
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
+# Set where to install stuff
+
 set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
 list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
 
@@ -11,22 +13,32 @@ list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
 set(CMAKE_C_STANDARD 14)
 set(CMAKE_CXX_STANDARD 14)
 
-# Find OpenCV 4.0; the fallback is OpenCV 3.0
+# Sort out the OpenGL warning
+if (POLICY CMP0072)
+   set(OpenGL_GL_PREFERENCE LEGACY)
+endif()
 
+# Find OpenCV 4.0; the fallback is OpenCV 3.0
 find_package(OpenCV 4.0)
 if(NOT OpenCV_FOUND)
-  find_package(OpenCV 3.0)
-  if(NOT OpenCV_FOUND)
-    message(FATAL_ERROR "OpenCV > 3.0 not found.")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
+  else()
+    find_package(OpenCV 3.0 REQUIRED)
   endif()
 endif()
-message(INFO "OPENCV VERSION:" ${OpenCV_VERSION})
+message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
 
+# Find the other necessary packages
 find_package(Eigen3 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(DBoW2 REQUIRED)
 find_package(DLib REQUIRED)
 find_package(g2o REQUIRED)
 
+# Add the libraries and examples
 add_subdirectory(Libraries)
 add_subdirectory(Examples)
+add_subdirectory(Resources)
+
+# Third party libraries are built separately to speed things up

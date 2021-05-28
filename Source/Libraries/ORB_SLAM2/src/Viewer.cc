@@ -74,6 +74,7 @@ void Viewer::Run()
     pangolin::Var<bool> menuShowGraph("menu.Show Graph",true,true);
     pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode",false,true);
     pangolin::Var<bool> menuReset("menu.Reset",false,false);
+    pangolin::Var<bool> menuFinish("menu.Finish",false,false);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState s_cam(
@@ -137,7 +138,9 @@ void Viewer::Run()
         pangolin::FinishFrame();
 
         cv::Mat im = mpFrameDrawer->DrawFrame();
-        cv::imshow("ORB-SLAM2: Current Frame",im);
+        cv::Mat im_half;
+        cv::resize(im, im_half, cv::Size(), 0.5, 0.5);
+        cv::imshow("ORB-SLAM2: Current Frame",im_half);
         cv::waitKey(mT);
 
         if(menuReset)
@@ -155,12 +158,17 @@ void Viewer::Run()
             menuReset = false;
         }
 
+        if (menuFinish)
+        {
+            RequestFinish();
+        }
+
         if(Stop())
         {
             while(isStopped())
             {
-	      this_thread::sleep_for(chrono::microseconds(3000));
-	      //usleep(3000);
+              this_thread::sleep_for(chrono::microseconds(3000));
+              //usleep(3000);
             }
         }
 

@@ -29,7 +29,17 @@ set(SRCS
 set(DEPENDENCY_DIR ${CMAKE_CURRENT_BINARY_DIR}/dependencies)
 set(DEPENDENCY_INSTALL_DIR ${DEPENDENCY_DIR}/install)
 
-find_package(OpenCV REQUIRED)
+# Find OpenCV 4.0; the fallback is OpenCV 3.0
+find_package(OpenCV 4.0)
+if(NOT OpenCV_FOUND)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
+  else()
+    find_package(OpenCV 3.0 REQUIRED)
+  endif()
+endif()
+message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 if(BUILD_DBoW2)
