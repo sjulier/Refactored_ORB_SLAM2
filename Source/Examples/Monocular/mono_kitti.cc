@@ -50,7 +50,11 @@ int main(int argc, char **argv)
     int nImages = vstrImageFilenames.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,argv[1],ORB_SLAM2::System::MONOCULAR,true);
+     string settingsFile = string(DEFAULT_SETTINGS_DIRECTORY) + string("/") + string(argv[1]);	
+    // ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,settingsFile,ORB_SLAM2::System::MONOCULAR,true);
+    ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,settingsFile,ORB_SLAM2::System::MONOCULAR,true);
+
+    // ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,argv[1],ORB_SLAM2::System::MONOCULAR,true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -60,6 +64,8 @@ int main(int argc, char **argv)
     cout << "Start processing sequence ..." << endl;
     cout << "Images in the sequence: " << nImages << endl << endl;
 
+        int main_error = 0;
+    std::thread runthread([&]() {  // Start in new thread
     // Main loop
     cv::Mat im;
     for(int ni=0; ni<nImages; ni++)
@@ -96,6 +102,14 @@ int main(int argc, char **argv)
 	  this_thread::sleep_for(chrono::duration<double>(T-ttrack));
 	//            usleep((T-ttrack)*1e6);
     }
+       });
+    SLAM.StartViewer();
+    
+    cout << "Viewer started, waiting for thread." << endl;
+    runthread.join();
+    if (main_error != 0)
+        return main_error;
+    cout << "Tracking thread joined..." << endl;
 
     // Stop all threads
     SLAM.Shutdown();
