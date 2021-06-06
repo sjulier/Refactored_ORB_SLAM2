@@ -85,5 +85,5 @@ rem Set up the tool chain file which is needed
 set toolchain_file=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
 
 rem Now call the build scripts
-call Build_ThirdParty.bat %build_type% %toolchain_file%
-call Build_Source.bat %build_type% %toolchain_file%
+call Scripts\Build_ThirdParty.bat %build_type% %toolchain_file%
+call Scripts\Build_Source.bat %build_type% %toolchain_file%
