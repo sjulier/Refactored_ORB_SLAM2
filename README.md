@@ -19,4 +19,19 @@ You should be able to build by running:
 3. Therefore, a example command for running KITTI00 dataset would be:
 
    `./Build/Debug/Source/Examples/Monocular/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
+  
+4. To simplify development, if you go to the directory:
 
+   `cd ./Build/Debug/Source/Examples/Monocular`
+   
+   You can run the code from:
+   
+   `./mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
+  
+   You can recompile code changes from:
+   
+   `make`
+  
+On linux it is highly recommend you get used to the valgrind libraries.
+   
+   
