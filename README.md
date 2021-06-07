@@ -32,6 +32,6 @@ You should be able to build by running:
    
    `make`
   
-On linux it is highly recommend you get used to the valgrind libraries.
+On linux it is highly recommend you get used to using valgrind. See https://www.valgrind.org/docs/manual/quick-start.html
    
    
