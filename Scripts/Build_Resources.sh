@@ -29,3 +29,6 @@ pushd Build/${build_type}/Source/Resources > /dev/null
 cmake ${root_dir}/Source/Resources -DCMAKE_BUILD_TYPE=${build_type}
 make -j${num_jobs} install
 popd
+
+echo "Converting vocabulary to binary"
+./Tools/bin_vocabulary
