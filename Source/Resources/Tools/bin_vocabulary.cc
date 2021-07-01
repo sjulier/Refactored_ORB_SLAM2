@@ -2,9 +2,7 @@
 #include <string>
 #include <iostream>
 
-//#include "../../../Libraries/ORB_SLAM2/include/ORBVocabulary.h"
-#include "../../Libraries/ORB_SLAM2/include/ORBVocabulary.h"
-
+#include "ORBVocabulary.h"
 
 using namespace std;
 
@@ -50,8 +48,12 @@ int main(int argc, char **argv) {
     cout << "BoW load/save benchmark" << endl;
     ORB_SLAM2::ORBVocabulary* voc = new ORB_SLAM2::ORBVocabulary();
 
-    load_as_text(voc, "Vocabulary/ORBvoc.txt");
-    save_as_binary(voc, "Vocabulary/ORBvoc.bin");
+    // DEFAULT_ORB_VOCABULARY stores where the vocabulary is installed
+    // 
+    
+    load_as_text(voc, DEFAULT_ORB_VOCABULARY);
+    save_as_binary(voc, DEFAULT_BINARY_ORB_VOCABULARY);
+    cout << DEFAULT_BINARY_ORB_VOCABULARY << endl;
 
     return 0;
 }
