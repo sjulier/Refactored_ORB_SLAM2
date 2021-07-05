@@ -30,7 +30,7 @@ if (POLICY CMP0072)
 endif()
 
 # Find OpenCV 4.0; the fallback is OpenCV 3.0
-find_package(OpenCV 4.0)
+find_package(OpenCV 4.0 QUIET)
 if(NOT OpenCV_FOUND)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
