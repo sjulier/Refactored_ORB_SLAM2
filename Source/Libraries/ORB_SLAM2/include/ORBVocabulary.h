@@ -41,7 +41,22 @@ namespace ORB_SLAM2
 	
 	void saveToTextFile(const std::string &filename) const;
 
-    private:
+
+//  https://github.com/raulmur/ORB_SLAM2/pull/21
+	/**
+   * Loads the vocabulary from a binary file
+   * @param filename
+   */
+      bool loadFromBinaryFile(const std::string &filename);
+
+      /**
+       * Saves the vocabulary into a binary file
+       * @param filename
+       */
+      void saveToBinaryFile(const std::string &filename) const;
+
+
+  private:
 
 	using F = DBoW2::FORB;
     };

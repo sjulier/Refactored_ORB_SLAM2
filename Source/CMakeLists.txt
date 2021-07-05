@@ -14,10 +14,14 @@ set(CMAKE_C_STANDARD 14)
 set(CMAKE_CXX_STANDARD 14)
 
 # The default vocabulary
+set(DEFAULT_ORB_VOCABULARY "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.txt")
+set(DEFAULT_BINARY_ORB_VOCABULARY "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.bin")
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
-   add_compile_definitions(DEFAULT_ORB_VOCABULARY="${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.txt")
+   add_compile_definitions(DEFAULT_ORB_VOCABULARY="${DEFAULT_ORB_VOCABULARY}")
+   add_compile_definitions(DEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 else()
-   add_definitions(-DDEFAULT_ORB_VOCABULARY="${BUILD_INSTALL_PREFIX}/var/lib/orbslam2/ORBvoc.txt")
+   add_definitions(-DDEFAULT_ORB_VOCABULARY="${DEFAULT_ORB_VOCABULARY}")
+   add_definitions(-DDEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 endif()
 
 # Sort out the OpenGL warning
@@ -26,7 +30,7 @@ if (POLICY CMP0072)
 endif()
 
 # Find OpenCV 4.0; the fallback is OpenCV 3.0
-find_package(OpenCV 4.0)
+find_package(OpenCV 4.0 QUIET)
 if(NOT OpenCV_FOUND)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
