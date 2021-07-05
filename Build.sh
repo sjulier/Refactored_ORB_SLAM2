@@ -15,6 +15,4 @@ then
 fi
 
 ./Scripts/Build_ThirdParty.sh ${build_type}
-./Scripts/Build_Resources.sh ${build_type}
 ./Scripts/Build_Source.sh ${build_type}
-
