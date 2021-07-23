@@ -38,7 +38,7 @@ src/Viewer.cc
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
-Eigen3::Eigen
+${EIGEN3_EIGEN_LIBS}
 pangolin
 ${DBoW2_LIBS}
 ${DLib_LIBS}
