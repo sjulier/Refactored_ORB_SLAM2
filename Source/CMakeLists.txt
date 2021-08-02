@@ -43,6 +43,15 @@ message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
 
 # Find the other necessary packages
 find_package(Eigen3 REQUIRED)
+
+# Backwards compatibilty for eigen
+if (TARGET Eigen3::Eigen)
+  set(EIGEN3_EIGEN_LIBS Eigen3::Eigen)
+else()
+  set(EIGEN3_EIGEN_LIBS )
+  include_directories(${EIGEN3_INCLUDE_DIR})
+endif ()
+
 find_package(Pangolin REQUIRED)
 find_package(DBoW2 REQUIRED)
 find_package(DLib REQUIRED)
