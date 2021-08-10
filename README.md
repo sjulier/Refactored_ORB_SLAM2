@@ -33,5 +33,15 @@ You should be able to build by running:
    `make`
   
 On linux it is highly recommend you get used to using valgrind. See https://www.valgrind.org/docs/manual/quick-start.html
+
+##### Other examples
+
+Suppose we wish to run `mono_tum` on the Freiburg fr1/xyz dataset. Download the data set from the repository directory (https://vision.in.tum.de/data/datasets/rgbd-dataset/download) and uncompress it to, say your `~/Downloads` directory. This should produce a directory called  `rgbd_dataset_freiburg1_xyz`.
+
+You can then run the code using:
+
+`./Build/Debug/Source/Examples/Monocular/mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`   
    
-   
+Or change to the `./Build/Debug/Source/Examples/Monocular` directory and run:
+
+`./mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`
