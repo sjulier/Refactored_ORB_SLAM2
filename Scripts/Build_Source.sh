@@ -13,6 +13,15 @@ then
   exit 1
 fi
 
+# Check if the vocabulary file exists. If not, uncompress it
+
+if [ ! -f "Source/Vocabulary/ORBvoc.txt" ]
+then
+    echo "Uncompressing vocabulary file."
+    unzip Source/Vocabulary/ORBvoc.txt.zip
+    mv ORBvoc.txt Source/Vocabulary
+fi
+
 # Heuristic to suggest how many CPUs to use - take
 # total memory, divide by 4GB, and round up
 unameOut="$(uname -s)"
@@ -28,4 +37,5 @@ mkdir -p Build/${build_type}/Source
 pushd Build/${build_type}/Source > /dev/null
 cmake ${root_dir}/Source -DCMAKE_BUILD_TYPE=${build_type} -DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX}
 make -j${num_jobs}
+make install
 popd

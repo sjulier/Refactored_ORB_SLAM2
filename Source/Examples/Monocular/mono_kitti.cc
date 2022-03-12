@@ -48,12 +48,9 @@ int main(int argc, char **argv) {
     int nImages = vstrImageFilenames.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    string settingsFile = string(DEFAULT_SETTINGS_DIRECTORY) + string("/") + string(argv[1]);
-    ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile, ORB_SLAM2::System::MONOCULAR,
-                           true);//binary readin
-//    ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,settingsFile,ORB_SLAM2::System::MONOCULAR,true);// original txt vocabulary file read in
-
-    // ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY,argv[1],ORB_SLAM2::System::MONOCULAR,true);
+    string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string(argv[1]);
+    ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile, ORB_SLAM2::System::MONOCULAR,
+                           true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;

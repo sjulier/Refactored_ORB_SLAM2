@@ -15,14 +15,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 # The default vocabulary
 set(DEFAULT_ORB_VOCABULARY_DIR "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2")
+set(DEFAULT_ORB_SETTINGS_DIR "${BUILD_INSTALL_PREFIX}/etc/orbslam2")
 string(CONCAT DEFAULT_ORB_VOCABULARY ${DEFAULT_ORB_VOCABULARY_DIR} "/ORBvoc.txt")
-string(CONCAT DEFAULT_BINARY_ORB_VOCABULARY ${DEFAULT_ORB_VOCABULARY_DIR} "/ORBvoc.bin")
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
    add_compile_definitions(DEFAULT_ORB_VOCABULARY="${DEFAULT_ORB_VOCABULARY}")
-   add_compile_definitions(DEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 else()
    add_definitions(-DDEFAULT_ORB_VOCABULARY="${DEFAULT_ORB_VOCABULARY}")
-   add_definitions(-DDEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 endif()
 
 # Sort out the OpenGL warning
@@ -60,5 +58,6 @@ find_package(g2o REQUIRED)
 # Add the libraries and examples
 add_subdirectory(Libraries)
 add_subdirectory(Examples)
+add_subdirectory(Vocabulary)
 
 # Third party libraries are built separately to speed things up
