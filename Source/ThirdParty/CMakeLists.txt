@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.1)
 project(ThirdParty)
 
 # Set the language support level
-set(CMAKE_C_STANDARD 14)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 
 # Where intermediate builds end up
 set(BUILD_INSTALL_PREFIX ${ThirdParty_SOURCE_DIR}/../../Develop/${CMAKE_BUILD_TYPE})

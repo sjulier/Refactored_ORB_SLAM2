@@ -10,8 +10,8 @@ set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TY
 list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
 
 # Set the language support level
-set(CMAKE_C_STANDARD 14)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 
 # The default vocabulary
 set(DEFAULT_ORB_VOCABULARY_DIR "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2")
@@ -60,6 +60,5 @@ find_package(g2o REQUIRED)
 # Add the libraries and examples
 add_subdirectory(Libraries)
 add_subdirectory(Examples)
-add_subdirectory(Resources)
 
 # Third party libraries are built separately to speed things up
