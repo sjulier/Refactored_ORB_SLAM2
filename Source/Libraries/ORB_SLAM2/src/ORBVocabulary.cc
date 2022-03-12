@@ -1,6 +1,5 @@
 #include "ORBVocabulary.h"
 
-
 using namespace ::std;
 
 namespace ORB_SLAM2
@@ -173,7 +172,7 @@ bool ORBVocabulary::loadFromTextFile(const string &filename)
 
 // --------------------------------------------------------------------------
 
-    void ORBVocabulary::saveToBinaryFile(const std::string &filename) const {
+    bool ORBVocabulary::saveToBinaryFile(const std::string &filename) const {
         fstream f;
         f.open(filename.c_str(), ios_base::out|ios::binary);
         unsigned int nb_nodes = m_nodes.size();
@@ -193,6 +192,7 @@ bool ORBVocabulary::loadFromTextFile(const string &filename)
             bool is_leaf = node.isLeaf(); f.write((char*)&is_leaf, sizeof(is_leaf)); // i put this one at the end for alignement....
         }
         f.close();
+	return true;
     }
 
 // --------------------------------------------------------------------------

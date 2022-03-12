@@ -26,7 +26,8 @@
 #include <pangolin/pangolin.h>
 #include <iomanip>
 #include <chrono>
-#include <time.h>
+#include <ctime>
+#include <filesystem>
 
 using namespace ::std;
 
@@ -46,6 +47,7 @@ namespace ORB_SLAM2 {
         // Output welcome message
         cout << endl <<
              "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza." << endl <<
+             "(modifications carried out at UCL, 2022)" << endl <<
              "This program comes with ABSOLUTELY NO WARRANTY;" << endl <<
              "This is free software, and you are welcome to redistribute it" << endl <<
              "under certain conditions. See LICENSE.txt." << endl << endl;
@@ -72,22 +74,65 @@ namespace ORB_SLAM2 {
         clock_t tStart = clock();
         mpVocabulary = new ORBVocabulary();
 
-//    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+	bool bVocLoad = false;
 
-        bool bVocLoad = false; // chose loading method based on file extension
-        if (has_suffix(strVocFile, ".txt")) {
-            bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
-            cout<<"Loading Vocabulary in txt mode."<<endl;
-        } else {
-            bVocLoad = mpVocabulary->loadFromBinaryFile(strVocFile);
-            cout<<"Loading Vocabulary in binary mode."<<endl;
-        }
-        if (!bVocLoad) {
-            cerr << "Wrong path to vocabulary. " << endl;
-            cerr << "Falied to open at: " << strVocFile << endl;
-            exit(-1);
-        }
-//    cout << "Vocabulary loaded!" << endl << endl;
+	// First check if a cached binary version of the vocabulary file exists.
+	size_t lastTxtInstance = strVocFile.find_last_of(".");
+
+	string strBinaryVocFile;
+
+	// Create the binary file name
+	if (lastTxtInstance == string::npos)
+	  {
+	    strBinaryVocFile = strVocFile + ".bin";
+	  }
+	else
+	  {
+	    strBinaryVocFile = strVocFile.substr(0, lastTxtInstance) + ".bin";
+	  }
+    
+	// Check if the binary file exists.
+	bool binaryVocFileExists = filesystem::exists(strBinaryVocFile);
+
+	// If the binary file exists, load it. If the file exists but won't load,
+	// pretend it isn't there to force text file load and binary save
+	if (binaryVocFileExists)
+	  {
+	    cout << "Using the binary cache file" << endl;
+	    bVocLoad = mpVocabulary->loadFromBinaryFile(strBinaryVocFile);
+	    if (!bVocLoad)
+	      {
+		cout << "Binary cache file load failed; trying text version" << endl;
+		binaryVocFileExists = false;
+	      }
+	  }
+
+	// Load the text file if necessary - happens if either the binary file does not
+	// exist, or it can't be loaded
+	if (!bVocLoad)
+	  {
+	    cout << "Using the text file. This could take a while..." << endl;
+	    bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+	  }
+	
+	if (!bVocLoad)
+	  {
+	    cerr << "Wrong path to vocabulary. " << endl;
+	    cerr << "Failed to open at: " << strVocFile << endl;
+	    exit(-1);
+	  }
+
+	// If we loaded the vocabulary and the binary version doesn't exist, write it out.
+    
+	if (!binaryVocFileExists)
+	  {
+	    cout << "Saving the binary cache to " << strBinaryVocFile << endl;
+	    if (!mpVocabulary->saveToBinaryFile(strBinaryVocFile))
+	      {
+		cerr << "Cannot save the binary cache file" << endl;
+	      }
+	  }
+
         printf("Vocabulary loaded in %.2fs\n", (double) (clock() - tStart) / CLOCKS_PER_SEC);
         //Create KeyFrame Database
         mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
