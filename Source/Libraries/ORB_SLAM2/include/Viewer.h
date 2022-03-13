@@ -56,6 +56,8 @@ public:
 
     void Release();
 
+    void SetDisplayImageWidth(int displayImageWidth);
+
 private:
 
     bool Stop();
@@ -68,6 +70,10 @@ private:
     // 1/fps in ms
     double mT;
     float mImageWidth, mImageHeight;
+
+    // Specify how the image should be shown
+    float mDisplayImageWidth;
+    float mDisplayImageScale;
 
     float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
 

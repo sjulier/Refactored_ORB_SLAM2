@@ -39,6 +39,8 @@ Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer
         fps=30;
     mT = 1e3/fps;
 
+    mDisplayImageWidth = 640;
+
     mImageWidth = fSettings["Camera.width"];
     mImageHeight = fSettings["Camera.height"];
     if(mImageWidth<1 || mImageHeight<1)
@@ -47,6 +49,8 @@ Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer
         mImageHeight = 480;
     }
 
+    mDisplayImageScale = mDisplayImageWidth / mImageWidth;
+    
     mViewpointX = fSettings["Viewer.ViewpointX"];
     mViewpointY = fSettings["Viewer.ViewpointY"];
     mViewpointZ = fSettings["Viewer.ViewpointZ"];
@@ -138,9 +142,9 @@ void Viewer::Run()
         pangolin::FinishFrame();
 
         cv::Mat im = mpFrameDrawer->DrawFrame();
-        cv::Mat im_half;
-        cv::resize(im, im_half, cv::Size(), 0.5, 0.5);
-        cv::imshow("ORB-SLAM2: Current Frame",im_half);
+        cv::Mat im_display;
+        cv::resize(im, im_display, cv::Size(), mDisplayImageScale, mDisplayImageScale);
+        cv::imshow("ORB-SLAM2: Current Frame",im_display);
         cv::waitKey(mT);
 
         if(menuReset)
@@ -238,6 +242,12 @@ void Viewer::Release()
 {
     unique_lock<mutex> lock(mMutexStop);
     mbStopped = false;
+}
+
+void Viewer::SetDisplayImageWidth(int displayImageWidth)
+{
+    mDisplayImageWidth = float(displayImageWidth);
+    mDisplayImageScale = mDisplayImageWidth / mImageWidth;
 }
 
 }
