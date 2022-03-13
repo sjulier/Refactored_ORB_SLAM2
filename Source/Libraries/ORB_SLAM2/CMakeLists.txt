@@ -38,7 +38,7 @@ src/Viewer.cc
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
-Eigen3::Eigen
+${EIGEN3_EIGEN_LIBS}
 pangolin
 ${DBoW2_LIBS}
 ${DLib_LIBS}
@@ -46,7 +46,6 @@ g2o::types_sba
 g2o::types_sim3
 g2o::core
 )
-
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

@@ -51,7 +51,6 @@ namespace ORB_SLAM2
        */
       bool saveToBinaryFile(const std::string &filename) const;
 
-
   private:
 
 	using F = DBoW2::FORB;
