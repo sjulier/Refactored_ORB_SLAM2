@@ -157,10 +157,9 @@ namespace ORB_SLAM2 {
         mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor != MONOCULAR);
         mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
-        //Initialize the Viewer thread and launch
+        //Initialize the Viewer thread
         if (bUseViewer) {
             mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile);
-            // mptViewer = new thread(&Viewer::Run, mpViewer);
             mpTracker->SetViewer(mpViewer);
         }
 
