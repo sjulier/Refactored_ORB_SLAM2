@@ -27,16 +27,10 @@
 #include <iomanip>
 #include <chrono>
 #include <ctime>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
+namespace fs = ::boost::filesystem;
 using namespace ::std;
-
-
-bool has_suffix(const std::string &str, const std::string &suffix) {
-    std::size_t index = str.find(suffix, str.size() - suffix.size());
-    return (index != std::string::npos);
-}
-
 
 namespace ORB_SLAM2 {
 
@@ -92,7 +86,7 @@ namespace ORB_SLAM2 {
 	  }
     
 	// Check if the binary file exists.
-	bool binaryVocFileExists = filesystem::exists(strBinaryVocFile);
+	bool binaryVocFileExists = fs::exists(strBinaryVocFile);
 
 	// If the binary file exists, load it. If the file exists but won't load,
 	// pretend it isn't there to force text file load and binary save

@@ -45,6 +45,7 @@ ${DLib_LIBS}
 g2o::types_sba
 g2o::types_sim3
 g2o::core
+Boost::filesystem
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

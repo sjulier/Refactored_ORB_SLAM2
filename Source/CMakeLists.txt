@@ -4,6 +4,10 @@ project(ORB_SLAM2)
 
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
+# Set the language support level
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+
 # Set where to install stuff
 set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
 list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
@@ -23,9 +27,22 @@ else()
    add_definitions(-DDEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 endif()
 
-# Set the language support level
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_CXX_STANDARD 17)
+# postfix, based on type
+set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "postfix applied to debug build of libraries")
+set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "postfix applied to release build of libraries")
+set(CMAKE_RELWITHDEBINFO_POSTFIX "_rd" CACHE STRING "postfix applied to release-with-debug-information libraries")
+set(CMAKE_MINSIZEREL_POSTFIX "_s" CACHE STRING "postfix applied to minimium-size-build libraries")
+
+# work out the postfix; required where we use OUTPUT_NAME
+if(CMAKE_BUILD_TYPE MATCHES Release)
+  set(EXE_POSTFIX)
+elseif(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(EXE_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+  set(EXE_POSTFIX ${CMAKE_RELWITHDEBINFO_POSTFIX})
+elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+  set(EXE_POSTFIX ${CMAKE_MINSIZEREL_POSTFIX})
+endif(CMAKE_BUILD_TYPE MATCHES Release)
 
 # Sort out the OpenGL warning
 if (POLICY CMP0072)
@@ -54,24 +71,7 @@ else()
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif ()
 
-
-
-# postfix, based on type
-set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "postfix applied to debug build of libraries")
-set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "postfix applied to release build of libraries")
-set(CMAKE_RELWITHDEBINFO_POSTFIX "_rd" CACHE STRING "postfix applied to release-with-debug-information libraries")
-set(CMAKE_MINSIZEREL_POSTFIX "_s" CACHE STRING "postfix applied to minimium-size-build libraries")
-
-# work out the postfix; required where we use OUTPUT_NAME
-if(CMAKE_BUILD_TYPE MATCHES Release)
-  set(EXE_POSTFIX)
-elseif(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(EXE_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-  set(EXE_POSTFIX ${CMAKE_RELWITHDEBINFO_POSTFIX})
-elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
-  set(EXE_POSTFIX ${CMAKE_MINSIZEREL_POSTFIX})
-endif(CMAKE_BUILD_TYPE MATCHES Release)
+find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # Find the required packages; these are from ThirdParty
 find_package(Pangolin REQUIRED)
