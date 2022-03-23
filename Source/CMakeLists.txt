@@ -9,8 +9,13 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
 # Set where to install stuff
-set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
+set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Install)
 list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
+
+# Set where the get the prebuilt third party libraries from
+set(THIRD_PARTY_BUILT_LIBRARY_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
+list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}")
+message(CMAKE_SYSTEM_PREFIX_PATH=${CMAKE_SYSTEM_PREFIX_PATH})
 
 # Default installation and search libraries where the yaml files will be stored
 set(DEFAULT_ORB_SETTINGS_DIR "${BUILD_INSTALL_PREFIX}/etc/orbslam2")
