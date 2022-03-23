@@ -4,33 +4,36 @@ This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-
 
 You should be able to build by running:
 
-./Build.sh
+`./Build.sh`
 
+to build a debug version. To build a release version, type:
 
+`./Build.sh Release`
+
+If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
+
+`set PATH=$PATH:$PWD/Install/bin`
 
 ##### Difference on execution against original  ORB_SLAM2:
 
-1.  The executable location is changed to  `./Build/${build_type}/Source/Examples/Monocular/`
+1.  All executables are installed in `./Install/bin` and a suffix is used to denote debug builds.
 
-   For instance, if you want to run mono_kitti with the default Build.sh file setting, the executable is located at `./Build/Debug/Source/Examples/Monocular/mono_kitti`
+   For instance, if you want to run mono_kitti with the default Build.sh file setting, the executable is located at `./Install/bin/mono_kitti_d`
 
-2. The setting file directory is prepended with default location at `./Source/Examples/`, therefore only filename is required for the yaml files.
+2. The standard ORB vocabulary is loaded by default and does not have to be specified on the command line. (It is installed in `./Install/var/lib/orbslam2` subdirectory). The system will try to load the binary version of the vocabulary. If it is not able to, it will load the text version, convert it, and save the binary version to the same directory. This speeds up start up times from several seconds to less than 0.5s.
 
-3. Therefore, a example command for running KITTI00 dataset would be:
+3. The standard settings files are installed in `./Install/etc/orbslam2/Monocular`. You do not need to specify the directory. Therefore, a example command for running KITTI00 (using a debug build) is:
 
-   `./Build/Debug/Source/Examples/Monocular/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
-  
-4. To simplify development, if you go to the directory:
-
-   `cd ./Build/Debug/Source/Examples/Monocular`
+   `./Install/bin/mono_kitti_d KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
    
-   You can run the code from:
+ The release build would be:
+ 
+   `./Install/bin/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
    
-   `./mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
-  
-   You can recompile code changes from:
-   
-   `make`
+If you have set the `PATH` variable as specified above, you can change it to:
+
+   `mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
+
   
 On linux it is highly recommend you get used to using valgrind. See https://www.valgrind.org/docs/manual/quick-start.html
 
@@ -40,8 +43,6 @@ Suppose we wish to run `mono_tum` on the Freiburg fr1/xyz dataset. Download the 
 
 You can then run the code using:
 
-`./Build/Debug/Source/Examples/Monocular/mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`   
+`./Install/bin/mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`   
    
-Or change to the `./Build/Debug/Source/Examples/Monocular` directory and run:
-
 `./mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`
