@@ -45,4 +45,6 @@ You can then run the code using:
 
 `./Install/bin/mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`   
    
+ Or, if you did the trick with setting `PATH`, this can be simplified to:
+   
 `./mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`
