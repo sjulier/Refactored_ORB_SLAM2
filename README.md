@@ -2,6 +2,17 @@
 
 This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2 and g2o libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
 
+## Prerequisites
+
+This version depends on a few system libraries:
+
+1. eigen3
+2. boost
+3. OpenCV (either 3.x or 4.x)
+4. Suite sparse
+
+
+
 You should be able to build by running:
 
 `./Build.sh`
