@@ -130,7 +130,11 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
   m_nodes.clear();
   m_nodes.resize(nb_nodes + 1);
   m_nodes[0].id = 0;
+#ifdef _WIN32
   char* buf = new char[size_node];
+#else
+  char buf[size_node];
+#endif // _WIN32
   int nid = 1;
   while (!f.eof()) {
     f.read(buf, size_node);
@@ -153,7 +157,9 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
     nid += 1;
   }
   f.close();
+#ifdef _WIN32
   delete buf;
+#endif // _WIN32
   return true;
 }
 

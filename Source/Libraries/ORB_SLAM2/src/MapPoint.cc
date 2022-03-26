@@ -261,37 +261,64 @@ void MapPoint::ComputeDistinctiveDescriptors() {
   // Compute distances between them
   const std::size_t N = vDescriptors.size();
 
-
-	std::vector<std::vector<float> > Distances;
-	Distances.resize(N, vector<float>(N, 0));
-	for (size_t i = 0; i<N; i++)
-	{
-		Distances[i][i] = 0;
-		for (size_t j = i + 1;j<N;j++)
-		{
-			int distij = ORBmatcher::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
-			Distances[i][j] = distij;
-			Distances[j][i] = distij;
-		}
-	}
-
-
-    // Take the descriptor with least median distance to the rest
-    int BestMedian = INT_MAX;
-    int BestIdx = 0;
-    for(size_t i=0;i<N;i++)
+#ifdef _WIN32  
+  std::vector<std::vector<float> > Distances;
+  Distances.resize(N, vector<float>(N, 0));
+  for (size_t i = 0; i<N; i++)
     {
-        vector<int> vDists(Distances[i].begin(),Distances[i].end());
-        sort(vDists.begin(),vDists.end());
-        int median = vDists[0.5*(N-1)];
+      Distances[i][i] = 0;
+      for (size_t j = i + 1;j<N;j++)
+	{
+	  int distij = ORBmatcher::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
+	  Distances[i][j] = distij;
+	  Distances[j][i] = distij;
+	}
+    }
+  
 
-        if(median<BestMedian)
+  // Take the descriptor with least median distance to the rest
+  int BestMedian = INT_MAX;
+  int BestIdx = 0;
+  for(size_t i=0;i<N;i++)
+    {
+      vector<int> vDists(Distances[i].begin(),Distances[i].end());
+      sort(vDists.begin(),vDists.end());
+      int median = vDists[0.5*(N-1)];
+      
+      if(median<BestMedian)
         {
-            BestMedian = median;
-            BestIdx = i;
+	  BestMedian = median;
+	  BestIdx = i;
         }
     }
 
+#else
+  float Distances[N][N];
+  for (std::size_t i = 0; i < N; i++) {
+    Distances[i][i] = 0;
+    for (std::size_t j = i + 1; j < N; j++) {
+      int distij =
+          ORBmatcher::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
+      Distances[i][j] = distij;
+      Distances[j][i] = distij;
+    }
+  }
+
+  // Take the descriptor with least median distance to the rest
+  int BestMedian = INT_MAX;
+  int BestIdx = 0;
+  for (std::size_t i = 0; i < N; i++) {
+    std::vector<int> vDists(Distances[i], Distances[i] + N);
+    sort(vDists.begin(), vDists.end());
+    int median = vDists[0.5 * (N - 1)];
+
+    if (median < BestMedian) {
+      BestMedian = median;
+      BestIdx = i;
+    }
+  }
+#endif // _WIN32
+  
   {
     unique_lock<mutex> lock(mMutexFeatures);
     mDescriptor = vDescriptors[BestIdx].clone();
