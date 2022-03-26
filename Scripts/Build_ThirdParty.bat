@@ -17,6 +17,5 @@ cmake.exe %root_dir%\Source\ThirdParty -DCMAKE_BUILD_TYPE=%build_type% -G"NMake 
 nmake
 popd
 
-rem Add the empty file which confirms it's been built
-
-type nul > %third_party_build_tag%
+rem Add the empty file which confirms the third party libraries have been built; only do this if nmake returned no error
+if %errorlevel% == 0 (type nul > %third_party_build_tag%)
