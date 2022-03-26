@@ -61,3 +61,7 @@ set toolchain_file=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
 rem Now call the build scripts
 call Scripts\Build_ThirdParty.bat %build_type% %toolchain_file%
 call Scripts\Build_Source.bat %build_type% %toolchain_file%
+
+rem We need to somehow get these into the system path
+echo %~dp0\Install\bin
+echo %VCPKG_ROOT%\installed\x64-windows\bin
