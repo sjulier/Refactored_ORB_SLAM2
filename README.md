@@ -2,6 +2,8 @@
 
 This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2 and g2o libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
 
+It has been succesfully built on Ubunutu 18.04. Ubuntu 20.04, Windows 10 (natively), Intel Mac, M1 Mac.
+
 ## Prerequisites
 
 This version depends on a few system libraries:
@@ -11,7 +13,14 @@ This version depends on a few system libraries:
 3. OpenCV (either 3.x or 4.x)
 4. Suite sparse
 
+The code comes shipped with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI).
 
+The build instructions are deliberately designed to be similar on all supported operating systems.
+
+## Linux build instructions
+
+
+Clone this repository.
 
 You should be able to build by running:
 
@@ -24,6 +33,50 @@ to build a debug version. To build a release version, type:
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
 `set PATH=$PATH:$PWD/Install/bin`
+
+
+## Mac (Intel and Apple Silicon) build instructions.
+
+We use homebrew and build using the XCode command line tools. Please ensure that both have been installed.
+
+Install the support libraries:
+
+brew install boost eigen3 suitesparse opencv
+
+Clone this repository.
+
+You should be able to build by running:
+
+`./Build.sh`
+
+to build a debug version. To build a release version, type:
+
+`./Build.sh Release`
+
+If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
+
+`set PATH=$PATH:$PWD/Install/bin`
+
+## Windows 10 build
+
+Windows 10 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use vcpkg.
+
+PLEASE MAKE SURE TO CLEAR THE CMAKE PACKAGE REGISTRY BEFORE YOU TRY TO BUILD. WE HAVE ENCOUNTERED A LOT OF PROBLEMS WITH THE PACKAGE REGISTRY BEING USED TO LINK TO THE WRONG VERSIONS OF LIBRARIES, LEADING TO A LOT OF CONFUSION AND FRUSTRATION.
+
+First, install vcpkg
+
+Second,
+
+You should be able to build by running:
+
+`Build.bat`
+
+to build a debug version. To build a release version, type:
+
+`Build.bat Release`
+
+This will launch four build jobs in parallel. If your machine can take it, you can task more cpus by changing the value passed to maxcpucount
+
 
 ##### Difference on execution against original  ORB_SLAM2:
 
