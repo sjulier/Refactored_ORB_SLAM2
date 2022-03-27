@@ -9,7 +9,7 @@ if not "%errorlevel%"=="0" (
 rem Set the build type
 
 if "%1" == "" (
-    set build_type=Debug
+    set build_type=Release
 ) else (
     set build_type=%1
 )
