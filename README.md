@@ -123,7 +123,7 @@ List of things to install:
    2. For cmake:
       1. https://cmake.org/download/
       2. add CMake to environmental PATH in installation selection. 
-      3. ![ select "add CMake to environmental PATH"](Doc\cmake.png " add CMake to environmental PATH")
+      3. ![ select "add CMake to environmental PATH"](https://github.com/sjulier/Refactored_ORB_SLAM2/blob/ziwen_windows_stepbystep/Doc/cmake.png " add CMake to environmental PATH")
 
    1. restart your machine.
 
@@ -147,11 +147,11 @@ Make sure you are at vcpkg source directory: something like this:
 1. Configure environmental variables:
    1. msbuild
       1. https://debajmecrm.com/how-to-resolve-msbuild-is-not-recognized-as-internal-or-external-command-error-in-visual-studio-code/
-      2. !["add msbuild path to PATH"](Doc\PATH_vs.png " add msbuild to environmental PATH")
+      2. !["add msbuild path to PATH"](https://github.com/sjulier/Refactored_ORB_SLAM2/blob/ziwen_windows_stepbystep/Doc/PATH_vs.png " add msbuild to environmental PATH")
    2. VCPKG_ROOT
       1. It should be where you placed your vcpkg package, for my case it's  C:\src\
-      2. !["add VCPKG_ROOT path to environmental variable"](Doc\VCPKG_ROOT.png " add VCPKG_ROOT to environmental variable")
+      2. !["add VCPKG_ROOT path to environmental variable"](https://github.com/sjulier/Refactored_ORB_SLAM2/blob/ziwen_windows_stepbystep/Doc/VCPKG_ROOT.png " add VCPKG_ROOT to environmental variable")
    3. VCPKG_DEFAULT_TRIPLET
       1. Wait for error message when run Build.bat in Refactored_ORB_SLAM2 folder.
       2. If you are using x64 system, it should be VCPKG_DEFAULT_TRIPLET
-      3. !["add VCPKG_DEFAULT_TRIPLET path to environmental variable"](Doc\VCPKG_DEFAULT_TRIPLET.png " add VCPKG_DEFAULT_TRIPLET to environmental variable")
+      3. !["add VCPKG_DEFAULT_TRIPLET path to environmental variable"](https://github.com/sjulier/Refactored_ORB_SLAM2/blob/ziwen_windows_stepbystep/Doc/VCPKG_DEFAULT_TRIPLET.png " add VCPKG_DEFAULT_TRIPLET to environmental variable")
