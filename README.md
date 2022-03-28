@@ -135,15 +135,16 @@ List of things to install:
 4. use vcpkg to install other dependencies
    1. vcpkg
 
-Make sure you are at vcpkg source directory: something like this:
- `C:\src> .\vcpkg\vcpkg.exe install opencv`
- depends on your internet speed and how powerful your CPU is, each of the following may take a while. The elapsed time below are from my laptop, it's relatively old so yours should be faster. Please have your laptop plugged in.
+      - Make sure you are at vcpkg source directory: something like this: `C:\src> .\vcpkg\vcpkg.exe install opencv`. 
+      - depends on your internet speed and how powerful your CPU is, each of the following may take a while. The elapsed time below are from my laptop, it's relatively old  so yours should be faster. Please have your laptop plugged in.
    2. Opencv  (Total elapsed time: 26.29 min)
-      1.`vcpkg.exe install opencv`
+      - `vcpkg.exe install opencv`
    3. boost (Total elapsed time: 33.99 min)
-      1. `vcpkg.exe install boost`
+      - `vcpkg.exe install boost`
    4. Eigen3 (39.73 s)
-      1. `vcpkg.exe install eigen3`
+      - `vcpkg.exe install eigen3`
+   5. glew
+      -  `vcpkg.exe install glew`
 1. Configure environmental variables:
    1. msbuild
       1. https://debajmecrm.com/how-to-resolve-msbuild-is-not-recognized-as-internal-or-external-command-error-in-visual-studio-code/
