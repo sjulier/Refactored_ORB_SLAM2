@@ -112,3 +112,46 @@ You can then run the code using:
  Or, if you did the trick with setting `PATH`, this can be simplified to:
    
 `./mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`
+
+
+## Windows 10 build - A step by step instruction:
+
+List of things to install:
+
+1. Install visual studio 2019, git and cmake
+   1. If you have installed Unity before, then it's very likely that you already have visual studio installed.
+   2. For cmake:
+      1. https://cmake.org/download/
+      2. add CMake to environmental PATH in installation selection. 
+      3. ![ select "add CMake to environmental PATH"](Doc\cmake.png " add CMake to environmental PATH")
+
+   1. restart your machine.
+
+2. install vcpkg and configure environmental variable 
+   1. https://vcpkg.io/en/getting-started.html
+   2. (I personally placed vcpkg in `C:\src\vcpkg` )
+3. 
+   
+4. use vcpkg to install other dependencies
+   1. vcpkg
+
+Make sure you are at vcpkg source directory: something like this:
+ `C:\src> .\vcpkg\vcpkg.exe install opencv`
+ depends on your internet speed and how powerful your CPU is, each of the following may take a while. The elapsed time below are from my laptop, it's relatively old so yours should be faster. Please have your laptop plugged in.
+   2. Opencv  (Total elapsed time: 26.29 min)
+      1.`vcpkg.exe install opencv`
+   3. boost (Total elapsed time: 33.99 min)
+      1. `vcpkg.exe install boost`
+   4. Eigen3 (39.73 s)
+      1. `vcpkg.exe install eigen3`
+1. Configure environmental variables:
+   1. msbuild
+      1. https://debajmecrm.com/how-to-resolve-msbuild-is-not-recognized-as-internal-or-external-command-error-in-visual-studio-code/
+      2. !["add msbuild path to PATH"](Doc\PATH_vs.png " add msbuild to environmental PATH")
+   2. VCPKG_ROOT
+      1. It should be where you placed your vcpkg package, for my case it's  C:\src\
+      2. !["add VCPKG_ROOT path to environmental variable"](Doc\VCPKG_ROOT.png " add VCPKG_ROOT to environmental variable")
+   3. VCPKG_DEFAULT_TRIPLET
+      1. Wait for error message when run Build.bat in Refactored_ORB_SLAM2 folder.
+      2. If you are using x64 system, it should be VCPKG_DEFAULT_TRIPLET
+      3. !["add VCPKG_DEFAULT_TRIPLET path to environmental variable"](Doc\VCPKG_DEFAULT_TRIPLET.png " add VCPKG_DEFAULT_TRIPLET to environmental variable")
