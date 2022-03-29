@@ -156,3 +156,23 @@ List of things to install:
       1. Wait for error message when run Build.bat in Refactored_ORB_SLAM2 folder.
       2. If you are using x64 system, it should be VCPKG_DEFAULT_TRIPLET
       3. !["add VCPKG_DEFAULT_TRIPLET path to environmental variable"](https://github.com/sjulier/Refactored_ORB_SLAM2/blob/ziwen_windows_stepbystep/Doc/VCPKG_DEFAULT_TRIPLET.png " add VCPKG_DEFAULT_TRIPLET to environmental variable")
+
+
+
+
+## MacOS Build:
+
+List of things to install:
+
+1. Install Xcode through Appstore and install the xcode command line tools
+   1. See the macOS requirement part of homebrew:https://docs.brew.sh/Installation 
+2. install Homebrew:https://brew.sh/
+3. install the following dependencies through home brew:
+   1.  brew update
+   2.  brew install gh cmake eigen glew pkgconfig freeglut opencv@3
+   (If you see additional information after opencv installation, please follow them to register OpenCV symlink. )
+
+4. Restart terminal
+5. `git clone https://github.com/sjulier/Refactored_ORB_SLAM2.git`
+6. `cd Refactored_ORB_SLAM2`
+7. `./build.sh`
