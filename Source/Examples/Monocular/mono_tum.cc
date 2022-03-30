@@ -36,7 +36,7 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv) {
   if (argc != 4) {
-    cerr << endl << "Usage: settings_files path_to_sequence results_file" << endl;
+    cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence results_file" << endl;
     return 1;
   }
 

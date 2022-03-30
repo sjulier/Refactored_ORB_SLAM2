@@ -34,9 +34,7 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl
-         << "Usage: ./mono_tum path_to_settings path_to_image_folder "
-            "path_to_times_file"
-         << endl;
+          << "Usage: " << argv[0] << " settings_files path_to_image_folder path_to_times_file results_file" << endl;
     return 1;
   }
 
