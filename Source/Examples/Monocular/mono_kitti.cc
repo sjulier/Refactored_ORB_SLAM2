@@ -79,6 +79,10 @@ int main(int argc, char **argv) {
         break;
       }
 
+      if (SLAM.isFinished() == true) {
+	  break;
+      }
+      
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
@@ -106,7 +110,7 @@ int main(int argc, char **argv) {
   SLAM.StartViewer();
 
   cout << "Viewer started, waiting for thread." << endl;
-  //runthread.join();
+  runthread.join();
   if (main_error != 0)
     return main_error;
   cout << "Tracking thread joined..." << endl;

@@ -102,8 +102,7 @@ void Viewer::Run() {
   bool bFollow = true;
   bool bLocalizationMode = false;
 
-  while (mbStopRequested == false) {
-    cout << mbStopped << endl;
+  while (1) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mpMapDrawer->GetCurrentOpenGLCameraMatrix(Twc);
@@ -161,8 +160,17 @@ void Viewer::Run() {
     if (menuFinish) {
       RequestFinish();
     }
+        if (Stop()) {
+      while (isStopped()) {
+        this_thread::sleep_for(chrono::microseconds(3000));
+      }
+    }
+
+    if (CheckFinish())
+      break;
   }
-  cout << "Thread terminated." << endl;
+
+  cout << "Viewer thread finished." << endl;
   SetFinish();
 }
 

@@ -66,9 +66,9 @@ int main(int argc, char **argv) {
   // Main loop
   int main_error = 0;
   std::thread runthread([&]() { // Start in new thread
+
     cv::Mat im;
     for (int ni = 0; ni < nImages; ni++) {
-      cout << ni << endl;
       // Read image from file
       im = cv::imread(string(argv[2]) + "/" + vstrImageFilenames[ni],
                       cv::IMREAD_UNCHANGED);
@@ -80,6 +80,10 @@ int main(int argc, char **argv) {
              << vstrImageFilenames[ni] << endl;
         main_error = 1;
         break;
+      }
+
+      if (SLAM.isFinished() == true) {
+	  break;
       }
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
@@ -104,18 +108,17 @@ int main(int argc, char **argv) {
       if (ttrack < T)
         this_thread::sleep_for(chrono::duration<double>(T - ttrack));
     }
-    cout << "Got to end of thread" << endl;
     SLAM.StopViewer();
   });
 
-  // Start the visualization thread
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
   SLAM.StartViewer();
 
-  cout << "Viewer started, waiting for thread." << endl;
   runthread.join();
+  
   if (main_error != 0)
     return main_error;
-  cout << "Tracking thread joined..." << endl;
 
   // Stop all threads
   SLAM.Shutdown();

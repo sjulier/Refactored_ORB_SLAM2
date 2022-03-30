@@ -79,7 +79,11 @@ int main(int argc, char **argv) {
         cerr << endl
              << "Failed to load image at: " << vstrImageFilenames[ni] << endl;
         main_error = 1;
-        return;
+        break;
+      }
+
+      if (SLAM.isFinished() == true) {
+	  break;
       }
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
