@@ -3,7 +3,7 @@
 # Check the build type
 if [ "$#" -ne 1 ];
 then
-  build_type=Debug
+  build_type=Release
 else
   build_type=$1
 fi

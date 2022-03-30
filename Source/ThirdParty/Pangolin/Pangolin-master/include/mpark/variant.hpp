@@ -242,8 +242,12 @@ namespace std {
 #define MPARK_TYPE_PACK_ELEMENT
 #endif
 
+// From https://github.com/stevenlovegrove/Pangolin/issues/609
+
 #if defined(__cpp_constexpr) && __cpp_constexpr >= 201304
+#ifndef _WIN32
 #define MPARK_CPP14_CONSTEXPR
+#endif
 #endif
 
 #if __has_feature(cxx_exceptions) || defined(__cpp_exceptions) || \
