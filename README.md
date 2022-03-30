@@ -2,7 +2,7 @@
 
 This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2 and g2o libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
 
-It has been succesfully built on Ubunutu 18.04. Ubuntu 20.04, Windows 10 (natively), Intel Mac, M1 Mac.
+It has been succesfully built on Ubunutu (18.04 and 20.04), Windows 10 (natively and WSL2), Windows 11 (natively and WSL2), Intel Mac and M1 Mac.
 
 ## Prerequisites
 
