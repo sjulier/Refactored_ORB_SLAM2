@@ -348,8 +348,8 @@ void System::Shutdown() {
     this_thread::sleep_for(chrono::milliseconds(1));
   }
 
-  if (mpViewer)
-    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
+//  if (mpViewer)
+//    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
 }
 
 void System::SaveTrajectoryTUM(const string &filename) {
