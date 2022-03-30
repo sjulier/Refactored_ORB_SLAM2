@@ -526,4 +526,10 @@ void System::StartViewer() {
     mpViewer->Run();
 }
 
+void System::StopViewer() {
+  if (mpViewer)
+    mpViewer->RequestStop();
+}
+
+
 } // namespace ORB_SLAM2

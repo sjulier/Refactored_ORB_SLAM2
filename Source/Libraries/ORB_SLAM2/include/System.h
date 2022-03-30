@@ -122,6 +122,8 @@ public:
 
   void StartViewer();
 
+  void StopViewer();
+
 private:
   // Input sensor
   eSensor mSensor;

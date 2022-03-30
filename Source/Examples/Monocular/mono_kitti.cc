@@ -100,8 +100,8 @@ int main(int argc, char **argv) {
 
       if (ttrack < T)
         this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-      //            usleep((T-ttrack)*1e6);
     }
+    SLAM.StopViewer();
   });
   SLAM.StartViewer();
 
