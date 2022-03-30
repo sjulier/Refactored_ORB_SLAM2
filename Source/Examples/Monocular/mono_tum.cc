@@ -36,7 +36,7 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv) {
   if (argc != 4) {
-    cerr << endl << "Usage: path_to_settings path_to_sequence path_to_trajectory_result_file(*.txt should work)" << endl;
+    cerr << endl << "Usage: settings_files path_to_sequence results_file" << endl;
     return 1;
   }
 
@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
   std::thread runthread([&]() { // Start in new thread
     cv::Mat im;
     for (int ni = 0; ni < nImages; ni++) {
+      cout << ni << endl;
       // Read image from file
       im = cv::imread(string(argv[2]) + "/" + vstrImageFilenames[ni],
                       cv::IMREAD_UNCHANGED);
@@ -78,7 +79,7 @@ int main(int argc, char **argv) {
              << "Failed to load image at: " << string(argv[2]) << "/"
              << vstrImageFilenames[ni] << endl;
         main_error = 1;
-        return;
+        break;
       }
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
@@ -102,8 +103,9 @@ int main(int argc, char **argv) {
 
       if (ttrack < T)
         this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-      // usleep((T-ttrack)*1e6);
     }
+    cout << "Got to end of thread" << endl;
+    SLAM.StopViewer();
   });
 
   // Start the visualization thread
@@ -131,8 +133,10 @@ int main(int argc, char **argv) {
 
   // Save camera trajectory
   // SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
-  SLAM.SaveTrajectoryTUM(string(argv[4]));
+  SLAM.SaveTrajectoryTUM(string(argv[3]));
 
+  cout << "All done" << endl;
+  
   return 0;
 }
 

@@ -354,15 +354,15 @@ void System::Shutdown() {
 
 void System::SaveTrajectoryTUM(const string &filename) {
   cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
-  // if(mSensor==MONOCULAR)
-  // {
-  //     cerr << "ERROR: SaveTrajectoryTUM cannot be used for monocular." <<
-  //     endl; return;
-  // }
 
   vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
   sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
 
+  if (vpKFs.size() == 0) {
+    cout << "The map is empty; nothing to save" << endl;
+    return;
+  }
+  
   // Transform all keyframes so that the first keyframe is at the origin.
   // After a loop closure the first keyframe might not be at the origin.
   cv::Mat Two = vpKFs[0]->GetPoseInverse();
@@ -527,8 +527,10 @@ void System::StartViewer() {
 }
 
 void System::StopViewer() {
+  cout << "System::StopViewer()" << endl;
   if (mpViewer)
     mpViewer->RequestStop();
+  cout << "System::StopViewer() done" << endl;
 }
 
 
