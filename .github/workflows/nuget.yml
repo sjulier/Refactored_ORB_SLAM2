@@ -1,0 +1,95 @@
+
+name: nuget
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# actions.yaml
+#
+# In this example, vcpkg has been added as a submodule (`git submodule add https://github.com/Microsoft/vcpkg`).
+env:
+  VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: add submodules
+        run: git submodule add https://github.com/Microsoft/vcpkg
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
+      - name: 'Setup NuGet Credentials'
+        shell: 'bash'
+        # Replace <OWNER> with your organization name
+        run: >
+          ./vcpkg/vcpkg fetch nuget | tail -n 1
+          sources add
+          -source "https://nuget.pkg.github.com/<OWNER>/index.json"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "<OWNER>"
+          -password "${{ secrets.GITHUB_TOKEN }}"
+      # Omit this step if you're using manifests
+      - name: 'vcpkg package restore'
+        shell: 'bash'
+        run: >
+          ./vcpkg/vcpkg install opencv boost eigen3 glew --triplet ${{ matrix.triplet }}
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+        # - name: Build through Run bat script on PowerShell
+        # working-directory: ${{env.GITHUB_WORKSPACE}}
+        # # Add additional options to the MSBuild command line here (like platform or verbosity level).
+        # # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+        # shell: pwsh
+        # run: setx MACHINE Brand1 /m
+        # - name: Install packages and dependencies
+        #   run: |
+        #     bootstrap-vcpkg
+        #     vcpkg install opencv boost eigen3 glew
+
+      - name: Build through Run bat script on PowerShell
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+          # Add additional options to the MSBuild command line here (like platform or verbosity level).
+          # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+        shell: pwsh
+        run: setx VCPKG_ROOT C:\vcpkg\ /m
+
+      - name: Build through Run bat script on PowerShell
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+          # Add additional options to the MSBuild command line here (like platform or verbosity level).
+          # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+        shell: pwsh
+        run: setx VCPKG_DEFAULT_TRIPLET x64 system /m
+
+      - name: Build through Run bat script on PowerShell
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+          # Add additional options to the MSBuild command line here (like platform or verbosity level).
+          # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+        shell: pwsh
+        run: .\Build.bat 
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
