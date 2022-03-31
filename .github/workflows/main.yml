@@ -20,9 +20,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install dependecies
+    - name: Update apt list
       run: sudo apt-get update
-           sudo apt-get install cmake build-essential libeigen3-dev libboost-dev libopencv-dev libglew-dev
+      
+    - name: Install dependecies
+      run: sudo apt-get install cmake build-essential libeigen3-dev libboost-dev libopencv-dev libglew-dev
       
     - name: Try compilation
       run: |
