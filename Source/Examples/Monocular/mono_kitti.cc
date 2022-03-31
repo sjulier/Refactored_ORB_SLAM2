@@ -38,7 +38,7 @@ void LoadImages(const string &strSequence, vector<string> &vstrImageFilenames,
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl
-         << "Usage: ./mono_kitti path_to_settings path_to_sequence path_to_trajectory_result_file(*.txt should work)" << endl;
+          << "Usage: " << argv[0] << " settings_files path_to_sequence results_file" << endl;
     return 1;
   }
 
@@ -76,9 +76,13 @@ int main(int argc, char **argv) {
         cerr << endl
              << "Failed to load image at: " << vstrImageFilenames[ni] << endl;
         main_error = 1;
-        return;
+        break;
       }
 
+      if (SLAM.isFinished() == true) {
+	  break;
+      }
+      
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 
       // Pass the image to the SLAM system

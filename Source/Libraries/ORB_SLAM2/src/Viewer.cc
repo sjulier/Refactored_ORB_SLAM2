@@ -160,8 +160,7 @@ void Viewer::Run() {
     if (menuFinish) {
       RequestFinish();
     }
-
-    if (Stop()) {
+        if (Stop()) {
       while (isStopped()) {
         this_thread::sleep_for(chrono::microseconds(3000));
       }
@@ -171,6 +170,7 @@ void Viewer::Run() {
       break;
   }
 
+  cout << "Viewer thread finished." << endl;
   SetFinish();
 }
 
