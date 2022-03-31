@@ -44,7 +44,7 @@ jobs:
           brew install gh
       - name: Install dependencies
         run: |
-          brew install brew install cmake eigen glew pkgconfig freeglut opencv
+          brew install cmake eigen glew pkgconfig freeglut opencv
           
       - name: link opencv
         run: |
