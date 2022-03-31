@@ -5,24 +5,22 @@ env:
   VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite'
 
 matrix:
-  os: ['windows-2019']
+  os: ['windows-2019', 'ubuntu-20.04']
   include:
     - os: 'windows-2019'
       triplet: 'x86-windows'
       mono: ''
+    - os: 'ubuntu-20.04'
+      triplet: 'x64-linux'
+      # To run `nuget.exe` on non-Windows platforms, we must use `mono`.
+      mono: 'mono'
 
 steps:
-
-
-  - name: add submodules
-    run: git submodule add https://github.com/Microsoft/vcpkg
-  - name: Checkout submodules
-    run: git submodule update --init --recursive
   # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
   - name: 'Setup NuGet Credentials'
     shell: 'bash'
     # Replace <OWNER> with your organization name
-    run: 
+    run: >
       ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
       sources add
       -source "https://nuget.pkg.github.com/<OWNER>/index.json"
@@ -34,40 +32,5 @@ steps:
   # Omit this step if you're using manifests
   - name: 'vcpkg package restore'
     shell: 'bash'
-    run: 
-      ./vcpkg/vcpkg install opencv boost eigen3 glew --triplet ${{ matrix.triplet }}
-
-  - name: Add MSBuild to PATH
-    uses: microsoft/setup-msbuild@v1.0.2
-      
-    # - name: Build through Run bat script on PowerShell
-    # working-directory: ${{env.GITHUB_WORKSPACE}}
-    # # Add additional options to the MSBuild command line here (like platform or verbosity level).
-    # # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-    # shell: pwsh
-    # run: setx MACHINE Brand1 /m
-    # - name: Install packages and dependencies
-    #   run: |
-    #     bootstrap-vcpkg
-    #     vcpkg install opencv boost eigen3 glew
-
-  - name: set through PowerShell
-    working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-    shell: pwsh
-    run: setx VCPKG_ROOT C:\vcpkg\ /m
-    
-  - name: set on PowerShell
-    working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-    shell: pwsh
-    run: setx VCPKG_DEFAULT_TRIPLET x64 system /m
-    
-  - name: Build through Run bat script on PowerShell
-    working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-    shell: pwsh
-    run: .\Build.bat 
+    run: >
+      ./vcpkg/vcpkg install sqlite3 cpprestsdk --triplet ${{ matrix.triplet }}
