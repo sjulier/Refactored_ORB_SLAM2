@@ -26,15 +26,13 @@ jobs:
       
     - name: set VCPKG_ROOT
       working-directory: ${{env.GITHUB_WORKSPACE}}
-        # Add additional options to the MSBuild command line here (like platform or verbosity level).
-        # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+
       shell: pwsh
       run: setx VCPKG_ROOT C:\vcpkg\ /m
 
     - name: set VCPKG_DEFAULT_TRIPLET
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+
       shell: pwsh
       run: setx VCPKG_DEFAULT_TRIPLET x64-system /m
 
