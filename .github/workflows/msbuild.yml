@@ -23,12 +23,7 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Install packages and dependencies
-      run: |
-        bootstrap-vcpkg
-        vcpkg install opencv boost eigen3 glew
-        
+      
     - name: set VCPKG_ROOT
       working-directory: ${{env.GITHUB_WORKSPACE}}
         # Add additional options to the MSBuild command line here (like platform or verbosity level).
@@ -41,7 +36,14 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       shell: pwsh
-      run: setx VCPKG_DEFAULT_TRIPLET x64 system /m
+      run: setx VCPKG_DEFAULT_TRIPLET x64-system /m
+
+
+    - name: Install packages and dependencies
+      run: |
+        bootstrap-vcpkg
+        vcpkg install opencv boost eigen3 glew
+        
 
 
 
