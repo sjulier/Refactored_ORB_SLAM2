@@ -21,6 +21,7 @@ jobs:
 
     steps:
       - name: add submodules
+        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: git submodule add https://github.com/Microsoft/vcpkg
 
       - name: Checkout submodules
