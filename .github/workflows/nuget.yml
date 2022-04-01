@@ -22,10 +22,13 @@ jobs:
     steps:
       - name: add submodules
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: git submodule add https://github.com/Microsoft/vcpkg
+        run: git clone  --recursive https://github.com/Microsoft/vcpkg
+        
+      - name: boostrap submodules
+        run:  ./vcpkg/bootstrap-vcpkg
 
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
+#       - name: Checkout submodules
+#         run: git submodule update --init --recursive
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'
@@ -70,7 +73,7 @@ jobs:
           # Add additional options to the MSBuild command line here (like platform or verbosity level).
           # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
         shell: pwsh
-        run: setx VCPKG_DEFAULT_TRIPLET x64 system /m
+        run: setx VCPKG_DEFAULT_TRIPLET x64-system /m
 
       - name: Build through Run bat script on PowerShell
         working-directory: ${{env.GITHUB_WORKSPACE}}
