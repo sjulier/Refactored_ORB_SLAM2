@@ -18,17 +18,20 @@ https://github.com/sjulier/Refactored_ORB_SLAM2/wiki
 
 2. The standard ORB vocabulary is loaded by default and does not have to be specified on the command line. (It is installed in `./Install/var/lib/orbslam2` subdirectory). The system will try to load the binary version of the vocabulary. If it is not able to, it will load the text version, convert it, and save the binary version to the same directory. This speeds up start up times from several seconds to less than 0.5s.
 
-3. The standard settings files are installed in `./Install/etc/orbslam2/Monocular`. You do not need to specify the directory. Therefore, a example command for running KITTI00 (using a debug build) is:
+3. The standard settings files are installed in `./Install/etc/orbslam2/Monocular`. You do not need to specify the directory. Therefore, a example command for running KITTI00 (using a debug build) is
+   
+   
+   (a text files such as `reuslt.txt` for result_file_name is perferred as you can open the file later in the text editor directly.):
 
-   `./Install/bin/mono_kitti_d KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
+ `./Install/bin/mono_kitti_d KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
    
  The release build would be:
  
-   `./Install/bin/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
+   `./Install/bin/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
    
 If you have set the `PATH` variable as specified above, you can change it to:
 
-   `mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00`
+   `mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
 
   
 On linux it is highly recommend you get used to using valgrind. See https://www.valgrind.org/docs/manual/quick-start.html
@@ -39,11 +42,11 @@ Suppose we wish to run `mono_tum` on the Freiburg fr1/xyz dataset. Download the 
 
 You can then run the code using:
 
-`./Install/bin/mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`   
+`./Install/bin/mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz ${result_file_name}`   
    
  Or, if you did the trick with setting `PATH`, this can be simplified to:
    
-`./mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz`
+`./mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz ${result_file_name}`
 
 
 
