@@ -1,9 +1,12 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${DBoW2_INCLUDE_DIR} ${DLib_INCLUDE_DIR})
 
-# From https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
+# For debugging strip the full path from https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
+# Note this will not work in Visual studio-type developer environments.
 
+if(NOT DEFINED MSVC)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-builtin-macro-redefined -D'__FILE__=\"$(subst $(realpath ${CMAKE_SOURCE_DIR})/,,$(abspath $<))\"'")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-builtin-macro-redefined -D'__FILE__=\"$(subst $(realpath ${CMAKE_SOURCE_DIR})/,,$(abspath $<))\"'")
+endif()
 
 if(NOT DEFINED BUILD_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBRARIES NO)
