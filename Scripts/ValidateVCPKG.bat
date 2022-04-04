@@ -1,3 +1,23 @@
+rem First locate visual studio
+
+"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -property installationPath > vs_path.txt
+
+set /p VS_PATH=<vs_path.txt
+
+del vs_path.txt
+
+if ["%VS_PATH%"] == [] (
+   echo.
+   echo Cannot run "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+   echo Please make sure Visual Studio is installed.
+   echo.
+   exit /b 1
+)
+
+echo.
+echo Running Visual Studio from "%VS_PATH%"
+echo.
+
 rem See if cmake can be found. If this fails, first try a fallback (default position)
 rem If the fallback fails, report an error and die.
 
@@ -5,7 +25,7 @@ cmake --version >NUL 2>NUL
 
 if errorlevel 1 (
     echo Cannot find cmake.exe on the command line; calling default vsvarsall.bat to install
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+    call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
     cmake --version >NUL 2>NUL
 )
 
@@ -16,7 +36,7 @@ if errorlevel 1 (
     echo.
     echo An example command line is:
     echo.
-    echo "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+    echo "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
     echo.
     exit /b 1
 )
