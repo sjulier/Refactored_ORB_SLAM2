@@ -20,6 +20,7 @@ https://github.com/sjulier/Refactored_ORB_SLAM2/wiki
 
 3. The standard settings files are installed in `./Install/etc/orbslam2/Monocular`. You do not need to specify the directory. Therefore, a example command for running KITTI00 (using a debug build) is:
    
+   (replace `00` with your sequence number)
    
    (a text files such as `result.txt` for result_file_name is perferred as you can open the file later in the text editor directly.):
 
