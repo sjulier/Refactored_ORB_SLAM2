@@ -27,9 +27,13 @@ sudo apt-get install libopencv-dev
 ## INSTALL Pangolin
 ### Go to any directory you want e.g. cd ~ to home dir
 git clone https://github.com/stevenlovegrove/Pangolin.git
+
 cd Pangolin
+
 mkdir build
+
 cd build
+
 cmake ..
 
 ### If got Pangolin build error: Could not find GLEW
@@ -42,6 +46,7 @@ sudo apt-get install libglew-dev
 ## CMAKE_CXX_COMPILER broken
 ### try
 sudo apt-get update
+
 sudo apt-get install -y build-essential
 ### if not work
 install g++ or other C++ compiler
