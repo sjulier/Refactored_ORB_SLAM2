@@ -39,6 +39,35 @@ bool ORBVocabulary::loadFromTextFile(const string &filename) {
   m_weighting = (DBoW2::WeightingType)n2;
   createScoringObject();
 
+  // Store where we are in the file; we'll return to this point later
+  streampos pos = f.tellg();
+  
+  // Now we need to count the number of lines in the file to
+  // preallocate the memory. Unfortunately this is messy, but fairly
+  // fast
+  string line;
+  int nb_nodes;
+  for(nb_nodes = 0; getline(f,line); nb_nodes++);
+
+  // Add a bit of extra space just in case the last line isn't \n terminated
+  nb_nodes += 2;
+  
+  cout << "Padded dictionary size = " << nb_nodes << std::endl;
+
+  // Resize the memory pool and get a pointer to the start for convenience
+  mvDictionaryMemoryPool.resize(F::L * nb_nodes);
+  if (mvDictionaryMemoryPool.size() != F::L * nb_nodes) 
+    {
+      cerr << "Could not resize the memory pool to " << F::L * nb_nodes << " bytes" << endl;
+      exit(0);
+    }
+  unsigned char* memory_pool_pointer = mvDictionaryMemoryPool.data();
+
+  // Clear the EOF bit and go back to the file, just after the header. The rest of the file
+  // consists of the dicionary entries
+  f.clear();
+  f.seekg(pos);
+  
   // nodes
   int expected_nodes =
       (int)((pow((double)m_k, (double)m_L + 1) - 1) / (m_k - 1));
@@ -51,6 +80,10 @@ bool ORBVocabulary::loadFromTextFile(const string &filename) {
   while (!f.eof()) {
     string snode;
     getline(f, snode);
+
+    if (snode.size() == 0)
+      continue;
+
     stringstream ssnode;
     ssnode << snode;
 
@@ -72,6 +105,8 @@ bool ORBVocabulary::loadFromTextFile(const string &filename) {
       ssnode >> sElement;
       ssd << sElement << " ";
     }
+    m_nodes[nid].descriptor = cv::Mat(1, F::L, CV_8U, memory_pool_pointer);
+    memory_pool_pointer += F::L;
     F::fromString(m_nodes[nid].descriptor, ssd.str());
 
     ssnode >> m_nodes[nid].weight;
