@@ -136,6 +136,18 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
   char buf[size_node];
 #endif // _WIN32
   int nid = 1;
+
+  // Resize the memory pool and get a pointer to the start for convenience
+  mvDictionaryMemoryPool.resize(F::L * nb_nodes);
+
+  if (mvDictionaryMemoryPool.size() != F::L * nb_nodes) 
+    {
+      cerr << "Could not resize the memory pool to " << F::L * nb_nodes << " bytes" << endl;
+      exit(0);
+    }
+  
+  unsigned char* memory_pool_pointer = mvDictionaryMemoryPool.data();
+  
   while (!f.eof()) {
     f.read(buf, size_node);
     m_nodes[nid].id = nid;
@@ -144,7 +156,8 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
     m_nodes[nid].parent = *ptr;
     // m_nodes[nid].parent = *(const int*)buf;
     m_nodes[m_nodes[nid].parent].children.push_back(nid);
-    m_nodes[nid].descriptor = cv::Mat(1, F::L, CV_8U);
+    m_nodes[nid].descriptor = cv::Mat(1, F::L, CV_8U, memory_pool_pointer);
+    memory_pool_pointer += F::L;
     memcpy(m_nodes[nid].descriptor.data, buf + 4, F::L);
     m_nodes[nid].weight = *(float *)(buf + 4 + F::L);
     if (buf[8 + F::L]) { // is leaf
@@ -157,6 +170,7 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
     nid += 1;
   }
   f.close();
+  
 #ifdef _WIN32
   delete buf;
 #endif // _WIN32
