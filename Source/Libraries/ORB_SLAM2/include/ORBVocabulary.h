@@ -51,6 +51,8 @@ public:
 
 private:
   using F = DBoW2::FORB;
+
+  std::vector<unsigned char> mvDictionaryMemoryPool;
 };
 
 } // namespace ORB_SLAM2
