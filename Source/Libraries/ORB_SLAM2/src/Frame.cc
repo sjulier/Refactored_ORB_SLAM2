@@ -98,8 +98,8 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   ComputeStereoMatches();
 
-  mvpMapPoints = std::vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvbOutlier = std::vector<bool>(N, false);
+  mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
+  mvbOutlier = vector<bool>(N, false);
 
   // This is done only for the first Frame (or after a change in the
   // calibration)
@@ -158,8 +158,8 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
   ComputeStereoFromRGBD(imDepth);
 
-  mvpMapPoints = std::vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvbOutlier = std::vector<bool>(N, false);
+  mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
+  mvbOutlier = vector<bool>(N, false);
 
   // This is done only for the first Frame (or after a change in the
   // calibration)
@@ -216,11 +216,11 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   UndistortKeyPoints();
 
   // Set no stereo information
-  mvuRight = std::vector<float>(N, -1);
-  mvDepth = std::vector<float>(N, -1);
+  mvuRight = vector<float>(N, -1);
+  mvDepth = vector<float>(N, -1);
 
-  mvpMapPoints = std::vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
-  mvbOutlier = std::vector<bool>(N, false);
+  mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
+  mvbOutlier = vector<bool>(N, false);
 
   // This is done only for the first Frame (or after a change in the
   // calibration)
@@ -338,10 +338,10 @@ bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit) {
   return true;
 }
 
-std::vector<std::size_t>
-Frame::GetFeaturesInArea(const float &x, const float &y, const float &r,
-                         const int minLevel, const int maxLevel) const {
-  std::vector<std::size_t> vIndices;
+vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
+                                        const float &r, const int minLevel,
+                                        const int maxLevel) const {
+  vector<size_t> vIndices;
   vIndices.reserve(N);
 
   const int nMinCellX =
@@ -370,11 +370,11 @@ Frame::GetFeaturesInArea(const float &x, const float &y, const float &r,
 
   for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
     for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
-      const std::vector<std::size_t> vCell = mGrid[ix][iy];
+      const vector<size_t> vCell = mGrid[ix][iy];
       if (vCell.empty())
         continue;
 
-      for (std::size_t j = 0, jend = vCell.size(); j < jend; j++) {
+      for (size_t j = 0, jend = vCell.size(); j < jend; j++) {
         const cv::KeyPoint &kpUn = mvKeysUn[vCell[j]];
         if (bCheckLevels) {
           if (kpUn.octave < minLevel)
@@ -411,8 +411,7 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 
 void Frame::ComputeBoW() {
   if (mBowVec.empty()) {
-    std::vector<cv::Mat> vCurrentDesc =
-        Converter::toDescriptorVector(mDescriptors);
+    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
     mpORBvocabulary->transform(vCurrentDesc, mBowVec, mFeatVec, 4);
   }
 }
@@ -476,16 +475,15 @@ void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
 }
 
 void Frame::ComputeStereoMatches() {
-  mvuRight = std::vector<float>(N, -1.0f);
-  mvDepth = std::vector<float>(N, -1.0f);
+  mvuRight = vector<float>(N, -1.0f);
+  mvDepth = vector<float>(N, -1.0f);
 
   const int thOrbDist = (ORBmatcher::TH_HIGH + ORBmatcher::TH_LOW) / 2;
 
   const int nRows = mpORBextractorLeft->mvImagePyramid[0].rows;
 
   // Assign keypoints to row table
-  std::vector<std::vector<std::size_t>> vRowIndices(nRows,
-                                                    std::vector<std::size_t>());
+  vector<vector<size_t>> vRowIndices(nRows, vector<size_t>());
 
   for (int i = 0; i < nRows; i++)
     vRowIndices[i].reserve(200);
@@ -509,7 +507,7 @@ void Frame::ComputeStereoMatches() {
   const float maxD = mbf / minZ;
 
   // For each left keypoint search a match in the right image
-  std::vector<pair<int, int>> vDistIdx;
+  vector<pair<int, int>> vDistIdx;
   vDistIdx.reserve(N);
 
   for (int iL = 0; iL < N; iL++) {
@@ -518,7 +516,7 @@ void Frame::ComputeStereoMatches() {
     const float &vL = kpL.pt.y;
     const float &uL = kpL.pt.x;
 
-    const std::vector<std::size_t> &vCandidates = vRowIndices[vL];
+    const vector<size_t> &vCandidates = vRowIndices[vL];
 
     if (vCandidates.empty())
       continue;
@@ -530,13 +528,13 @@ void Frame::ComputeStereoMatches() {
       continue;
 
     int bestDist = ORBmatcher::TH_HIGH;
-    std::size_t bestIdxR = 0;
+    size_t bestIdxR = 0;
 
     const cv::Mat &dL = mDescriptors.row(iL);
 
     // Compare descriptor to right keypoints
-    for (std::size_t iC = 0; iC < vCandidates.size(); iC++) {
-      const std::size_t iR = vCandidates[iC];
+    for (size_t iC = 0; iC < vCandidates.size(); iC++) {
+      const size_t iR = vCandidates[iC];
       const cv::KeyPoint &kpR = mvKeysRight[iR];
 
       if (kpR.octave < levelL - 1 || kpR.octave > levelL + 1)
@@ -575,7 +573,7 @@ void Frame::ComputeStereoMatches() {
       int bestDist = INT_MAX;
       int bestincR = 0;
       const int L = 5;
-      std::vector<float> vDists;
+      vector<float> vDists;
       vDists.resize(2 * L + 1);
 
       const float iniu = scaleduR0 + L - w;
@@ -648,8 +646,8 @@ void Frame::ComputeStereoMatches() {
 }
 
 void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth) {
-  mvuRight = std::vector<float>(N, -1);
-  mvDepth = std::vector<float>(N, -1);
+  mvuRight = vector<float>(N, -1);
+  mvDepth = vector<float>(N, -1);
 
   for (int i = 0; i < N; i++) {
     const cv::KeyPoint &kp = mvKeys[i];

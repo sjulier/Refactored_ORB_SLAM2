@@ -348,8 +348,8 @@ void System::Shutdown() {
     this_thread::sleep_for(chrono::milliseconds(1));
   }
 
-//  if (mpViewer)
-//    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
+  //  if (mpViewer)
+  //    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
 }
 
 void System::SaveTrajectoryTUM(const string &filename) {
@@ -362,7 +362,7 @@ void System::SaveTrajectoryTUM(const string &filename) {
     cout << "The map is empty; nothing to save" << endl;
     return;
   }
-  
+
   // Transform all keyframes so that the first keyframe is at the origin.
   // After a loop closure the first keyframe might not be at the origin.
   cv::Mat Two = vpKFs[0]->GetPoseInverse();
@@ -537,6 +537,6 @@ bool System::isFinished() {
   if (mpViewer)
     return mpViewer->isFinished();
   return false;
-}    
+}
 
 } // namespace ORB_SLAM2

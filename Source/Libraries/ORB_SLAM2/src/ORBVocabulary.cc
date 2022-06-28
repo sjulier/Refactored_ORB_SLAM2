@@ -41,33 +41,34 @@ bool ORBVocabulary::loadFromTextFile(const string &filename) {
 
   // Store where we are in the file; we'll return to this point later
   streampos pos = f.tellg();
-  
+
   // Now we need to count the number of lines in the file to
   // preallocate the memory. Unfortunately this is messy, but fairly
   // fast
   string line;
   int nb_nodes;
-  for(nb_nodes = 0; getline(f,line); nb_nodes++);
+  for (nb_nodes = 0; getline(f, line); nb_nodes++)
+    ;
 
   // Add a bit of extra space just in case the last line isn't \n terminated
   nb_nodes += 2;
-  
-  cout << "Padded dictionary size = " << nb_nodes << std::endl;
+
+  cout << "Padded dictionary size = " << nb_nodes << endl;
 
   // Resize the memory pool and get a pointer to the start for convenience
   mvDictionaryMemoryPool.resize(F::L * nb_nodes);
-  if (mvDictionaryMemoryPool.size() != F::L * nb_nodes) 
-    {
-      cerr << "Could not resize the memory pool to " << F::L * nb_nodes << " bytes" << endl;
-      exit(0);
-    }
-  unsigned char* memory_pool_pointer = mvDictionaryMemoryPool.data();
+  if (mvDictionaryMemoryPool.size() != F::L * nb_nodes) {
+    cerr << "Could not resize the memory pool to " << F::L * nb_nodes
+         << " bytes" << endl;
+    exit(0);
+  }
+  unsigned char *memory_pool_pointer = mvDictionaryMemoryPool.data();
 
-  // Clear the EOF bit and go back to the file, just after the header. The rest of the file
-  // consists of the dicionary entries
+  // Clear the EOF bit and go back to the file, just after the header. The rest
+  // of the file consists of the dicionary entries
   f.clear();
   f.seekg(pos);
-  
+
   // nodes
   int expected_nodes =
       (int)((pow((double)m_k, (double)m_L + 1) - 1) / (m_k - 1));
@@ -148,7 +149,7 @@ void ORBVocabulary::saveToTextFile(const string &filename) const {
   f.close();
 }
 
-bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
+bool ORBVocabulary::loadFromBinaryFile(const string &filename) {
   fstream f;
   f.open(filename.c_str(), ios_base::in | ios::binary);
   unsigned int nb_nodes, size_node;
@@ -166,7 +167,7 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
   m_nodes.resize(nb_nodes + 1);
   m_nodes[0].id = 0;
 #ifdef _WIN32
-  char* buf = new char[size_node];
+  char *buf = new char[size_node];
 #else
   char buf[size_node];
 #endif // _WIN32
@@ -175,14 +176,14 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
   // Resize the memory pool and get a pointer to the start for convenience
   mvDictionaryMemoryPool.resize(F::L * nb_nodes);
 
-  if (mvDictionaryMemoryPool.size() != F::L * nb_nodes) 
-    {
-      cerr << "Could not resize the memory pool to " << F::L * nb_nodes << " bytes" << endl;
-      exit(0);
-    }
-  
-  unsigned char* memory_pool_pointer = mvDictionaryMemoryPool.data();
-  
+  if (mvDictionaryMemoryPool.size() != F::L * nb_nodes) {
+    cerr << "Could not resize the memory pool to " << F::L * nb_nodes
+         << " bytes" << endl;
+    exit(0);
+  }
+
+  unsigned char *memory_pool_pointer = mvDictionaryMemoryPool.data();
+
   while (!f.eof()) {
     f.read(buf, size_node);
     m_nodes[nid].id = nid;
@@ -205,7 +206,7 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
     nid += 1;
   }
   f.close();
-  
+
 #ifdef _WIN32
   delete buf;
 #endif // _WIN32
@@ -214,7 +215,7 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
 
 // --------------------------------------------------------------------------
 
-bool ORBVocabulary::saveToBinaryFile(const std::string &filename) const {
+bool ORBVocabulary::saveToBinaryFile(const string &filename) const {
   fstream f;
   f.open(filename.c_str(), ios_base::out | ios::binary);
   unsigned int nb_nodes = m_nodes.size();

@@ -56,7 +56,7 @@ void Map::EraseKeyFrame(KeyFrame *pKF) {
   // Delete the MapPoint
 }
 
-void Map::SetReferenceMapPoints(const std::vector<MapPoint *> &vpMPs) {
+void Map::SetReferenceMapPoints(const vector<MapPoint *> &vpMPs) {
   unique_lock<mutex> lock(mMutexMap);
   mvpReferenceMapPoints = vpMPs;
 }
@@ -71,14 +71,14 @@ int Map::GetLastBigChangeIdx() {
   return mnBigChangeIdx;
 }
 
-std::vector<KeyFrame *> Map::GetAllKeyFrames() {
+vector<KeyFrame *> Map::GetAllKeyFrames() {
   unique_lock<mutex> lock(mMutexMap);
-  return std::vector<KeyFrame *>(mspKeyFrames.begin(), mspKeyFrames.end());
+  return vector<KeyFrame *>(mspKeyFrames.begin(), mspKeyFrames.end());
 }
 
-std::vector<MapPoint *> Map::GetAllMapPoints() {
+vector<MapPoint *> Map::GetAllMapPoints() {
   unique_lock<mutex> lock(mMutexMap);
-  return std::vector<MapPoint *>(mspMapPoints.begin(), mspMapPoints.end());
+  return vector<MapPoint *>(mspMapPoints.begin(), mspMapPoints.end());
 }
 
 long unsigned int Map::MapPointsInMap() {
@@ -91,7 +91,7 @@ long unsigned int Map::KeyFramesInMap() {
   return mspKeyFrames.size();
 }
 
-std::vector<MapPoint *> Map::GetReferenceMapPoints() {
+vector<MapPoint *> Map::GetReferenceMapPoints() {
   unique_lock<mutex> lock(mMutexMap);
   return mvpReferenceMapPoints;
 }
