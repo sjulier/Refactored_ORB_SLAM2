@@ -24,8 +24,8 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-std::vector<cv::Mat> Converter::toDescriptorVector(const cv::Mat &Descriptors) {
-  std::vector<cv::Mat> vDesc;
+vector<cv::Mat> Converter::toDescriptorVector(const cv::Mat &Descriptors) {
+  vector<cv::Mat> vDesc;
   vDesc.reserve(Descriptors.rows);
   for (int j = 0; j < Descriptors.rows; j++)
     vDesc.push_back(Descriptors.row(j));
@@ -122,11 +122,11 @@ Eigen::Matrix<double, 3, 3> Converter::toMatrix3d(const cv::Mat &cvMat3) {
   return M;
 }
 
-std::vector<float> Converter::toQuaternion(const cv::Mat &M) {
+vector<float> Converter::toQuaternion(const cv::Mat &M) {
   Eigen::Matrix<double, 3, 3> eigMat = toMatrix3d(M);
   Eigen::Quaterniond q(eigMat);
 
-  std::vector<float> v(4);
+  vector<float> v(4);
   v[0] = q.x();
   v[1] = q.y();
   v[2] = q.z();

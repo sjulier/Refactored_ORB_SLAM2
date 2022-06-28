@@ -52,7 +52,7 @@ bool ORBVocabulary::loadFromTextFile(const string &filename) {
   // Add a bit of extra space just in case the last line isn't \n terminated
   nb_nodes += 2;
   
-  cout << "Padded dictionary size = " << nb_nodes << std::endl;
+  cout << "Padded dictionary size = " << nb_nodes << endl;
 
   // Resize the memory pool and get a pointer to the start for convenience
   mvDictionaryMemoryPool.resize(F::L * nb_nodes);
@@ -148,7 +148,7 @@ void ORBVocabulary::saveToTextFile(const string &filename) const {
   f.close();
 }
 
-bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
+bool ORBVocabulary::loadFromBinaryFile(const string &filename) {
   fstream f;
   f.open(filename.c_str(), ios_base::in | ios::binary);
   unsigned int nb_nodes, size_node;
@@ -214,7 +214,7 @@ bool ORBVocabulary::loadFromBinaryFile(const std::string &filename) {
 
 // --------------------------------------------------------------------------
 
-bool ORBVocabulary::saveToBinaryFile(const std::string &filename) const {
+bool ORBVocabulary::saveToBinaryFile(const string &filename) const {
   fstream f;
   f.open(filename.c_str(), ios_base::out | ios::binary);
   unsigned int nb_nodes = m_nodes.size();
