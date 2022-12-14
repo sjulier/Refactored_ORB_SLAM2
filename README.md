@@ -12,9 +12,9 @@ https://github.com/sjulier/Refactored_ORB_SLAM2/wiki
 
 ## Difference on execution against original  ORB_SLAM2:
 
-1.  All executables are installed in `./Install/bin` and a suffix is used to denote debug builds.
+1.  All executables are installed in `./Install/bin` and the suffix "_d" is used to denote debug builds.
 
-   For instance, if you want to run mono_kitti with the default Build.sh file setting, the executable is located at `./Install/bin/mono_kitti_d`
+   For instance, if you want to run mono_kitti with the default Build.sh file setting, the executable is at `./Install/bin/mono_kitti`. If you build with debugging enabled, the executable is at `./Install/bin/mono_kitti_d`.
 
 2. The standard ORB vocabulary is loaded by default and does not have to be specified on the command line. (It is installed in `./Install/var/lib/orbslam2` subdirectory). The system will try to load the binary version of the vocabulary. If it is not able to, it will load the text version, convert it, and save the binary version to the same directory. This speeds up start up times from several seconds to less than 0.5s.
 
@@ -34,8 +34,7 @@ If you have set the `PATH` variable as specified above, you can change it to:
 
    `mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
 
-  
-On linux it is highly recommend you get used to using valgrind. See https://www.valgrind.org/docs/manual/quick-start.html
+On Linux it is highly recommend you should become familiar with `valgrind`. See https://www.valgrind.org/docs/manual/quick-start.html
 
 ##### Other examples
 
@@ -52,7 +51,7 @@ You can then run the code using:
 
 
 
-The following is an abstracted guidance for compilation:
+Build instructions:
 -----
 
 ## Prerequisites
@@ -75,11 +74,11 @@ Clone this repository.
 
 You should be able to build by running:
 
-`./Build.sh`
-
-to build a debug version. To build a release version, type:
-
 `./Build.sh Release`
+
+to build the release version. To build a debug version, type:
+
+`./Build.sh Debug`
 
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
@@ -99,13 +98,13 @@ brew install boost eigen3 suitesparse opencv
 
 Clone this repository.
 
-You should be able to build by running:
+You should be able to build the release by by running:
 
 `./Build.sh`
 
-to build a debug version. To build a release version, type:
+To build a debug version, type:
 
-`./Build.sh Release`
+`./Build.sh Debug`
 
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
@@ -113,11 +112,11 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 ### Windows 10 build
 
-Windows 10 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use vcpkg.
+Windows 10 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use `vcpkg` (https://github.com/microsoft/vcpkg).
 
 PLEASE MAKE SURE TO CLEAR THE CMAKE PACKAGE REGISTRY BEFORE YOU TRY TO BUILD. WE HAVE ENCOUNTERED A LOT OF PROBLEMS WITH THE PACKAGE REGISTRY BEING USED TO LINK TO THE WRONG VERSIONS OF LIBRARIES, LEADING TO A LOT OF CONFUSION AND FRUSTRATION.
 
-First, install vcpkg
+First, install `vcpkg`
 
 Second,
 
@@ -125,9 +124,9 @@ You should be able to build by running:
 
 `Build.bat`
 
-to build a debug version. To build a release version, type:
+to build a release version. To build a debug version, type:
 
-`Build.bat Release`
+`Build.bat Debug`
 
 This will launch four build jobs in parallel. If your machine can take it, you can task more cpus by changing the value passed to maxcpucount
 
