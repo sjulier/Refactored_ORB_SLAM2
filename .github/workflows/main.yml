@@ -25,7 +25,7 @@ jobs:
       run: sudo apt-get update
       
     - name: Install dependecies
-      run: sudo apt-get install cmake build-essential libeigen3-dev libboost-dev libopencv-dev libglew-dev
+      run: sudo apt-get install cmake build-essential libeigen3-dev libboost-dev libopencv-dev libglew-dev libboost-filesystem-dev
       
     - name: Try compilation
       run: |
@@ -42,7 +42,6 @@ jobs:
       - name: Install GitHub CLI
         run: |
           brew update
-          brew install gh
       - name: Install dependencies
         run: |
           brew install cmake eigen glew pkgconfig freeglut opencv
