@@ -1,4 +1,4 @@
-name: CMake
+name: Ubuntu_macOS_readme
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
           brew update
       - name: Install dependencies
         run: |
-          brew install cmake glew pkgconfig freeglut opencv boost eigen3 suitesparse 
+          brew install cmake glew pkgconfig freeglut opencv boost eigen suitesparse 
 
       - name: link opencv
         run: |
