@@ -94,7 +94,7 @@ We use homebrew and build using the XCode command line tools. Please ensure that
 
 Install the support libraries:
 
-`brew install boost eigen3 suitesparse opencv`
+`brew install boost eigen suitesparse opencv`
 
 Clone this repository.
 
