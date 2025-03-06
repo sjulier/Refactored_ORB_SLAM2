@@ -80,6 +80,12 @@ else()
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif ()
 
+# Suppress warning. From:
+# https://stackoverflow.com/questions/79146083/finding-boost-without-cmake-find-module-cmp0167
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # Find the required packages; these are from ThirdParty
