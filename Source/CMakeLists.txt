@@ -8,9 +8,11 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY TRUE)
+
 # Set where to install stuff
 set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Install)
-list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
+set(CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
 
 # Set where the get the prebuilt third party libraries from
 set(THIRD_PARTY_BUILT_LIBRARY_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
@@ -72,14 +74,6 @@ message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
 # Find the other necessary packages
 find_package(Eigen3 REQUIRED)
 
-# Backwards compatibilty for eigen
-if (TARGET Eigen3::Eigen)
-  set(EIGEN3_EIGEN_LIBS Eigen3::Eigen)
-else()
-  set(EIGEN3_EIGEN_LIBS )
-  include_directories(${EIGEN3_INCLUDE_DIR})
-endif ()
-
 # Suppress warning. From:
 # https://stackoverflow.com/questions/79146083/finding-boost-without-cmake-find-module-cmp0167
 if(POLICY CMP0167)
@@ -89,10 +83,11 @@ endif()
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # Find the required packages; these are from ThirdParty
-find_package(Pangolin REQUIRED)
+find_package(Pangolin REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
+
 find_package(DBoW2 REQUIRED)
 find_package(DLib REQUIRED)
-find_package(g2o REQUIRED)
+find_package(g2o REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
 
 # Add the libraries and examples
 add_subdirectory(Libraries)
