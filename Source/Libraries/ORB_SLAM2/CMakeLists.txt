@@ -1,5 +1,3 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${DBoW2_INCLUDE_DIR} ${DLib_INCLUDE_DIR})
-
 # For debugging strip the full path from https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
 # Note this will not work in Visual studio-type developer environments.
 
@@ -43,10 +41,13 @@ src/Initializer.cc
 src/Viewer.cc
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_DIRECTORY} ${DBoW2_INCLUDE_DIR} ${DLib_INCLUDE_DIR})
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
 ${OpenCV_LIBS}
-${EIGEN3_EIGEN_LIBS}
-pangolin
+Eigen3::Eigen
+pango_opengl
+pango_display
 ${DBoW2_LIBS}
 ${DLib_LIBS}
 g2o::types_sba
@@ -54,6 +55,10 @@ g2o::types_sim3
 g2o::core
 Boost::filesystem
 )
+
+# For some reason this isn't propagating over; I think this might be related to a LIST issue,
+# but I'm not sure
+target_compile_definitions(${PROJECT_NAME} PUBLIC HAVE_GLEW)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
