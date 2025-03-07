@@ -58,7 +58,9 @@ Boost::filesystem
 
 # For some reason this isn't propagating over; I think this might be related to a LIST issue,
 # but I'm not sure
-target_compile_definitions(${PROJECT_NAME} PUBLIC HAVE_GLEW)
+if(APPLE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC HAVE_GLEW)
+endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
