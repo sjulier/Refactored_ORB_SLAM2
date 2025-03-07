@@ -6,7 +6,7 @@ add_compile_definitions(DEFAULT_RGBD_SETTINGS_DIR="${RGBD_DEFAULT_SETTINGS_DIR}"
 # TUM
 add_executable(rgbd_tum rgbd_tum.cc)
 target_link_libraries(rgbd_tum ORB_SLAM2)
-set_target_properties(mono_tum PROPERTIES OUTPUT_NAME stereo_tum${EXE_POSTFIX})
+set_target_properties(rgbd_tum PROPERTIES OUTPUT_NAME rgbd_tum{EXE_POSTFIX})
 
 # Install compiled target
 install(TARGETS rgbd_tum RUNTIME DESTINATION ${BUILD_INSTALL_PREFIX}/bin)
