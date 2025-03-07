@@ -145,7 +145,7 @@ void LoadImages(const string &strPathToSequence,
   if (fs::exists(strPathToSequence) == false) {
     cerr << "FATAL: Could not find the timestamp file " << strPathToSequence
          << endl;
-    exit(0);
+    exit(EX_DATAERR);
   }
 
   ifstream fTimes;
@@ -153,7 +153,7 @@ void LoadImages(const string &strPathToSequence,
   if (fs::exists(strPathTimeFile) == false) {
     cerr << "FATAL: Could not find the timestamp file " << strPathTimeFile
          << endl;
-    exit(0);
+    exit(EX_DATAERR);
   }
   fTimes.open(strPathTimeFile.c_str());
   while (!fTimes.eof()) {

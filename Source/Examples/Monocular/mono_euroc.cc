@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
   // Save camera trajectory
   SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
-  return 0;
+  return main_error;
 }
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
