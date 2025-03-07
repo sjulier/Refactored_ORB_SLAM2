@@ -23,6 +23,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sysexits.h>
 
 #include <opencv2/core/core.hpp>
 
@@ -37,10 +38,10 @@ void LoadImages(const string &strPathLeft, const string &strPathRight,
 int main(int argc, char **argv) {
   if (argc != 5) {
     cerr << endl
-         << "Usage: ./stereo_euroc path_to_settings path_to_left_folder "
+         << "Usage: ./stereo_euroc settings_file path_to_left_folder "
             "path_to_right_folder path_to_times_file"
          << endl;
-    return 1;
+    return EX_USAGE;
   }
 
   // Retrieve paths to images
@@ -52,19 +53,21 @@ int main(int argc, char **argv) {
 
   if (vstrImageLeft.empty() || vstrImageRight.empty()) {
     cerr << "ERROR: No images in provided path." << endl;
-    return 1;
+    return EX_NOINPUT;
   }
 
   if (vstrImageLeft.size() != vstrImageRight.size()) {
     cerr << "ERROR: Different number of left and right images." << endl;
-    return 1;
+    return EX_DATAERR;
   }
 
   // Read rectification parameters
-  cv::FileStorage fsSettings(argv[1], cv::FileStorage::READ);
+  string fsSettingsFile = string(DEFAULT_STEREO_SETTINGS_DIR) + string(argv[1]);
+
+  cv::FileStorage fsSettings(fsSettingsFile, cv::FileStorage::READ);
   if (!fsSettings.isOpened()) {
     cerr << "ERROR: Wrong path to settings" << endl;
-    return -1;
+    return EX_DATAERR;
   }
 
   cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r;
@@ -90,7 +93,7 @@ int main(int argc, char **argv) {
       cols_l == 0 || cols_r == 0) {
     cerr << "ERROR: Calibration parameters to rectify stereo are missing!"
          << endl;
-    return -1;
+    return EX_DATAERR;
   }
 
   cv::Mat M1l, M2l, M1r, M2r;
@@ -117,6 +120,9 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
+  int main_error = EX_OK;
+  std::thread runthread([&]() { // Start in new thread
+
   cv::Mat imLeft, imRight, imLeftRect, imRightRect;
   for (int ni = 0; ni < nImages; ni++) {
     // Read left and right images from file
@@ -126,15 +132,22 @@ int main(int argc, char **argv) {
     if (imLeft.empty()) {
       cerr << endl
            << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
-      return 1;
+        main_error = EX_DATAERR;
+        break;
     }
 
     if (imRight.empty()) {
       cerr << endl
            << "Failed to load image at: " << string(vstrImageRight[ni]) << endl;
-      return 1;
+        main_error = EX_DATAERR;
+        break;
     }
 
+      if (SLAM.isFinished() == true) {
+	  break;
+      }
+
+    
     cv::remap(imLeft, imLeftRect, M1l, M2l, cv::INTER_LINEAR);
     cv::remap(imRight, imRightRect, M1r, M2r, cv::INTER_LINEAR);
 
@@ -162,11 +175,24 @@ int main(int argc, char **argv) {
 
     if (ttrack < T)
       this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-    //            usleep((T-ttrack)*1e6);
   }
+  SLAM.StopViewer();
+    });
 
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
+  SLAM.StartViewer();
+  
+  cout << "Viewer started, waiting for thread." << endl;
+
+  runthread.join();
+  
+  if (main_error != EX_OK)
+    return main_error;
+  
   // Stop all threads
   SLAM.Shutdown();
+  cout << "System Shutdown" << endl;
 
   // Tracking time statistics
   sort(vTimesTrack.begin(), vTimesTrack.end());
@@ -181,7 +207,7 @@ int main(int argc, char **argv) {
   // Save camera trajectory
   SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
 
-  return 0;
+  return main_error;
 }
 
 void LoadImages(const string &strPathLeft, const string &strPathRight,

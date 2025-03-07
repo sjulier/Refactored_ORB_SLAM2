@@ -22,6 +22,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <sysexits.h>
 
 #include <opencv2/core/core.hpp>
 
@@ -36,11 +37,8 @@ void LoadImages(const string &strAssociationFilename,
 
 int main(int argc, char **argv) {
   if (argc != 4) {
-    cerr << endl
-         << "Usage: ./rgbd_tum path_to_settings path_to_sequence "
-            "path_to_association"
-         << endl;
-    return 1;
+    cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence path_to_association" << endl;
+    return EX_USAGE;
   }
 
   // Retrieve paths to images
@@ -55,10 +53,10 @@ int main(int argc, char **argv) {
   int nImages = vstrImageFilenamesRGB.size();
   if (vstrImageFilenamesRGB.empty()) {
     cerr << endl << "No images found in provided path." << endl;
-    return 1;
+    return EX_NOINPUT;
   } else if (vstrImageFilenamesD.size() != vstrImageFilenamesRGB.size()) {
     cerr << endl << "Different number of images for rgb and depth." << endl;
-    return 1;
+    return EX_DATAERR;
   }
 
   // Create SLAM system. It initializes all system threads and gets ready to
@@ -76,50 +74,69 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
-  cv::Mat imRGB, imD;
-  for (int ni = 0; ni < nImages; ni++) {
-    // Read image and depthmap from file
-    imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni],
-                       cv::IMREAD_UNCHANGED);
-    imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
-                     cv::IMREAD_UNCHANGED);
-    double tframe = vTimestamps[ni];
 
-    if (imRGB.empty()) {
-      cerr << endl
-           << "Failed to load image at: " << string(argv[2]) << "/"
-           << vstrImageFilenamesRGB[ni] << endl;
-      return 1;
-    }
+  int main_error = EX_OK;
+  std::thread runthread([&]() { // Start in new thread
+      cv::Mat imRGB, imD;
+      for (int ni = 0; ni < nImages; ni++) {
+        // Read image and depthmap from file
+        imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni],
+                           cv::IMREAD_UNCHANGED);
+        imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
+                         cv::IMREAD_UNCHANGED);
+        double tframe = vTimestamps[ni];
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+        if (imRGB.empty()) {
+          cerr << endl
+               << "Failed to load image at: " << string(argv[2]) << "/"
+               << vstrImageFilenamesRGB[ni] << endl;
+          main_error = EX_DATAERR;
+          break;
+        }
 
-    // Pass the image to the SLAM system
-    SLAM.TrackRGBD(imRGB, imD, tframe);
+      if (SLAM.isFinished() == true) {
+	  break;
+      }
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+      chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+        
+      // Pass the image to the SLAM system
+      SLAM.TrackRGBD(imRGB, imD, tframe);
+      
+      std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
-    double ttrack =
+      double ttrack =
         std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
-            .count();
+        .count();
 
-    vTimesTrack[ni] = ttrack;
+      vTimesTrack[ni] = ttrack;
+      
+      // Wait to load the next frame
+      double T = 0;
+      if (ni < nImages - 1)
+        T = vTimestamps[ni + 1] - tframe;
+      else if (ni > 0)
+        T = tframe - vTimestamps[ni - 1];
+      
+      if (ttrack < T)
+        this_thread::sleep_for(chrono::duration<double>(T - ttrack));
+       }
+      SLAM.StopViewer();
+    });
 
-    // Wait to load the next frame
-    double T = 0;
-    if (ni < nImages - 1)
-      T = vTimestamps[ni + 1] - tframe;
-    else if (ni > 0)
-      T = tframe - vTimestamps[ni - 1];
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
+  SLAM.StartViewer();
 
-    if (ttrack < T)
-      this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-    // usleep((T-ttrack)*1e6);
-  }
+  runthread.join();
+    
+  if (main_error != EX_OK)
+    return main_error;
 
   // Stop all threads
   SLAM.Shutdown();
-
+  cout << "System Shutdown" << endl;
+  
   // Tracking time statistics
   sort(vTimesTrack.begin(), vTimesTrack.end());
   float totaltime = 0;
@@ -134,7 +151,7 @@ int main(int argc, char **argv) {
   SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
   SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
-  return 0;
+  return main_error;
 }
 
 void LoadImages(const string &strAssociationFilename,
