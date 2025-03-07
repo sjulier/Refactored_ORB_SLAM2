@@ -63,7 +63,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, argv[1],
+  string settingsFile = string(DEFAULT_RGBD_SETTINGS_DIR) + string(argv[1]);
+  ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::RGBD, true);
 
   // Vector for tracking time statistics
