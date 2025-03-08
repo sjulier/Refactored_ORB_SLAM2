@@ -24,9 +24,12 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include "System.h"
 
+
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
@@ -42,7 +45,8 @@ int main(int argc, char **argv) {
   // Retrieve paths to images
   vector<string> vstrImageFilenames;
   vector<double> vTimestamps;
-  LoadImages(string(argv[2]), string(argv[3]), vstrImageFilenames, vTimestamps);
+  string timeStampsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[3]);
+  LoadImages(string(argv[2]), timeStampsFile, vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
 
@@ -66,7 +70,7 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   int main_error = EX_OK;
-  std::thread runthread([&]() { // Start in new thread
+  thread runthread([&]() { // Start in new thread
     // Main loop
     cv::Mat im;
     for (int ni = 0; ni < nImages; ni++) {
@@ -139,6 +143,12 @@ int main(int argc, char **argv) {
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps) {
+  // Check the file exists
+  if (fs::exists(strPathTimes) == false) {
+    cerr << "FATAL: Could not find the EuRoC Timestamp file file " << strPathTimes << endl;
+    exit(EX_DATAERR);
+  }
+
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);

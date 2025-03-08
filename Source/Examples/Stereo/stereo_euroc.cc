@@ -24,11 +24,13 @@
 #include <iomanip>
 #include <iostream>
 #include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include <opencv2/core/core.hpp>
 
 #include <System.h>
 
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strPathLeft, const string &strPathRight,
@@ -48,7 +50,9 @@ int main(int argc, char **argv) {
   vector<string> vstrImageLeft;
   vector<string> vstrImageRight;
   vector<double> vTimeStamp;
-  LoadImages(string(argv[2]), string(argv[3]), string(argv[4]), vstrImageLeft,
+  string timeStampsFile = string(DEFAULT_STEREO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[4]);
+  
+  LoadImages(string(argv[2]), string(argv[3]), timeStampsFile, vstrImageLeft,
              vstrImageRight, vTimeStamp);
 
   if (vstrImageLeft.empty() || vstrImageRight.empty()) {
@@ -121,7 +125,7 @@ int main(int argc, char **argv) {
 
   // Main loop
   int main_error = EX_OK;
-  std::thread runthread([&]() { // Start in new thread
+  thread runthread([&]() { // Start in new thread
 
   cv::Mat imLeft, imRight, imLeftRect, imRightRect;
   for (int ni = 0; ni < nImages; ni++) {
@@ -153,15 +157,15 @@ int main(int argc, char **argv) {
 
     double tframe = vTimeStamp[ni];
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 
     // Pass the images to the SLAM system
     SLAM.TrackStereo(imLeftRect, imRightRect, tframe);
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
 
     double ttrack =
-        std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
+        chrono::duration_cast<chrono::duration<double>>(t2 - t1)
             .count();
 
     vTimesTrack[ni] = ttrack;
@@ -213,6 +217,12 @@ int main(int argc, char **argv) {
 void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimeStamps) {
+  // Check the file exists
+  if (fs::exists(strPathTimes) == false) {
+    cerr << "FATAL: Could not find the EuRoC Timestamp file file " << strPathTimes << endl;
+    exit(EX_DATAERR);
+  }
+
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);

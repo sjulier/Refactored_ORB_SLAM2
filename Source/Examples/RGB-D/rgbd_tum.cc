@@ -23,11 +23,13 @@
 #include <fstream>
 #include <iostream>
 #include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include <opencv2/core/core.hpp>
 
 #include <System.h>
 
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strAssociationFilename,
@@ -45,7 +47,7 @@ int main(int argc, char **argv) {
   vector<string> vstrImageFilenamesRGB;
   vector<string> vstrImageFilenamesD;
   vector<double> vTimestamps;
-  string strAssociationFilename = string(argv[3]);
+  string strAssociationFilename = string(DEFAULT_RGBD_SETTINGS_DIR) + "associations/" + string(argv[3]);
   LoadImages(strAssociationFilename, vstrImageFilenamesRGB, vstrImageFilenamesD,
              vTimestamps);
 
@@ -74,9 +76,8 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
-
   int main_error = EX_OK;
-  std::thread runthread([&]() { // Start in new thread
+  thread runthread([&]() { // Start in new thread
       cv::Mat imRGB, imD;
       for (int ni = 0; ni < nImages; ni++) {
         // Read image and depthmap from file
@@ -103,10 +104,10 @@ int main(int argc, char **argv) {
       // Pass the image to the SLAM system
       SLAM.TrackRGBD(imRGB, imD, tframe);
       
-      std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+      chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
 
       double ttrack =
-        std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
+        chrono::duration_cast<chrono::duration<double>>(t2 - t1)
         .count();
 
       vTimesTrack[ni] = ttrack;
@@ -120,7 +121,7 @@ int main(int argc, char **argv) {
       
       if (ttrack < T)
         this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-       }
+      }
       SLAM.StopViewer();
     });
 
@@ -158,6 +159,11 @@ void LoadImages(const string &strAssociationFilename,
                 vector<string> &vstrImageFilenamesRGB,
                 vector<string> &vstrImageFilenamesD,
                 vector<double> &vTimestamps) {
+  if (fs::exists(strAssociationFilename) == false) {
+    cerr << "FATAL: Could not find the association file file " << strAssociationFilename << endl;
+    exit(EX_DATAERR);
+  }
+
   ifstream fAssociation;
   fAssociation.open(strAssociationFilename.c_str());
   while (!fAssociation.eof()) {
