@@ -12,8 +12,9 @@ echo Build type %build_type%
 set root_dir=%cd%
 mkdir "Build/%build_type%/Source/ORBSLAM_2"
 pushd "Build/%build_type%/Source/ORBSLAM_2"
-cmake.exe %root_dir%\Source -DCMAKE_BUILD_TYPE=%build_type% -G"Visual Studio 16 2019" -DCMAKE_TOOLCHAIN_FILE=%toolchain_file% -DCMAKE_C_FLAGS="-bigoj" -DCMAKE_CXX_FLAGS="-bigobj -EHsc"
-msbuild INSTALL.vcxproj -maxcpucount:4 -property:Configuration=%build_type%
+cmake.exe %root_dir%\Source -DCMAKE_BUILD_TYPE=%build_type% -G"Ninja" -DCMAKE_TOOLCHAIN_FILE=%toolchain_file% -DCMAKE_C_FLAGS="-bigoj" -DCMAKE_CXX_FLAGS="-bigobj -EHsc"
+cmake --build .
+cmake --install .
 popd
 
 rem Copy the DLLs over afterwards because the install target doesn't

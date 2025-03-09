@@ -1,4 +1,4 @@
-@echo off 
+@echo on
 
 call Scripts\ValidateVCPKG.bat
 
@@ -56,11 +56,11 @@ if not exist "%sysexits_file%\include" (
 
 
 rem Set up the tool chain file which is needed
-set toolchain_file=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
+set toolchain_file="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
 
 rem Now call the build scripts
-call Scripts\Build_ThirdParty.bat %build_type% %toolchain_file%
-call Scripts\Build_Source.bat %build_type% %toolchain_file%
+call Scripts\Build_ThirdParty.bat %build_type% "%toolchain_file%"
+call Scripts\Build_Source.bat %build_type% "%toolchain_file%"
 
 rem We need to somehow get these into the system path
 echo %~dp0\Install\bin
