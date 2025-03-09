@@ -5,7 +5,7 @@ cmake --version >NUL 2>NUL
 
 if errorlevel 1 (
     echo Cannot find cmake.exe on the command line; calling default vsvarsall.bat to install
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+    call "C:\Program Files\Microsoft Visual Studio\2020\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
     cmake --version >NUL 2>NUL
 )
 
@@ -16,7 +16,7 @@ if errorlevel 1 (
     echo.
     echo An example command line is:
     echo.
-    echo "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+    echo "C:\Program Files\Microsoft Visual Studio\2020\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
     echo.
     exit /b 1
 )
