@@ -21,6 +21,12 @@ else()
 	set(common_cmake_args "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE};-DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX};-DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBRARIES}")
 endif()
 
+if(WIN32)
+   list(APPEND common_cmake_args "-DVCPKG_INSTALLED_DIR=${VCPKG_INSTALLED_DIR}")
+endif()
+
+message(common_cmake_args=${common_cmake_args})
+
 # Set up external project support
 include(ExternalProject)
 

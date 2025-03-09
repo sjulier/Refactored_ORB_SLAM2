@@ -1,4 +1,4 @@
-@echo on
+@echo off
 
 call Scripts\ValidateVCPKG.bat
 
@@ -28,8 +28,8 @@ if not "%build_type%" == "Debug" (
 
 rem Create the sysexits.h file if it doesn't exist
 set sysexits_file=Develop\%build_type%\include\sysexits.h
-echo Creating sysexits.h file %sysexits_file%
-if not exist "%sysexits_file%\include" (
+if not exist "%sysexits_file%" (
+        echo Creating sysexits.h file %sysexits_file%
 	mkdir Develop\%build_type%\include >NUL 2>NUL
 	echo #ifndef _SYSEXITS_H_ > %sysexits_file%
 	echo #define _SYSEXITS_H_ >> %sysexits_file%
@@ -54,14 +54,17 @@ if not exist "%sysexits_file%\include" (
 	echo #endif >> %sysexits_file%
 )
 
-
 rem Set up the tool chain file which is needed
-set toolchain_file="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
+set toolchain_file=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
+
+rem Set the local for the vcpkg install
+
+set vcpkg_installed_dir=%~dp0vcpkg_installed
 
 rem Now call the build scripts
-call Scripts\Build_ThirdParty.bat %build_type% "%toolchain_file%"
-call Scripts\Build_Source.bat %build_type% "%toolchain_file%"
+call Scripts\Build_ThirdParty.bat %build_type% "%toolchain_file%" "%vcpkg_installed_dir%"
+call Scripts\Build_Source.bat %build_type% "%toolchain_file%" "%vcpkg_installed_dir%"
 
 rem We need to somehow get these into the system path
-echo %~dp0\Install\bin
-echo %VCPKG_ROOT%\installed\x64-windows\bin
+rem echo %~dp0\Install\bin
+rem echo %VCPKG_ROOT%\installed\x64-windows\bin
