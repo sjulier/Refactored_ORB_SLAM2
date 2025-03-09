@@ -1,0 +1,10 @@
+{
+  "dependencies": [
+    "eigen3",
+    "boost-filesystem",
+    "boost-dynamic-bitset",
+    "glew",
+    "opencv4",
+    "suitesparse"
+  ]
+}

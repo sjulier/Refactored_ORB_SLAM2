@@ -13,8 +13,7 @@ echo Build type %build_type%
 set root_dir="%cd%"
 mkdir "Build/%build_type%/Source/ThirdParty"
 pushd "Build/%build_type%/Source/ThirdParty"
-cmake.exe "%root_dir%\Source\ThirdParty" -DCMAKE_BUILD_TYPE=%build_type% -G"Ninja" -DCMAKE_TOOLCHAIN_FILE=%toolchain_file%
-rem msbuild ALL_BUILD.vcxproj -maxcpucount:4 -property:Configuration=%build_type%
+cmake.exe "%root_dir%\Source\ThirdParty" -DCMAKE_BUILD_TYPE=%build_type% -G"Ninja" -DCMAKE_TOOLCHAIN_FILE="%toolchain_file%" -DVCPKG_INSTALLED_DIR=%vcpkg_installed_dir%
 cmake --build .
 cmake --install .
 popd
