@@ -25,5 +25,5 @@ install(TARGETS mono_tum mono_euroc mono_kitti RUNTIME DESTINATION ${BUILD_INSTA
 file(GLOB settings_files "*.yaml")
 install(FILES ${settings_files} DESTINATION ${MONO_DEFAULT_SETTINGS_DIR})
 
-# Install the timestamps, although there's actually no evidence they are used
+# Install the EuRoC timestamps
 install(DIRECTORY EuRoC_TimeStamps DESTINATION ${MONO_DEFAULT_SETTINGS_DIR})

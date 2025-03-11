@@ -20,5 +20,5 @@ install(TARGETS stereo_euroc stereo_kitti RUNTIME DESTINATION ${BUILD_INSTALL_PR
 file(GLOB settings_files "*.yaml")
 install(FILES ${settings_files} DESTINATION ${STEREO_DEFAULT_SETTINGS_DIR})
 
-# Install the timestamps, although there's actually no evidence they are used
+# Install the EuRoC timestamps
 install(DIRECTORY EuRoC_TimeStamps DESTINATION ${STEREO_DEFAULT_SETTINGS_DIR})
