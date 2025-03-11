@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
 # Where intermediate builds end up
-cmake_path(BUILD_INSTALL_PREFIX NORMALIZE ${ThirdParty_SOURCE_DIR}/../../Develop/${CMAKE_BUILD_TYPE})
+cmake_path(SET BUILD_INSTALL_PREFIX NORMALIZE ${ThirdParty_SOURCE_DIR}/../../Develop/${CMAKE_BUILD_TYPE})
 
 # Build shared libraries or not?
 if(NOT DEFINED BUILD_SHARED_LIBRARIES)
@@ -23,8 +23,9 @@ set(common_cmake_args
 
 # Set VCKPG installation directory on Windows
 if(WIN32)
-   list(APPEND common_cmake_args "-DVCPKG_INSTALLED_DIR=${VCPKG_INSTALLED_DIR}")
- endif()
+  cmake_path(SET NORMALIZED_VCPKG_INSTALLED_DIR NORMALIZE ${VCPKG_INSTALLED_DIR})
+  list(APPEND common_cmake_args "-DVCPKG_INSTALLED_DIR=${NORMALIZED_VCPKG_INSTALLED_DIR}")
+endif()
 
 # Old code
 #if (DEFINED CMAKE_TOOLCHAIN_FILE)
