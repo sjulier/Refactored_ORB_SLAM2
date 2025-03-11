@@ -14,7 +14,7 @@ if(NOT DEFINED BUILD_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBRARIES NO)
 endif()
 
-# Set common cmake arguments
+# Set common cmake arguments for all external projects
 set(common_cmake_args
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   -DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX}
@@ -24,7 +24,9 @@ set(common_cmake_args
 # Set VCKPG installation directory on Windows
 if(WIN32)
   cmake_path(SET NORMALIZED_VCPKG_INSTALLED_DIR NORMALIZE ${VCPKG_INSTALLED_DIR})
-  list(APPEND common_cmake_args "-DVCPKG_INSTALLED_DIR=${NORMALIZED_VCPKG_INSTALLED_DIR}")
+  list(APPEND common_cmake_args
+    -DVCPKG_INSTALLED_DIR=${NORMALIZED_VCPKG_INSTALLED_DIR}
+    )
 endif()
 
 # Old code
