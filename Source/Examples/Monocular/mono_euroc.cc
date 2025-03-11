@@ -28,12 +28,13 @@
 
 #include "System.h"
 
-
 namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps);
+
+string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
   if (argc != 4) {
@@ -57,7 +58,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string(argv[1]);
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
+
   ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::MONOCULAR, true);
 
@@ -165,4 +167,27 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
       vTimeStamps.push_back(t / 1e9);
     }
   }
+}
+
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+  
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+  
+  if (fs::exists(candidateFilename) == true)
+    {      
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }

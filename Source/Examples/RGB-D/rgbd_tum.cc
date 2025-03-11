@@ -37,6 +37,8 @@ void LoadImages(const string &strAssociationFilename,
                 vector<string> &vstrImageFilenamesD,
                 vector<double> &vTimestamps);
 
+string FindFile(const string& baseFileName, const string& pathHint);
+
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence path_to_association" << endl;
@@ -47,7 +49,7 @@ int main(int argc, char **argv) {
   vector<string> vstrImageFilenamesRGB;
   vector<string> vstrImageFilenamesD;
   vector<double> vTimestamps;
-  string strAssociationFilename = string(DEFAULT_RGBD_SETTINGS_DIR) + "associations/" + string(argv[3]);
+  string strAssociationFilename = FindFile(string(argv[3]), string(DEFAULT_RGBD_SETTINGS_DIR) + "associations/");
   LoadImages(strAssociationFilename, vstrImageFilenamesRGB, vstrImageFilenamesD,
              vTimestamps);
 
@@ -63,7 +65,7 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  string settingsFile = string(DEFAULT_RGBD_SETTINGS_DIR) + string(argv[1]);
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_RGBD_SETTINGS_DIR));
   ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::RGBD, true);
 
@@ -183,4 +185,26 @@ void LoadImages(const string &strAssociationFilename,
       vstrImageFilenamesD.push_back(sD);
     }
   }
+}
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+  
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+  
+  if (fs::exists(candidateFilename) == true)
+    {      
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }

@@ -24,15 +24,19 @@
 #include <iomanip>
 #include <iostream>
 #include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include <opencv2/core/core.hpp>
 
 #include <System.h>
 
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps);
+
+string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
   if (argc != 3) {
@@ -52,7 +56,8 @@ int main(int argc, char **argv) {
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
 
-  string settingsFile = string(DEFAULT_STEREO_SETTINGS_DIR) + string(argv[1]);
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_STEREO_SETTINGS_DIR));
+
   ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::STEREO, true);
 
@@ -174,4 +179,26 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
     vstrImageLeft[i] = strPrefixLeft + ss.str() + ".png";
     vstrImageRight[i] = strPrefixRight + ss.str() + ".png";
   }
+}
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+  
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+  
+  if (fs::exists(candidateFilename) == true)
+    {      
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }
