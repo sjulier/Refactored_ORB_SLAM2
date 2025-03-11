@@ -34,8 +34,6 @@ endif()
 #       set(common_cmake_args "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE};-DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX};-DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBRARIES}")
 #endif()
 
-message(common_cmake_args=${common_cmake_args})
-
 # Set up external project support
 include(ExternalProject)
 
@@ -50,8 +48,6 @@ list(APPEND g2o_cmake_args
   -DG2O_BUILD_SLAM2D_TYPES=NO
   -DG2O_USE_LOGGING=NO
   -DTEST_FLAG=ON)
-
-message(g2o_cmake_args=${g2o_cmake_args})
 
 ExternalProject_Add(g2o
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/g2o/g2o-20241228_git  
