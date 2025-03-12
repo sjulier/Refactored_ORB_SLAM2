@@ -31,11 +31,11 @@ If you have set the `PATH` variable as specified above, you can change it to:
 4. Some debugging is provided on command line arguments. The original programmes had almost no input argument validation and would hang or crash if illegal arguments were supplied.
 
 
+## Build instructions:
 
-Build instructions:
------
+### Prerequisites
 
-## Prerequisites
+You will need to clone this repository using https://github.com/sjulier/Refactored_ORB_SLAM2.git
 
 This version depends on a few system libraries:
 
@@ -51,12 +51,9 @@ The code comes shipped with matched versions of DLib and DBoW2 (for the bag of w
 
 The build instructions are deliberately designed to be similar on all supported operating systems.
 
-### Linux build instructions
+### Linux (and WSL2) build instructions
 
-
-Clone this repository.
-
-Install dependencies:
+Install the dependencies:
 
 `sudo apt install cmake build-essential libeigen3-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
 
@@ -73,11 +70,11 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 `set PATH=$PATH:$PWD/Install/bin`
 
 
-### Mac (Intel and Apple Silicon) build instructions.
+### Mac (Intel and Apple Silicon) build instructions
 
 We use `homebrew` (https://brew.sh/) and build using the XCode command line tools. Please ensure that both have been installed.
 
-Install the support libraries:
+Install the dependencies:
 
 `brew install eigen boost suitesparse opencv glew`
 
@@ -97,7 +94,7 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 ### Windows 10/11 build
 
-Windows 10/11 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use `vcpkg` (https://github.com/microsoft/vcpkg) but other package management systems are available.
+Windows 10/11 is a more challenging OS to build on because it doesn't have standard locations for where to have dependent and system level libraries. We use `vcpkg` (https://github.com/microsoft/vcpkg) but other package management systems are available.
 
 You need to install [git](https://git-scm.com/downloads), [Visual Studio](https://visualstudio.microsoft.com/vs/community/) and [vcpkg](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell).
 
@@ -121,15 +118,13 @@ Set the path:
 
 `set PATH=%PATH%;%cd%\vcpkg_installed\%VCPKG_TRIPLE%`
 
-
 ## Running Examples
 
 ORB-SLAM2 builds multiple executables to handle data from the TUM, KITTI and EuRoC datasets to use monocular (`mono_tum`, `mono_kitti`, `mono_euroc`), stereo (`stereo_kitti`, `stereo_euroc`) and RGBD (`rgbd_tum`) types of data. Each programme has a slightly different way of being invoked. The original instructions can be found on the [ORB-SLAM2 github page](https://github.com/raulmur/ORB_SLAM2) but we include a modified version here.
 
-## Monocular SLAM
+### Monocular SLAM
 
-
-### TUM Dataset
+#### TUM Dataset
 
 The data can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
 
@@ -149,7 +144,7 @@ This will open the GUI, run the example, and write out a test file called `fr1.t
    
 `mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz fr1.txt`
 
-### KITTI Dataset
+#### KITTI Dataset
 
 KITTI is a widely-used dataset for SLAM in outdoor environments. It was collected at Karlsruhe. More details can be found on the [KITTI website](https://www.cvlibs.net/datasets/kitti/index.php).
 
@@ -173,7 +168,7 @@ For example, if you want to run KITTI sequence 05, you would use the command:
 
  `./Install/bin/mono_kitti KITTI04-12.yaml ${your_kitti_dataset_folder}/sequences/05 ${result_file_name}`
 
-### EuRoC Dataset
+#### EuRoC Dataset
 
 The [EuRoC dataset](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) is a challenging one which was collected for drone navigation. It consists of data collected from the drone (including camera and depth data) as well as very sophisticated ground-truth data from stand off outside-in tracking systems. There are two main sets of sequences: the machine hall (prefix MH) and the Vicon Room (prefix V).
 
@@ -186,4 +181,14 @@ For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
 For a machine hall-related run with sequence `${mh_sequence}`, the command is slightly different: `cam0` must be replaced by `mav0`. Therefore, the command is:
 
  `./Install/bin/mono_euroc EuRoC.yaml ${your_euroc_folder}/mav0/data Examples/Monocular/EuRoC_TimeStamps/${mh_sequence}.txt`
+
+### RGBD SLAM
+
+#### TUM Dataset
+
+Add down here (need associations file).
+
+### Stereo SLAM
+
+Add down here (need directories for left and right frames).
 
