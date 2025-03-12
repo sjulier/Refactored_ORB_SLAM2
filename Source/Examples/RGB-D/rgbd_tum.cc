@@ -22,11 +22,14 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include <opencv2/core/core.hpp>
 
 #include <System.h>
 
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strAssociationFilename,
@@ -34,20 +37,19 @@ void LoadImages(const string &strAssociationFilename,
                 vector<string> &vstrImageFilenamesD,
                 vector<double> &vTimestamps);
 
+string FindFile(const string& baseFileName, const string& pathHint);
+
 int main(int argc, char **argv) {
   if (argc != 4) {
-    cerr << endl
-         << "Usage: ./rgbd_tum path_to_settings path_to_sequence "
-            "path_to_association"
-         << endl;
-    return 1;
+    cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence path_to_association" << endl;
+    return EX_USAGE;
   }
 
   // Retrieve paths to images
   vector<string> vstrImageFilenamesRGB;
   vector<string> vstrImageFilenamesD;
   vector<double> vTimestamps;
-  string strAssociationFilename = string(argv[3]);
+  string strAssociationFilename = FindFile(string(argv[3]), string(DEFAULT_RGBD_SETTINGS_DIR) + "associations/");
   LoadImages(strAssociationFilename, vstrImageFilenamesRGB, vstrImageFilenamesD,
              vTimestamps);
 
@@ -55,15 +57,16 @@ int main(int argc, char **argv) {
   int nImages = vstrImageFilenamesRGB.size();
   if (vstrImageFilenamesRGB.empty()) {
     cerr << endl << "No images found in provided path." << endl;
-    return 1;
+    return EX_NOINPUT;
   } else if (vstrImageFilenamesD.size() != vstrImageFilenamesRGB.size()) {
     cerr << endl << "Different number of images for rgb and depth." << endl;
-    return 1;
+    return EX_DATAERR;
   }
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, argv[1],
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_RGBD_SETTINGS_DIR));
+  ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::RGBD, true);
 
   // Vector for tracking time statistics
@@ -75,50 +78,68 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
-  cv::Mat imRGB, imD;
-  for (int ni = 0; ni < nImages; ni++) {
-    // Read image and depthmap from file
-    imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni],
-                       cv::IMREAD_UNCHANGED);
-    imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
-                     cv::IMREAD_UNCHANGED);
-    double tframe = vTimestamps[ni];
+  int main_error = EX_OK;
+  thread runthread([&]() { // Start in new thread
+      cv::Mat imRGB, imD;
+      for (int ni = 0; ni < nImages; ni++) {
+        // Read image and depthmap from file
+        imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni],
+                           cv::IMREAD_UNCHANGED);
+        imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
+                         cv::IMREAD_UNCHANGED);
+        double tframe = vTimestamps[ni];
 
-    if (imRGB.empty()) {
-      cerr << endl
-           << "Failed to load image at: " << string(argv[2]) << "/"
-           << vstrImageFilenamesRGB[ni] << endl;
-      return 1;
-    }
+        if (imRGB.empty()) {
+          cerr << endl
+               << "Failed to load image at: " << string(argv[2]) << "/"
+               << vstrImageFilenamesRGB[ni] << endl;
+          main_error = EX_DATAERR;
+          break;
+        }
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+      if (SLAM.isFinished() == true) {
+	  break;
+      }
 
-    // Pass the image to the SLAM system
-    SLAM.TrackRGBD(imRGB, imD, tframe);
+      chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+        
+      // Pass the image to the SLAM system
+      SLAM.TrackRGBD(imRGB, imD, tframe);
+      
+      chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+      double ttrack =
+        chrono::duration_cast<chrono::duration<double>>(t2 - t1)
+        .count();
 
-    double ttrack =
-        std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
-            .count();
+      vTimesTrack[ni] = ttrack;
+      
+      // Wait to load the next frame
+      double T = 0;
+      if (ni < nImages - 1)
+        T = vTimestamps[ni + 1] - tframe;
+      else if (ni > 0)
+        T = tframe - vTimestamps[ni - 1];
+      
+      if (ttrack < T)
+        this_thread::sleep_for(chrono::duration<double>(T - ttrack));
+      }
+      SLAM.StopViewer();
+    });
 
-    vTimesTrack[ni] = ttrack;
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
+  SLAM.StartViewer();
 
-    // Wait to load the next frame
-    double T = 0;
-    if (ni < nImages - 1)
-      T = vTimestamps[ni + 1] - tframe;
-    else if (ni > 0)
-      T = tframe - vTimestamps[ni - 1];
-
-    if (ttrack < T)
-      this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-    // usleep((T-ttrack)*1e6);
-  }
+  runthread.join();
+    
+  if (main_error != EX_OK)
+    return main_error;
 
   // Stop all threads
   SLAM.Shutdown();
-
+  cout << "System Shutdown" << endl;
+  
   // Tracking time statistics
   sort(vTimesTrack.begin(), vTimesTrack.end());
   float totaltime = 0;
@@ -133,13 +154,18 @@ int main(int argc, char **argv) {
   SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
   SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
-  return 0;
+  return main_error;
 }
 
 void LoadImages(const string &strAssociationFilename,
                 vector<string> &vstrImageFilenamesRGB,
                 vector<string> &vstrImageFilenamesD,
                 vector<double> &vTimestamps) {
+  if (fs::exists(strAssociationFilename) == false) {
+    cerr << "FATAL: Could not find the association file file " << strAssociationFilename << endl;
+    exit(EX_DATAERR);
+  }
+
   ifstream fAssociation;
   fAssociation.open(strAssociationFilename.c_str());
   while (!fAssociation.eof()) {
@@ -159,4 +185,26 @@ void LoadImages(const string &strAssociationFilename,
       vstrImageFilenamesD.push_back(sD);
     }
   }
+}
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+  
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+  
+  if (fs::exists(candidateFilename) == true)
+    {      
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }

@@ -23,48 +23,57 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include <opencv2/core/core.hpp>
 
 #include <System.h>
 
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimeStamps);
 
+string FindFile(const string& baseFileName, const string& pathHint);
+
 int main(int argc, char **argv) {
   if (argc != 5) {
     cerr << endl
-         << "Usage: ./stereo_euroc path_to_settings path_to_left_folder "
+         << "Usage: ./stereo_euroc settings_file path_to_left_folder "
             "path_to_right_folder path_to_times_file"
          << endl;
-    return 1;
+    return EX_USAGE;
   }
 
   // Retrieve paths to images
   vector<string> vstrImageLeft;
   vector<string> vstrImageRight;
   vector<double> vTimeStamp;
-  LoadImages(string(argv[2]), string(argv[3]), string(argv[4]), vstrImageLeft,
+  string timeStampsFile = string(DEFAULT_STEREO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[4]);
+  
+  LoadImages(string(argv[2]), string(argv[3]), timeStampsFile, vstrImageLeft,
              vstrImageRight, vTimeStamp);
 
   if (vstrImageLeft.empty() || vstrImageRight.empty()) {
     cerr << "ERROR: No images in provided path." << endl;
-    return 1;
+    return EX_NOINPUT;
   }
 
   if (vstrImageLeft.size() != vstrImageRight.size()) {
     cerr << "ERROR: Different number of left and right images." << endl;
-    return 1;
+    return EX_DATAERR;
   }
 
   // Read rectification parameters
-  cv::FileStorage fsSettings(argv[1], cv::FileStorage::READ);
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_STEREO_SETTINGS_DIR));
+    
+  cv::FileStorage fsSettings(settingsFile, cv::FileStorage::READ);
   if (!fsSettings.isOpened()) {
     cerr << "ERROR: Wrong path to settings" << endl;
-    return -1;
+    return EX_DATAERR;
   }
 
   cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r;
@@ -79,18 +88,21 @@ int main(int argc, char **argv) {
 
   fsSettings["LEFT.D"] >> D_l;
   fsSettings["RIGHT.D"] >> D_r;
-
+  
   int rows_l = fsSettings["LEFT.height"];
   int cols_l = fsSettings["LEFT.width"];
   int rows_r = fsSettings["RIGHT.height"];
   int cols_r = fsSettings["RIGHT.width"];
+
+  cout << "Config: " << rows_l << "," << cols_l << "," << rows_r << "," << cols_r << endl;
+  
 
   if (K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() ||
       R_r.empty() || D_l.empty() || D_r.empty() || rows_l == 0 || rows_r == 0 ||
       cols_l == 0 || cols_r == 0) {
     cerr << "ERROR: Calibration parameters to rectify stereo are missing!"
          << endl;
-    return -1;
+    return EX_DATAERR;
   }
 
   cv::Mat M1l, M2l, M1r, M2r;
@@ -103,7 +115,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, argv[1],
+
+  ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::STEREO, true);
 
   // Vector for tracking time statistics
@@ -115,6 +128,9 @@ int main(int argc, char **argv) {
   cout << "Images in the sequence: " << nImages << endl << endl;
 
   // Main loop
+  int main_error = EX_OK;
+  thread runthread([&]() { // Start in new thread
+
   cv::Mat imLeft, imRight, imLeftRect, imRightRect;
   for (int ni = 0; ni < nImages; ni++) {
     // Read left and right images from file
@@ -124,29 +140,36 @@ int main(int argc, char **argv) {
     if (imLeft.empty()) {
       cerr << endl
            << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
-      return 1;
+        main_error = EX_DATAERR;
+        break;
     }
 
     if (imRight.empty()) {
       cerr << endl
            << "Failed to load image at: " << string(vstrImageRight[ni]) << endl;
-      return 1;
+        main_error = EX_DATAERR;
+        break;
     }
 
+      if (SLAM.isFinished() == true) {
+	  break;
+      }
+
+    
     cv::remap(imLeft, imLeftRect, M1l, M2l, cv::INTER_LINEAR);
     cv::remap(imRight, imRightRect, M1r, M2r, cv::INTER_LINEAR);
 
     double tframe = vTimeStamp[ni];
 
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 
     // Pass the images to the SLAM system
     SLAM.TrackStereo(imLeftRect, imRightRect, tframe);
 
-    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
 
     double ttrack =
-        std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1)
+        chrono::duration_cast<chrono::duration<double>>(t2 - t1)
             .count();
 
     vTimesTrack[ni] = ttrack;
@@ -160,11 +183,24 @@ int main(int argc, char **argv) {
 
     if (ttrack < T)
       this_thread::sleep_for(chrono::duration<double>(T - ttrack));
-    //            usleep((T-ttrack)*1e6);
   }
+  SLAM.StopViewer();
+    });
 
+  // Start the visualization thread; this blocks until the SLAM system
+  // has finished.
+  SLAM.StartViewer();
+  
+  cout << "Viewer started, waiting for thread." << endl;
+
+  runthread.join();
+  
+  if (main_error != EX_OK)
+    return main_error;
+  
   // Stop all threads
   SLAM.Shutdown();
+  cout << "System Shutdown" << endl;
 
   // Tracking time statistics
   sort(vTimesTrack.begin(), vTimesTrack.end());
@@ -179,12 +215,18 @@ int main(int argc, char **argv) {
   // Save camera trajectory
   SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
 
-  return 0;
+  return main_error;
 }
 
 void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimeStamps) {
+  // Check the file exists
+  if (fs::exists(strPathTimes) == false) {
+    cerr << "FATAL: Could not find the EuRoC Timestamp file file " << strPathTimes << endl;
+    exit(EX_DATAERR);
+  }
+
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);
@@ -203,4 +245,26 @@ void LoadImages(const string &strPathLeft, const string &strPathRight,
       vTimeStamps.push_back(t / 1e9);
     }
   }
+}
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+  
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+  
+  if (fs::exists(candidateFilename) == true)
+    {      
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }

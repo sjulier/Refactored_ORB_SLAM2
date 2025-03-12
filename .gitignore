@@ -22,6 +22,7 @@ Source/Vocabulary/ORBvoc.txt
 build/
 Build/
 *~
+.DS_Store
 lib/
 Develop/
 CMakeCache.txt

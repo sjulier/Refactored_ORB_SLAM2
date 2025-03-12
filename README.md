@@ -72,9 +72,13 @@ The build instructions are deliberately designed to be similar on all supported 
 
 Clone this repository.
 
+Install dependencies:
+
+`sudo apt install boost eigen suitesparse opencv`
+
 You should be able to build by running:
 
-`./Build.sh Release`
+`./Build.sh`
 
 to build the release version. To build a debug version, type:
 
@@ -83,9 +87,6 @@ to build the release version. To build a debug version, type:
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
 `set PATH=$PATH:$PWD/Install/bin`
-
-
-
 
 
 ### Mac (Intel and Apple Silicon) build instructions.
@@ -110,15 +111,21 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 `set PATH=$PATH:$PWD/Install/bin`
 
-### Windows 10 build
+### Windows 10/11 build
 
-Windows 10 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use `vcpkg` (https://github.com/microsoft/vcpkg).
+Windows 10/11 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use `vcpkg` (https://github.com/microsoft/vcpkg).
 
 PLEASE MAKE SURE TO CLEAR THE CMAKE PACKAGE REGISTRY BEFORE YOU TRY TO BUILD. WE HAVE ENCOUNTERED A LOT OF PROBLEMS WITH THE PACKAGE REGISTRY BEING USED TO LINK TO THE WRONG VERSIONS OF LIBRARIES, LEADING TO A LOT OF CONFUSION AND FRUSTRATION.
 
-First, install `vcpkg`
+First install a copy of Visual Studio (e.g., Community 2022).
 
-Second,
+Second, install `vcpkg`. See (https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)
+
+Third, install the vcpkg dependencies by running:
+
+`vcpkg install`
+
+This should create a directory `vcpkg_installed` in the current directory.
 
 You should be able to build by running:
 
@@ -128,6 +135,11 @@ to build a release version. To build a debug version, type:
 
 `Build.bat Debug`
 
-This will launch four build jobs in parallel. If your machine can take it, you can task more cpus by changing the value passed to maxcpucount
+This uses the `Ninja` build system.
+
+Set the path:
+
+`set PATH=%PATH%;%cd%\vcpkg_installed\%VCPKG_TRIPLE%`
+
 
 

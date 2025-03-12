@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.20)
 
 project(ORB_SLAM2)
 
@@ -8,19 +8,22 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY TRUE)
+
 # Set where to install stuff
-set(BUILD_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Install)
-list(APPEND CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
+cmake_path(SET BUILD_INSTALL_PREFIX NORMALIZE ${CMAKE_CURRENT_SOURCE_DIR}/../Install)
+set(CMAKE_PREFIX_PATH "${BUILD_INSTALL_PREFIX}")
 
 # Set where the get the prebuilt third party libraries from
-set(THIRD_PARTY_BUILT_LIBRARY_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
+cmake_path(SET THIRD_PARTY_BUILT_LIBRARY_PREFIX NORMALIZE ${CMAKE_CURRENT_SOURCE_DIR}/../Develop/${CMAKE_BUILD_TYPE})
+message(THIRD_PARTY_BUILT_LIBRARY_PREFIX=${THIRD_PARTY_BUILT_LIBRARY_PREFIX})
 list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}")
 
 # Default installation and search libraries where the yaml files will be stored
 set(DEFAULT_ORB_SETTINGS_DIR "${BUILD_INSTALL_PREFIX}/etc/orbslam2")
 
 # Set the vocabulary
-set(DEFAULT_ORB_VOCABULARY_DIR "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2")
+cmake_path(SET DEFAULT_ORB_VOCABULARY_DIR "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2")
 string(CONCAT DEFAULT_ORB_VOCABULARY ${DEFAULT_ORB_VOCABULARY_DIR} "/ORBvoc.txt")
 string(CONCAT DEFAULT_BINARY_ORB_VOCABULARY ${DEFAULT_ORB_VOCABULARY_DIR} "/ORBvoc.bin")
 add_compile_definitions(DEFAULT_ORB_VOCABULARY="${DEFAULT_ORB_VOCABULARY}")
@@ -52,7 +55,7 @@ endif()
 find_package(OpenCV 4.0 QUIET)
 if(NOT OpenCV_FOUND)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    find_package(OpenCV 3.0 HINTS "/usr/local/opt/opencv@3" REQUIRED)
+    find_package(OpenCV 3.0 HINTS "${HOMEBREW_PREFIX}/opt/opencv@3" REQUIRED)
   else()
     find_package(OpenCV 3.0 REQUIRED)
   endif()
@@ -62,21 +65,20 @@ message(STATUS "OPENCV VERSION:" ${OpenCV_VERSION})
 # Find the other necessary packages
 find_package(Eigen3 REQUIRED)
 
-# Backwards compatibilty for eigen
-if (TARGET Eigen3::Eigen)
-  set(EIGEN3_EIGEN_LIBS Eigen3::Eigen)
-else()
-  set(EIGEN3_EIGEN_LIBS )
-  include_directories(${EIGEN3_INCLUDE_DIR})
-endif ()
+# Suppress warning. From:
+# https://stackoverflow.com/questions/79146083/finding-boost-without-cmake-find-module-cmp0167
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # Find the required packages; these are from ThirdParty
-find_package(Pangolin REQUIRED)
+find_package(Pangolin REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
+
 find_package(DBoW2 REQUIRED)
 find_package(DLib REQUIRED)
-find_package(g2o REQUIRED)
+find_package(g2o REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
 
 # Add the libraries and examples
 add_subdirectory(Libraries)

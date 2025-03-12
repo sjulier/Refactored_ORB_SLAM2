@@ -24,6 +24,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sysexits.h>
 
 #include <opencv2/core/core.hpp>
 
@@ -35,11 +36,13 @@ using namespace std;
 void LoadImages(const string &strSequence, vector<string> &vstrImageFilenames,
                 vector<double> &vTimestamps);
 
+string FindFile(const string& baseFileName, const string& pathHint);
+
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl
           << "Usage: " << argv[0] << " settings_files path_to_sequence results_file" << endl;
-    return 1;
+    return EX_USAGE;
   }
 
   // Retrieve paths to images
@@ -51,7 +54,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string(argv[1]);
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
+
   ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
                          ORB_SLAM2::System::MONOCULAR, true);
 
@@ -63,7 +67,7 @@ int main(int argc, char **argv) {
   cout << "Start processing sequence ..." << endl;
   cout << "Images in the sequence: " << nImages << endl << endl;
 
-  int main_error = 0;
+  int main_error = EX_OK;
   std::thread runthread([&]() { // Start in new thread
     // Main loop
     cv::Mat im;
@@ -75,7 +79,7 @@ int main(int argc, char **argv) {
       if (im.empty()) {
         cerr << endl
              << "Failed to load image at: " << vstrImageFilenames[ni] << endl;
-        main_error = 1;
+        main_error = EX_DATAERR;
         break;
       }
 
@@ -107,12 +111,15 @@ int main(int argc, char **argv) {
     }
     SLAM.StopViewer();
   });
+
   SLAM.StartViewer();
 
   cout << "Viewer started, waiting for thread." << endl;
   runthread.join();
-  if (main_error != 0)
+  
+  if (main_error != EX_OK)
     return main_error;
+
   cout << "Tracking thread joined..." << endl;
 
   // Stop all threads
@@ -129,9 +136,8 @@ int main(int argc, char **argv) {
   cout << "mean tracking time: " << totaltime / nImages << endl;
 
   // Save camera trajectory
-  // SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
   SLAM.SaveTrajectoryTUM(string(argv[3]));
-  return 0;
+  return main_error;
 }
 
 void LoadImages(const string &strPathToSequence,
@@ -142,7 +148,7 @@ void LoadImages(const string &strPathToSequence,
   if (fs::exists(strPathToSequence) == false) {
     cerr << "FATAL: Could not find the timestamp file " << strPathToSequence
          << endl;
-    exit(0);
+    exit(EX_DATAERR);
   }
 
   ifstream fTimes;
@@ -150,7 +156,7 @@ void LoadImages(const string &strPathToSequence,
   if (fs::exists(strPathTimeFile) == false) {
     cerr << "FATAL: Could not find the timestamp file " << strPathTimeFile
          << endl;
-    exit(0);
+    exit(EX_DATAERR);
   }
   fTimes.open(strPathTimeFile.c_str());
   while (!fTimes.eof()) {
@@ -175,4 +181,27 @@ void LoadImages(const string &strPathToSequence,
     ss << setfill('0') << setw(6) << i;
     vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
   }
+}
+
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+  
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+  
+  if (fs::exists(candidateFilename) == true)
+    {      
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }

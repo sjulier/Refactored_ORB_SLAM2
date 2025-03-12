@@ -527,10 +527,8 @@ void System::StartViewer() {
 }
 
 void System::StopViewer() {
-  cout << "System::StopViewer()" << endl;
   if (mpViewer)
     mpViewer->RequestFinish();
-  cout << "System::StopViewer() done" << endl;
 }
 
 bool System::isFinished() {
