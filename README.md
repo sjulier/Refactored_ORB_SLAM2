@@ -129,6 +129,10 @@ Set the path:
 
 `set PATH=%PATH%;%cd%\vcpkg_installed\%VCPKG_TRIPLE%`
 
+If you want to avoid typing `Install\bin everywhere`, modify the command to
+
+`set PATH=%PATH%;%cd%\Install\bin;%cd%\vcpkg_installed\%VCPKG_TRIPLE%`
+
 ## Running Examples
 
 ORB-SLAM2 builds multiple executables to handle data from the TUM, KITTI and EuRoC datasets to use monocular (`mono_tum`, `mono_kitti`, `mono_euroc`), stereo (`stereo_kitti`, `stereo_euroc`) and RGBD (`rgbd_tum`) types of data. Each programme has a slightly different way of being invoked. The original instructions can be found on the [ORB-SLAM2 github page](https://github.com/raulmur/ORB_SLAM2) but we include a modified version here.
