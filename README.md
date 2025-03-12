@@ -46,6 +46,7 @@ This version depends on a few system libraries:
 5. GLEW
 6. unzip
 7. cmake (version 3.20 or above)
+8. libepoxy
 
 The code comes shipped with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI).
 
@@ -55,7 +56,7 @@ The build instructions are deliberately designed to be similar on all supported 
 
 Install the dependencies:
 
-`sudo apt install cmake build-essential libeigen3-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
+`sudo apt install cmake build-essential libeigen3-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libepoxy-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
 
 You should be able to build by running:
 
