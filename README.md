@@ -46,7 +46,6 @@ This version depends on a few system libraries:
 5. GLEW
 6. unzip
 7. cmake (version 3.20 or above)
-8. libepoxy
 
 The code comes shipped with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI).
 
