@@ -165,17 +165,21 @@ The [EuRoC dataset](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisual
 
 All runs should be downloaded using the ASL format.
 
-For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
+##### EuRoC Machine Hall Dataset
 
- `mono_euroc EuRoC.yaml ${your_euroc_folder}/cam0/data ${mh_sequence}.txt`
-
-For a machine hall-related run with sequence `MH${mh_sequence}`, the command is slightly different: `cam0` must be replaced by `mav0`. Therefore, the command is:
+The Machine Hall datasets all have the form `MH${mh_sequence}`. The command is:
 
  `mono_euroc EuRoC.yaml ${your_euroc_dataset_folder}/MH${mh_sequence_number}/mav0/cam0/data MH${mh_sequence_number}.txt`
 
 For example, for MH01 installed in the checkout directory, the command is:
 
 `mono_euroc EuRoC.yaml MH01/mav0/data MH01.txt`
+
+##### EuRoC Vicon Dataset
+
+For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
+
+ `mono_euroc EuRoC.yaml ${your_euroc_folder}/cam0/data ${mh_sequence}.txt`
 
 ### RGBD SLAM
 
@@ -192,6 +196,16 @@ The associations file is used to link RGB and D files together. The files start 
 ### Stereo SLAM
 
 Add down here (need directories for left and right frames).
+
+#### EuRoC Dataset
+
+This actually uses the same dataset as for the monocular data.
+
+`stereo_euroc EuRoC.yaml MH_01/mav0/cam0/data MH_01/mav0/cam1/data MH01.txt`
+
+#### KITTI Dataset
+
+To do
 
 ## Spare material:
 
