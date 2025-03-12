@@ -118,26 +118,24 @@ If you want to avoid typing `Install\bin everywhere`, modify the command to
 
 ORB-SLAM2 builds multiple executables to handle data from the TUM, KITTI and EuRoC datasets for monocular (`mono_tum`, `mono_kitti`, `mono_euroc`), stereo (`stereo_kitti`, `stereo_euroc`) and RGBD (`rgbd_tum`) types of data. Each programme has a slightly different way of being invoked. The original instructions can be found on the [ORB-SLAM2 github page](https://github.com/raulmur/ORB_SLAM2). Modified versions are provided below.
 
+We assume the instructions have been followed to set the `PATH` variable so you don't have to type the full Install path.
+
 ### Monocular SLAM
 
 #### TUM Dataset
 
 The data can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
 
- `./Install/bin/mono_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} ${result_file_name}`
+ `mono_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} ${result_file_name}`
 
 For example, suppose we wish to run `mono_tum` on the Freiburg `fr1/xyz dataset`. Download the data set from the repository directory (https://vision.in.tum.de/data/datasets/rgbd-dataset/download) and uncompress it to, say the same directory you cloned the repository into. This should produce a directory called  `rgbd_dataset_freiburg1_xyz`.
 
 You can then run the code using:
 
-`./Install/bin/mono_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr01_results.txt` 
+`mono_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr01_results.txt` 
 
 This will open the GUI, run the example, and write out a text file called `fr01_results.txt` which contains a time set of estiamtes of the camera pose.
    
-Or, if you did the trick with setting `PATH`, this can be simplified to:
-   
-`mono_tum TUM1.yaml ~/Downloads/rgbd_dataset_freiburg1_xyz fr01_results.txt`
-
 #### KITTI Dataset
 
 KITTI is a widely-used dataset for SLAM in outdoor environments. It was collected at Karlsruhe. More details can be found on the [KITTI website](https://www.cvlibs.net/datasets/kitti/index.php).
@@ -148,7 +146,7 @@ The dataset can be obtained from [Visual Odometry / SLAM Evaluation 2012](https:
 
 KITTI sequences are numbered 0,...,21. For run `${kitti_sequence}`, ORB-SLAM is invoked using the command line of the form:
 
- `./Install/bin/mono_kitti KITTI${kitti_yaml_code}.yaml ${your_kitti_dataset_folder}/sequences/${kitti_sequence} ${result_file_name}`
+ `mono_kitti KITTI${kitti_yaml_code}.yaml ${your_kitti_dataset_folder}/sequences/${kitti_sequence} ${result_file_name}`
 
 In the 22 sequences, the first 11 (00-10) has ground truth for comparison. And ORB-SLAM embedded the lens calibration parameters for the first 13 sequences (00-12) in the yaml file it provided.
 The `${kitti_yaml_code}` is determined as follows:
@@ -159,7 +157,7 @@ The `${kitti_yaml_code}` is determined as follows:
 
 For example, if you want to run KITTI sequence 05 and write the results in `kitti05_results.txt`, you would use the command:
 
- `./Install/bin/mono_kitti KITTI04-12.yaml ${your_kitti_dataset_folder}/sequences/05 kitti05_results.txt`
+ `mono_kitti KITTI04-12.yaml ${your_kitti_dataset_folder}/sequences/05 kitti05_results.txt`
 
 #### EuRoC Dataset
 
@@ -169,17 +167,27 @@ All runs should be downloaded using the ASL format.
 
 For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
 
- `./Install/bin/mono_euroc EuRoC.yaml ${your_euroc_folder}/cam0/data Examples/Monocular/EuRoC_TimeStamps/${mh_sequence}.txt`
+ `mono_euroc EuRoC.yaml ${your_euroc_folder}/cam0/data ${mh_sequence}.txt`
 
-For a machine hall-related run with sequence `${mh_sequence}`, the command is slightly different: `cam0` must be replaced by `mav0`. Therefore, the command is:
+For a machine hall-related run with sequence `MH${mh_sequence}`, the command is slightly different: `cam0` must be replaced by `mav0`. Therefore, the command is:
 
- `./Install/bin/mono_euroc EuRoC.yaml ${your_euroc_folder}/mav0/data Examples/Monocular/EuRoC_TimeStamps/${mh_sequence}.txt`
+ `mono_euroc EuRoC.yaml ${your_euroc_dataset_folder}/MH${mh_sequence_number}/mav0/cam0/data MH${mh_sequence_number}.txt`
+
+For example, for MH01 installed in the checkout directory, the command is:
+
+`mono_euroc EuRoC.yaml MH01/mav0/data MH01.txt`
 
 ### RGBD SLAM
 
 #### TUM Dataset
 
-Add down here (need associations file).
+This actually uses the same dataset as for the monocular data. It can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
+
+`mono_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} {associations_file_name}`
+
+The associations file is used to link RGB and D files together. The files start with `fr_${fr_code}`, but there isn't a standard suffix that's used and has to be checked individuall. To run the basic set, an example would be:
+
+`mono_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr1_xyz.txt`
 
 ### Stereo SLAM
 
