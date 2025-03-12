@@ -54,6 +54,7 @@ This version depends on a few system libraries:
 4. Suite sparse
 5. GLEW
 6. unzip
+7. cmake (version 3.20 or above)
 
 The code comes shipped with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI).
 
@@ -107,11 +108,9 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 Windows 10/11 is a more challenging OS to build on because it doesn't have hard standards for how to lay out build and install. We use `vcpkg` (https://github.com/microsoft/vcpkg) but other package management systems are available.
 
-First install a copy of Visual Studio (e.g., Community 2022).
+You need to install [git](https://git-scm.com/downloads), [Visual Studio](https://visualstudio.microsoft.com/vs/community/) and [vcpkg](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell).
 
-Second, install `vcpkg`. See (https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)
-
-Third, install the vcpkg dependencies by running:
+Install the vcpkg dependencies by running:
 
 `vcpkg install`
 
