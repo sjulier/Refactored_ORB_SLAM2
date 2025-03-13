@@ -6,7 +6,7 @@ project(ThirdParty)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
 
-# Where intermediate builds end up
+# Set where intermediate builds end up
 cmake_path(SET BUILD_INSTALL_PREFIX NORMALIZE ${ThirdParty_SOURCE_DIR}/../../Develop/${CMAKE_BUILD_TYPE})
 
 # Build shared libraries or not?
@@ -21,20 +21,20 @@ set(common_cmake_args
   -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBRARIES}
   )
 
+# Set the toolchain file if it's defined
+if (DEFINED CMAKE_TOOLCHAIN_FILE)
+  list(PREPEND common_cmake_args
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+  )
+endif()
+
 # Set VCKPG installation directory on Windows
 if(WIN32)
   cmake_path(SET NORMALIZED_VCPKG_INSTALLED_DIR NORMALIZE ${VCPKG_INSTALLED_DIR})
-  list(APPEND common_cmake_args
+  list(PREPEND common_cmake_args
     -DVCPKG_INSTALLED_DIR=${NORMALIZED_VCPKG_INSTALLED_DIR}
-    )
+  )
 endif()
-
-# Old code
-#if (DEFINED CMAKE_TOOLCHAIN_FILE)
-#       set(common_cmake_args "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE};-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE};-DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX};-DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBRARIES}")
-#else()
-#       set(common_cmake_args "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE};-DCMAKE_INSTALL_PREFIX=${BUILD_INSTALL_PREFIX};-DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBRARIES}")
-#endif()
 
 # Set up external project support
 include(ExternalProject)
