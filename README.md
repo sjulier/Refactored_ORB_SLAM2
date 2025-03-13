@@ -1,8 +1,8 @@
-# Refactored_ORB_SLAM2
+# ORB-SLAM2
 
 This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2, g2o and Pangolin libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
 
-It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly.)
+It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly and whether something builds changes on an hourly basis.)
 
 ## User-visible changes from the original ORB-SLAM2:
 
