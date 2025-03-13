@@ -91,7 +91,7 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 `set PATH=$PATH:$PWD/Install/bin`
 
-### Windows 10/11 build (does not work; do NOT use)
+### Windows 10/11 native build (does not work; do NOT use - use WLS instructions instead)
 
 Windows 10/11 is a more challenging OS to build on because it doesn't have a completely standard location for development. We use `vcpkg` (https://github.com/microsoft/vcpkg) but other package management systems are available.
 
