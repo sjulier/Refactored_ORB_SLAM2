@@ -54,7 +54,7 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 #### Installing cmake 3.20:
 
-If your version of cmake is older than 3.20, you will need to install it manually.  I've just seen (https://gist.github.com/bmegli/4049b7394f9cfa016c24ed67e5041930) but not tested it. Old instructions below:
+If your version of cmake is older than 3.20, you will need to install it manually:
 
 `wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -`
 
