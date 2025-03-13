@@ -13,12 +13,13 @@ It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2)
 3. The settings files are installed in `./Install/etc/orbslam2/`. By default, the executables will first search the current directory for the settings file and, if not defined, it will try the default directory.
    
 4. Some error checking is carried out on command line arguments to validate things like files and directories exist.
-5. 
+
+   
 ## Build instructions:
 
 ### Prerequisites
 
-You will need to clone this repository using https://github.com/sjulier/Refactored_ORB_SLAM2.git
+You will need to clone this repository using `git clone https://github.com/UCL/COMP0249_24-25_ORB_SLAM2.git`
 
 It depends on a few widely-available libraries:
 
