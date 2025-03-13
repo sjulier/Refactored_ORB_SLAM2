@@ -2,7 +2,7 @@
 
 This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2, g2o and Pangolin libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
 
-It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (natively and on WSL2), Intel Mac and M1 Mac.
+It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly.)
 
 ## User-visible changes from the original ORB-SLAM2:
 
@@ -84,7 +84,7 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 `set PATH=$PATH:$PWD/Install/bin`
 
-### Windows 10/11 build
+### Windows 10/11 build (does not work; do NOT use)
 
 Windows 10/11 is a more challenging OS to build on because it doesn't have a completely standard location for development. We use `vcpkg` (https://github.com/microsoft/vcpkg) but other package management systems are available.
 
