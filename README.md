@@ -64,6 +64,12 @@ If your version of cmake is older than 3.20, you will need to install it manuall
 
 `sudo apt install cmake`
 
+#### Display issues:
+
+You can get errors of the form `terminate called after throwing an instance of 'std::runtime_error' what():  Pangolin X11: Failed to open X display`. To fix (at least in our case) set:
+
+`export DISPLAY=:0`
+
 ### Mac (Intel and Apple Silicon) build instructions
 
 We use `homebrew` (https://brew.sh/) and build using the XCode command line tools. Please ensure that both have been installed.
