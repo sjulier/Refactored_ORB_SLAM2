@@ -14,9 +14,20 @@ set root_dir="%cd%"
 mkdir "Build/%build_type%/Source/ThirdParty"
 pushd "Build/%build_type%/Source/ThirdParty"
 cmake.exe "%root_dir%\Source\ThirdParty" -DCMAKE_BUILD_TYPE=%build_type% -G"Ninja" -DCMAKE_TOOLCHAIN_FILE="%toolchain_file%" -DVCPKG_INSTALLED_DIR=%vcpkg_installed_dir%
-cmake --build .
-cmake --install .
+set thirdpartyerrorlevel=%errorlevel%
+
+if  %thirdpartyerrorlevel% == 0 (
+    cmake --build .
+    set thirdpartyerrorlevel=%errorlevel%
+)
+if  %thirdpartyerrorlevel% == 0 (
+    cmake --install .
+    set thirdpartyerrorlevel=%errorlevel%
+)
+
 popd
 
+echo thirdpartyerrorlevel=%thirdpartyerrorlevel%
+
 rem Add the empty file which confirms the third party libraries have been built; only do this if nmake returned no error
-if %errorlevel% == 0 (type nul > %third_party_build_tag%)
+if %thirdpartyerrorlevel% == 0 (type nul > "%third_party_build_tag%")
