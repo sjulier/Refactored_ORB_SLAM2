@@ -50,7 +50,7 @@ To build a debug version, type:
 
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
-`set PATH=$PATH:$PWD/Install/bin`
+`export PATH=$PATH:$PWD/Install/bin`
 
 #### Installing cmake 3.20:
 
@@ -90,7 +90,7 @@ To build a debug version, type:
 
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
-`set PATH=$PATH:$PWD/Install/bin`
+`export PATH=$PATH:$PWD/Install/bin`
 
 ### Windows 10/11 native build (does not work; do NOT use - use WSL instructions instead)
 
