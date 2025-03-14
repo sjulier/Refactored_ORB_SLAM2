@@ -18,6 +18,8 @@ It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2)
 
 ### Prerequisites
 
+**Do not build the code in a conda environment; please deactivate it first otherwise you will end up trying to link with incompatible versions of libraries**
+
 You will need to clone this repository using `git clone https://github.com/UCL/COMP0249_24-25_ORB_SLAM2.git`
 
 It depends on a few widely-available libraries:
@@ -78,7 +80,7 @@ We use `homebrew` (https://brew.sh/) and build using the XCode command line tool
 
 Install the dependencies:
 
-`brew install eigen boost suitesparse opencv glew`
+`brew install cmake eigen boost suitesparse opencv glew`
 
 You should be able to build the release by by running:
 
