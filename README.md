@@ -10,7 +10,7 @@ It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2)
 
 2. The ORB vocabulary is loaded automatically and does not have to be specified on the command line. (It is installed in the `./Install/var/lib/orbslam2` subdirectory). The system will try to load the binary version of the vocabulary. If it is not able to, it will load the text version, convert it, and save the binary version to the same directory. This speeds up start up times from several seconds to less than 0.5s.
 
-3. The settings files are installed in `./Install/etc/orbslam2/`. By default, the executables will first search the current directory for the settings file and, if not defined, it will try the default directory.
+3. The settings files are installed in `./Install/etc/orbslam2/`. By default, the executables will first search the current directory for the settings file and, if not defined, it will try the default directory. This means that there is less to type if running the standard examples (TUM, EuRoC, KITTI).
    
 4. Some error checking is carried out on command line arguments to validate things like files and directories exist.
    
