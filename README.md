@@ -1,12 +1,12 @@
 # ORB-SLAM2
 
-This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2, g2o and Pangolin libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
+This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2, g2o and Pangolin libraries, supports all static and all dynamic libraries (for debugging) and C++17 multi-platform support for sleep, threads, namespaces, etc.
 
-It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly and whether something builds changes on an hourly basis.)
+It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly and whether something builds or not changes on an hourly basis.)
 
 ## User-visible changes from the original ORB-SLAM2:
 
-1.  All executables are installed in `./Install/bin` and the suffix "_d" is used to denote debug builds. For instance, if you want to run mono_kitti with the default (release) Build.sh file setting, the executable is at `./Install/bin/mono_kitti`. If you build with debugging enabled, the executable is at `./Install/bin/mono_kitti_d`. Typically you will only need to build Debug if there are issues with execution.
+1.  All executables are installed in `./Install/bin` and the suffix "_d" is used to denote debug builds. For instance, if you want to run mono_kitti with the default (release) Build.sh file setting, the executable is at `./Install/bin/mono_kitti`. If you build with debugging enabled, the executable is `./Install/bin/mono_kitti_d`. Debug build is only required if you are doing some debugging and you are unlikely to need it for the coursework.
 
 2. The ORB vocabulary is loaded automatically and does not have to be specified on the command line. (It is installed in the `./Install/var/lib/orbslam2` subdirectory). The system will try to load the binary version of the vocabulary. If it is not able to, it will load the text version, convert it, and save the binary version to the same directory. This speeds up start up times from several seconds to less than 0.5s.
 
