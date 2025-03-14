@@ -13,7 +13,6 @@ It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2)
 3. The settings files are installed in `./Install/etc/orbslam2/`. By default, the executables will first search the current directory for the settings file and, if not defined, it will try the default directory.
    
 4. Some error checking is carried out on command line arguments to validate things like files and directories exist.
-
    
 ## Build instructions:
 
@@ -31,7 +30,7 @@ It depends on a few widely-available libraries:
 6. unzip
 7. cmake (version 3.20 or above)
 
-The ships with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI).
+This repo ships with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI). The latter two are the most current release targets (as of 14/03/2025).
 
 The build instructions are deliberately designed to be similar on all supported operating systems.
 
@@ -41,11 +40,11 @@ Install the dependencies:
 
 `sudo apt install cmake build-essential libeigen3-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libepoxy-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
 
-Build by running:
+The default (Release) version of the library is built by running:
 
 `./Build.sh`
 
-to build the release version. To build a debug version, type:
+To build a debug version, type:
 
 `./Build.sh Debug`
 
@@ -55,7 +54,7 @@ If you want to avoid typing `./Install/bin` everywhere, run this command from th
 
 #### Installing cmake 3.20:
 
-If your version of cmake is older than 3.20, you will need to install it manually:
+If your version of cmake is older than 3.20, you will need to install the most recent version of cmake. There are several ways to do it. One is to use the current official release from kitware:
 
 `wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -`
 
@@ -65,6 +64,8 @@ If your version of cmake is older than 3.20, you will need to install it manuall
 
 `sudo apt install cmake`
 
+The other is to follow instructions and build and install from source.
+
 #### Display issues:
 
 You can get errors of the form `terminate called after throwing an instance of 'std::runtime_error' what():  Pangolin X11: Failed to open X display`. To fix (at least in our case) set:
@@ -73,7 +74,7 @@ You can get errors of the form `terminate called after throwing an instance of '
 
 ### Mac (Intel and Apple Silicon) build instructions
 
-We use `homebrew` (https://brew.sh/) and build using the XCode command line tools. Please ensure that both have been installed.
+We use `homebrew` (https://brew.sh/) and build using the XCode command line tools. Please ensure that both have been installed and that `brew doctor` is happy.
 
 Install the dependencies:
 
