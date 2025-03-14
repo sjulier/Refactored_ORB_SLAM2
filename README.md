@@ -126,6 +126,8 @@ If you want to avoid typing `Install\bin everywhere`, modify the command to
 
 ORB-SLAM2 builds multiple executables to handle data from the TUM, KITTI and EuRoC datasets for monocular (`mono_tum`, `mono_kitti`, `mono_euroc`), stereo (`stereo_kitti`, `stereo_euroc`) and RGBD (`rgbd_tum`) types of data. Each programme has a slightly different way of being invoked. The original instructions can be found on the [ORB-SLAM2 github page](https://github.com/raulmur/ORB_SLAM2). Modified versions are provided below.
 
+Some of these methods of running the code seem to be fairly redundant, but we have included this redundancy to confirm with the original ORB-SLAM2 invocation.
+
 We assume the instructions have been followed to set the `PATH` variable so you don't have to type the full Install path.
 
 ### Monocular SLAM
@@ -181,7 +183,7 @@ The Machine Hall datasets all have the form `MH${mh_sequence}`. The command is:
 
 For example, for MH01 installed in the checkout directory, the command is:
 
-`mono_euroc EuRoC.yaml MH01/mav0/data MH01.txt`
+`mono_euroc EuRoC.yaml MH01/mav0/cam0/data MH01.txt`
 
 ##### EuRoC Vicon Dataset
 
@@ -193,7 +195,7 @@ For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
 
 #### TUM Dataset
 
-This actually uses the same dataset as for the monocular data. It can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
+This TUM mono dataset contains RGB as well. It can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
 
 `mono_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} {associations_file_name}`
 
@@ -207,30 +209,10 @@ Add down here (need directories for left and right frames).
 
 #### EuRoC Dataset
 
-This actually uses the same dataset as for the monocular data.
+All the EuRoC datasets actually include two sets of camera data (`cam0` and `cam1`) already. To run the code, you have to specify the directories containing both the left and right image streams. For example, for MH01 run
 
 `stereo_euroc EuRoC.yaml MH_01/mav0/cam0/data MH_01/mav0/cam1/data MH01.txt`
 
 #### KITTI Dataset
 
 To do
-
-## Spare material:
-
- Therefore, a example command for running KITTI00 (using a debug build) is:
-   
-   (replace `00` with your sequence number)
-   
-   (a text files such as `result.txt` for result_file_name is perferred as you can open the file later in the text editor directly.):
-
- `./Install/bin/mono_kitti_d KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
-   
- The release build would be:
- 
-   `./Install/bin/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
-   
-If you have set the `PATH` variable as specified above, you can change it to:
-
-   `mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
-
-
