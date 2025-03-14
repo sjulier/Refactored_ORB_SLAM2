@@ -203,7 +203,7 @@ This TUM mono dataset contains RGB as well. It can be downloaded from [here](htt
 
 The associations file is used to link RGB and D files together. The files start with `fr_${fr_code}`, but there isn't a standard suffix that's used and has to be checked individuall. To run the basic set, an example would be:
 
-`mono_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr1_xyz.txt`
+`rgbd_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr1_xyz.txt`
 
 ### Stereo SLAM
 
