@@ -1,24 +1,26 @@
-# Refactored_ORB_SLAM2
+# ORB-SLAM2
 
-This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2, g2o and Pangolin libraries, supports all static and all dynamic libraries (for debugging) and 2011 era C++ for sleep, threads, namespaces, etc.
+This is a refactoring of the ORB_SLAM2 repository. It uses up-to-date cmake, up-to-date DBoW2, g2o and Pangolin libraries, supports all static and all dynamic libraries (for debugging) and C++17 multi-platform support for sleep, threads, namespaces, etc.
 
-It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly.)
+It has been succesfully built on Ubunutu (18.04-22.04), Windows 10 and 11 (WSL2), Intel Mac and M1 Mac. (The Windows 10 / 11 native build is currently broken; vcpkg and cmake do not interact properly and whether something builds or not changes on an hourly basis.)
 
 ## User-visible changes from the original ORB-SLAM2:
 
-1.  All executables are installed in `./Install/bin` and the suffix "_d" is used to denote debug builds. For instance, if you want to run mono_kitti with the default (release) Build.sh file setting, the executable is at `./Install/bin/mono_kitti`. If you build with debugging enabled, the executable is at `./Install/bin/mono_kitti_d`. Typically you will only need to build Debug if there are issues with execution.
+1.  All executables are installed in `./Install/bin` and the suffix "_d" is used to denote debug builds. For instance, if you want to run mono_kitti with the default (release) Build.sh file setting, the executable is at `./Install/bin/mono_kitti`. If you build with debugging enabled, the executable is `./Install/bin/mono_kitti_d`. Debug build is only required if you are doing some debugging and you are unlikely to need it for the coursework.
 
 2. The ORB vocabulary is loaded automatically and does not have to be specified on the command line. (It is installed in the `./Install/var/lib/orbslam2` subdirectory). The system will try to load the binary version of the vocabulary. If it is not able to, it will load the text version, convert it, and save the binary version to the same directory. This speeds up start up times from several seconds to less than 0.5s.
 
-3. The settings files are installed in `./Install/etc/orbslam2/`. By default, the executables will first search the current directory for the settings file and, if not defined, it will try the default directory.
+3. The settings files are installed in `./Install/etc/orbslam2/`. By default, the executables will first search the current directory for the settings file and, if not defined, it will try the default directory. This means that there is less to type if running the standard examples (TUM, EuRoC, KITTI).
    
 4. Some error checking is carried out on command line arguments to validate things like files and directories exist.
-5. 
+   
 ## Build instructions:
 
 ### Prerequisites
 
-You will need to clone this repository using https://github.com/sjulier/Refactored_ORB_SLAM2.git
+**Do not build the code in a conda environment; please deactivate it first otherwise you will end up trying to link with incompatible versions of libraries**
+
+You will need to clone this repository using `git clone https://github.com/UCL/COMP0249_24-25_ORB_SLAM2.git`
 
 It depends on a few widely-available libraries:
 
@@ -30,7 +32,7 @@ It depends on a few widely-available libraries:
 6. unzip
 7. cmake (version 3.20 or above)
 
-The ships with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI).
+This repo ships with matched versions of DLib and DBoW2 (for the bag of words for data association), g2o (both front and backend optimization) and pangolin (GUI). The latter two are the most current release targets (as of 14/03/2025).
 
 The build instructions are deliberately designed to be similar on all supported operating systems.
 
@@ -40,21 +42,21 @@ Install the dependencies:
 
 `sudo apt install cmake build-essential libeigen3-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libepoxy-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
 
-Build by running:
+The default (Release) version of the library is built by running:
 
 `./Build.sh`
 
-to build the release version. To build a debug version, type:
+To build a debug version, type:
 
 `./Build.sh Debug`
 
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
-`set PATH=$PATH:$PWD/Install/bin`
+`export PATH=$PATH:$PWD/Install/bin`
 
 #### Installing cmake 3.20:
 
-If your version of cmake is older than 3.20, you will need to install it manually:
+If your version of cmake is older than 3.20, you will need to install the most recent version of cmake. There are several ways to do it. One is to use the current official release from kitware:
 
 `wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -`
 
@@ -64,6 +66,8 @@ If your version of cmake is older than 3.20, you will need to install it manuall
 
 `sudo apt install cmake`
 
+The other is to follow instructions and build and install from source.
+
 #### Display issues:
 
 You can get errors of the form `terminate called after throwing an instance of 'std::runtime_error' what():  Pangolin X11: Failed to open X display`. To fix (at least in our case) set:
@@ -72,11 +76,11 @@ You can get errors of the form `terminate called after throwing an instance of '
 
 ### Mac (Intel and Apple Silicon) build instructions
 
-We use `homebrew` (https://brew.sh/) and build using the XCode command line tools. Please ensure that both have been installed.
+We use `homebrew` (https://brew.sh/) and build using the XCode command line tools. Please ensure that both have been installed and that `brew doctor` is happy.
 
 Install the dependencies:
 
-`brew install eigen boost suitesparse opencv glew`
+`brew install cmake eigen boost suitesparse opencv glew`
 
 You should be able to build the release by by running:
 
@@ -88,9 +92,9 @@ To build a debug version, type:
 
 If you want to avoid typing `./Install/bin` everywhere, run this command from the command line:
 
-`set PATH=$PATH:$PWD/Install/bin`
+`export PATH=$PATH:$PWD/Install/bin`
 
-### Windows 10/11 build (does not work; do NOT use)
+### Windows 10/11 native build (does not work; do NOT use - use WSL instructions instead)
 
 Windows 10/11 is a more challenging OS to build on because it doesn't have a completely standard location for development. We use `vcpkg` (https://github.com/microsoft/vcpkg) but other package management systems are available.
 
@@ -123,6 +127,8 @@ If you want to avoid typing `Install\bin everywhere`, modify the command to
 ## Running Examples
 
 ORB-SLAM2 builds multiple executables to handle data from the TUM, KITTI and EuRoC datasets for monocular (`mono_tum`, `mono_kitti`, `mono_euroc`), stereo (`stereo_kitti`, `stereo_euroc`) and RGBD (`rgbd_tum`) types of data. Each programme has a slightly different way of being invoked. The original instructions can be found on the [ORB-SLAM2 github page](https://github.com/raulmur/ORB_SLAM2). Modified versions are provided below.
+
+Some of these methods of running the code seem to be fairly redundant, but we have included this redundancy to confirm with the original ORB-SLAM2 invocation.
 
 We assume the instructions have been followed to set the `PATH` variable so you don't have to type the full Install path.
 
@@ -179,7 +185,7 @@ The Machine Hall datasets all have the form `MH${mh_sequence}`. The command is:
 
 For example, for MH01 installed in the checkout directory, the command is:
 
-`mono_euroc EuRoC.yaml MH01/mav0/data MH01.txt`
+`mono_euroc EuRoC.yaml MH01/mav0/cam0/data MH01.txt`
 
 ##### EuRoC Vicon Dataset
 
@@ -191,13 +197,13 @@ For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
 
 #### TUM Dataset
 
-This actually uses the same dataset as for the monocular data. It can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
+This TUM mono dataset contains RGB as well. It can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
 
 `mono_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} {associations_file_name}`
 
 The associations file is used to link RGB and D files together. The files start with `fr_${fr_code}`, but there isn't a standard suffix that's used and has to be checked individuall. To run the basic set, an example would be:
 
-`mono_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr1_xyz.txt`
+`rgbd_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr1_xyz.txt`
 
 ### Stereo SLAM
 
@@ -205,30 +211,10 @@ Add down here (need directories for left and right frames).
 
 #### EuRoC Dataset
 
-This actually uses the same dataset as for the monocular data.
+All the EuRoC datasets actually include two sets of camera data (`cam0` and `cam1`) already. To run the code, you have to specify the directories containing both the left and right image streams. For example, for MH01 run
 
 `stereo_euroc EuRoC.yaml MH_01/mav0/cam0/data MH_01/mav0/cam1/data MH01.txt`
 
 #### KITTI Dataset
 
 To do
-
-## Spare material:
-
- Therefore, a example command for running KITTI00 (using a debug build) is:
-   
-   (replace `00` with your sequence number)
-   
-   (a text files such as `result.txt` for result_file_name is perferred as you can open the file later in the text editor directly.):
-
- `./Install/bin/mono_kitti_d KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
-   
- The release build would be:
- 
-   `./Install/bin/mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
-   
-If you have set the `PATH` variable as specified above, you can change it to:
-
-   `mono_kitti KITTI00-02.yaml ${your_kitti_dataset_folder}/sequences/00 ${result_file_name}`
-
-

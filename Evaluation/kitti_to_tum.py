@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from evo.core.trajectory import PoseTrajectory3D
 from evo.tools import file_interface
 import numpy as np
