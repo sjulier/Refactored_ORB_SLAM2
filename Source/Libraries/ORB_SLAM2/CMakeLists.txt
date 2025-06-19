@@ -1,3 +1,4 @@
+
 if(NOT DEFINED BUILD_SHARED_LIBRARIES)
   set(BUILD_SHARED_LIBRARIES NO)
 endif()
@@ -5,7 +6,9 @@ endif()
 if(BUILD_SHARED_LIBRARIES)
   set(LIB_TYPE SHARED)
 else()
-  set(LIB_TYPE STATIC)
+  set(LIB_TYPE STATIC
+          include/AKAZEextractor.h
+          src/AKAZEextractor.cc)
 endif()
 
 project(ORB_SLAM2)

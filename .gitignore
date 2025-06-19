@@ -27,4 +27,5 @@ lib/
 Develop/
 CMakeCache.txt
 CMakeFiles
+.idea/
 

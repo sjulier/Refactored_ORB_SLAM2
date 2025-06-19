@@ -37,6 +37,8 @@
 #include "System.h"
 #include "Viewer.h"
 
+#include "AKAZEextractor.h"
+
 #include <mutex>
 
 namespace ORB_SLAM2 {
@@ -160,6 +162,10 @@ protected:
   // ORB
   ORBextractor *mpORBextractorLeft, *mpORBextractorRight;
   ORBextractor *mpIniORBextractor;
+
+  // AKAZE
+  //AKAZEextractor *mpORBextractorLeft, *mpORBextractorRight;
+  //AKAZEextractor *mpIniORBextractor;
 
   // BoW
   ORBVocabulary *mpORBVocabulary;

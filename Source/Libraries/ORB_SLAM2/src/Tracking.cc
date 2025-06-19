@@ -115,16 +115,48 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc, FrameDrawer *pFrameDrawer,
   int fIniThFAST = fSettings["ORBextractor.iniThFAST"];
   int fMinThFAST = fSettings["ORBextractor.minThFAST"];
 
-  mpORBextractorLeft = new ORBextractor(nFeatures, fScaleFactor, nLevels,
-                                        fIniThFAST, fMinThFAST);
+
+
+  std::string extractorType = fSettings["FeatureExtractor"];
+  std::cout << "ExtractorType raw: " << extractorType << std::endl;
+  std::transform(extractorType.begin(), extractorType.end(),
+                 extractorType.begin(), ::toupper);
+  bool useAKAZE = (extractorType == "AKAZE");
+
+  std::cout << "Config file path: " << strSettingPath << std::endl;
+  std::cout << "FeatureExtractor read from YAML: " << extractorType << std::endl;
+  std::cout << "nFeatures read from YAML: " << nFeatures << std::endl;
+
+
+  auto makeExtractor = [&](bool initExtractor) -> ORBextractor* {
+    int n = initExtractor ? 2 * nFeatures : nFeatures;
+    if(useAKAZE) {
+      return new AKAZEextractor(n);
+    } else {
+      return new ORBextractor(n,
+                              fScaleFactor,
+                              nLevels,
+                              fIniThFAST,
+                              fMinThFAST);
+    }
+  };
+
+  //mpORBextractorLeft = new ORBextractor(nFeatures, fScaleFactor, nLevels,
+  //                                      fIniThFAST, fMinThFAST);
+  mpORBextractorLeft = makeExtractor(false);
 
   if (sensor == System::STEREO)
-    mpORBextractorRight = new ORBextractor(nFeatures, fScaleFactor, nLevels,
-                                           fIniThFAST, fMinThFAST);
+    //mpORBextractorRight = new ORBextractor(nFeatures, fScaleFactor, nLevels,
+    //                                       fIniThFAST, fMinThFAST);
+    //mpORBextractorRight = new AKAZEextractor(nFeatures);
+    mpORBextractorRight = makeExtractor(false);
+
 
   if (sensor == System::MONOCULAR)
-    mpIniORBextractor = new ORBextractor(2 * nFeatures, fScaleFactor, nLevels,
-                                         fIniThFAST, fMinThFAST);
+    //mpIniORBextractor = new ORBextractor(2 * nFeatures, fScaleFactor, nLevels,
+    //                                     fIniThFAST, fMinThFAST);
+    //mpIniORBextractor = new AKAZEextractor(nFeatures);
+    mpIniORBextractor = makeExtractor(true);
 
   cout << endl << "ORB Extractor Parameters: " << endl;
   cout << "- Number of Features: " << nFeatures << endl;
