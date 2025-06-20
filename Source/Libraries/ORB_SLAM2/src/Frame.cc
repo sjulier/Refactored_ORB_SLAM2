@@ -64,8 +64,8 @@ Frame::Frame(const Frame &frame)
 }
 
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
-             const double &timeStamp, ORBextractor *extractorLeft,
-             ORBextractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
+             const double &timeStamp, AbstractExtractor *extractorLeft,
+             AbstractExtractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
     : mpORBvocabulary(voc), mpORBextractorLeft(extractorLeft),
       mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),
@@ -127,11 +127,11 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 }
 
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
-             const double &timeStamp, ORBextractor *extractor,
+             const double &timeStamp, AbstractExtractor *extractor,
              ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth)
     : mpORBvocabulary(voc), mpORBextractorLeft(extractor),
-      mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
+      mpORBextractorRight(static_cast<AbstractExtractor *>(NULL)),
       mTimeStamp(timeStamp), mK(K.clone()), mDistCoef(distCoef.clone()),
       mbf(bf), mThDepth(thDepth) {
   // Frame ID
@@ -187,10 +187,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 }
 
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K,
+             AbstractExtractor *extractor, ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth)
     : mpORBvocabulary(voc), mpORBextractorLeft(extractor),
-      mpORBextractorRight(static_cast<ORBextractor *>(NULL)),
+      mpORBextractorRight(static_cast<AbstractExtractor *>(NULL)),
       mTimeStamp(timeStamp), mK(K.clone()), mDistCoef(distCoef.clone()),
       mbf(bf), mThDepth(thDepth) {
   // Frame ID
@@ -480,7 +480,7 @@ void Frame::ComputeStereoMatches() {
 
   const int thOrbDist = (ORBmatcher::TH_HIGH + ORBmatcher::TH_LOW) / 2;
 
-  const int nRows = mpORBextractorLeft->mvImagePyramid[0].rows;
+  const int nRows = mpORBextractorLeft->GetImagePyramid()[0].rows;
 
   // Assign keypoints to row table
   vector<vector<size_t>> vRowIndices(nRows, vector<size_t>());
@@ -564,7 +564,7 @@ void Frame::ComputeStereoMatches() {
 
       // sliding window search
       const int w = 5;
-      cv::Mat IL = mpORBextractorLeft->mvImagePyramid[kpL.octave]
+      cv::Mat IL = mpORBextractorLeft->GetImagePyramid()[kpL.octave]
                        .rowRange(scaledvL - w, scaledvL + w + 1)
                        .colRange(scaleduL - w, scaleduL + w + 1);
       IL.convertTo(IL, CV_32F);
@@ -579,12 +579,12 @@ void Frame::ComputeStereoMatches() {
       const float iniu = scaleduR0 + L - w;
       const float endu = scaleduR0 + L + w + 1;
       if (iniu < 0 ||
-          endu >= mpORBextractorRight->mvImagePyramid[kpL.octave].cols)
+          endu >= mpORBextractorRight->GetImagePyramid()[kpL.octave].cols)
         continue;
 
       for (int incR = -L; incR <= +L; incR++) {
         cv::Mat IR =
-            mpORBextractorRight->mvImagePyramid[kpL.octave]
+            mpORBextractorRight->GetImagePyramid()[kpL.octave]
                 .rowRange(scaledvL - w, scaledvL + w + 1)
                 .colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
         IR.convertTo(IR, CV_32F);

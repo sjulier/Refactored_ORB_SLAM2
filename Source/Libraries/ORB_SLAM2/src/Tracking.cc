@@ -128,7 +128,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc, FrameDrawer *pFrameDrawer,
   std::cout << "nFeatures read from YAML: " << nFeatures << std::endl;
 
 
-  auto makeExtractor = [&](bool initExtractor) -> ORBextractor* {
+  auto makeExtractor = [&](bool initExtractor) -> AbstractExtractor* {
     int n = initExtractor ? 2 * nFeatures : nFeatures;
     if(useAKAZE) {
       return new AKAZEextractor(n);
@@ -148,14 +148,12 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc, FrameDrawer *pFrameDrawer,
   if (sensor == System::STEREO)
     //mpORBextractorRight = new ORBextractor(nFeatures, fScaleFactor, nLevels,
     //                                       fIniThFAST, fMinThFAST);
-    //mpORBextractorRight = new AKAZEextractor(nFeatures);
     mpORBextractorRight = makeExtractor(false);
 
 
   if (sensor == System::MONOCULAR)
     //mpIniORBextractor = new ORBextractor(2 * nFeatures, fScaleFactor, nLevels,
     //                                     fIniThFAST, fMinThFAST);
-    //mpIniORBextractor = new AKAZEextractor(nFeatures);
     mpIniORBextractor = makeExtractor(true);
 
   cout << endl << "ORB Extractor Parameters: " << endl;

@@ -25,6 +25,8 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
+#include "AbstractExtractor.h"
+
 namespace ORB_SLAM2 {
 
 class ExtractorNode {
@@ -40,7 +42,7 @@ public:
   bool bNoMore;
 };
 
-class ORBextractor {
+class ORBextractor : public AbstractExtractor {
 public:
   enum { HARRIS_SCORE = 0, FAST_SCORE = 1 };
 
@@ -52,27 +54,27 @@ public:
   // Compute the ORB features and descriptors on an image.
   // ORB are dispersed on the image using an octree.
   // Mask is ignored in the current implementation.
-  virtual void operator()(cv::InputArray image, cv::InputArray mask,
+  void operator()(cv::InputArray image, cv::InputArray mask,
                   std::vector<cv::KeyPoint> &keypoints,
                   cv::OutputArray descriptors);
 
-  int inline GetLevels() { return nlevels; }
+  int GetLevels() const override { return nlevels; }
 
-  float inline GetScaleFactor() { return scaleFactor; }
+  float GetScaleFactor() const override { return scaleFactor; }
 
-  std::vector<float> inline GetScaleFactors() { return mvScaleFactor; }
+  const std::vector<float>& GetScaleFactors() const override { return mvScaleFactor; }
 
-  std::vector<float> inline GetInverseScaleFactors() {
-    return mvInvScaleFactor;
-  }
+  const std::vector<float>& GetInverseScaleFactors() const override { return mvInvScaleFactor; }
 
-  std::vector<float> inline GetScaleSigmaSquares() { return mvLevelSigma2; }
+  const std::vector<float>& GetScaleSigmaSquares() const override { return mvLevelSigma2; }
 
-  std::vector<float> inline GetInverseScaleSigmaSquares() {
-    return mvInvLevelSigma2;
-  }
+  const std::vector<float>& GetInverseScaleSigmaSquares() const override { return mvInvLevelSigma2; }
 
-  std::vector<cv::Mat> mvImagePyramid;
+  const std::vector<cv::Mat>& GetImagePyramid() const override { return mvImagePyramid; }
+
+  int  DescriptorBytes() const override { return 32; }
+
+  std::string Name()     const override { return "ORB"; }
 
 protected:
   void ComputePyramid(cv::Mat image);
@@ -101,6 +103,8 @@ protected:
   std::vector<float> mvInvScaleFactor;
   std::vector<float> mvLevelSigma2;
   std::vector<float> mvInvLevelSigma2;
+  std::vector<cv::Mat> mvImagePyramid;
+
 };
 
 } // namespace ORB_SLAM2

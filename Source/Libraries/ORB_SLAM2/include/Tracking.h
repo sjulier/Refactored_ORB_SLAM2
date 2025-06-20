@@ -37,6 +37,7 @@
 #include "System.h"
 #include "Viewer.h"
 
+#include "AbstractExtractor.h"
 #include "AKAZEextractor.h"
 
 #include <mutex>
@@ -160,12 +161,8 @@ protected:
   LoopClosing *mpLoopClosing;
 
   // ORB
-  ORBextractor *mpORBextractorLeft, *mpORBextractorRight;
-  ORBextractor *mpIniORBextractor;
-
-  // AKAZE
-  //AKAZEextractor *mpORBextractorLeft, *mpORBextractorRight;
-  //AKAZEextractor *mpIniORBextractor;
+  AbstractExtractor *mpORBextractorLeft, *mpORBextractorRight;
+  AbstractExtractor *mpIniORBextractor;
 
   // BoW
   ORBVocabulary *mpORBVocabulary;

@@ -4,14 +4,13 @@
 namespace ORB_SLAM2 {
 
     AKAZEextractor::AKAZEextractor(int nfeatures)
-        : ORBextractor(nfeatures, 1.2f, 8, 20, 7)
-        , nfeatures_(nfeatures)
+        : nfeatures_(nfeatures)
     {
         mpAKAZE = cv::AKAZE::create(
             cv::AKAZE::DESCRIPTOR_MLDB,
             0,          // full length
             3,          // descriptor_channels
-            1e-4f,      // threshold
+            1e-3f,      // threshold
             4,          // num octaves
             4,          // num octave layers
             cv::KAZE::DIFF_PM_G2);
@@ -22,6 +21,8 @@ namespace ORB_SLAM2 {
                                     std::vector<cv::KeyPoint>& keypoints,
                                     cv::OutputArray            descriptors)
     {
+        mvImagePyramid_[0] = image.getMat();
+
         cv::Mat raw;
         mpAKAZE->detectAndCompute(image, mask, keypoints, raw, false);
 
