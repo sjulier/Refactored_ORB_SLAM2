@@ -26,6 +26,8 @@ namespace ORB_SLAM2 {
         cv::Mat raw;
         mpAKAZE->detectAndCompute(image, mask, keypoints, raw, false);
 
+        for(auto& kp : keypoints) kp.octave = 0;
+
         if(static_cast<int>(keypoints.size()) > nfeatures_)
         {
             cv::KeyPointsFilter::retainBest(keypoints, nfeatures_);
