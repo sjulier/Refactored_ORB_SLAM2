@@ -40,8 +40,8 @@ MapDrawer::MapDrawer(Map *pMap, const string &strSettingPath) : mpMap(pMap) {
 }
 
 void MapDrawer::DrawMapPoints() {
-  const vector<MapPoint *> &vpMPs = mpMap->GetAllMapPoints();
-  const vector<MapPoint *> &vpRefMPs = mpMap->GetReferenceMapPoints();
+  const std::vector<MapPoint *> &vpMPs = mpMap->GetAllMapPoints();
+  const std::vector<MapPoint *> &vpRefMPs = mpMap->GetReferenceMapPoints();
 
   set<MapPoint *> spRefMPs(vpRefMPs.begin(), vpRefMPs.end());
 
@@ -52,7 +52,7 @@ void MapDrawer::DrawMapPoints() {
   glBegin(GL_POINTS);
   glColor3f(0.0, 0.0, 0.0);
 
-  for (size_t i = 0, iend = vpMPs.size(); i < iend; i++) {
+  for (std::size_t i = 0, iend = vpMPs.size(); i < iend; i++) {
     if (vpMPs[i]->isBad() || spRefMPs.count(vpMPs[i]))
       continue;
     cv::Mat pos = vpMPs[i]->GetWorldPos();
@@ -80,10 +80,10 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph) {
   const float h = w * 0.75;
   const float z = w * 0.6;
 
-  const vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
+  const std::vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
 
   if (bDrawKF) {
-    for (size_t i = 0; i < vpKFs.size(); i++) {
+    for (std::size_t i = 0; i < vpKFs.size(); i++) {
       KeyFrame *pKF = vpKFs[i];
       cv::Mat Twc = pKF->GetPoseInverse().t();
 
@@ -125,14 +125,12 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph) {
     glColor4f(0.0f, 1.0f, 0.0f, 0.6f);
     glBegin(GL_LINES);
 
-    for (size_t i = 0; i < vpKFs.size(); i++) {
+    for (std::size_t i = 0; i < vpKFs.size(); i++) {
       // Covisibility Graph
-      const vector<KeyFrame *> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
+      const std::vector<KeyFrame *> vCovKFs = vpKFs[i]->GetCovisiblesByWeight(100);
       cv::Mat Ow = vpKFs[i]->GetCameraCenter();
       if (!vCovKFs.empty()) {
-        for (vector<KeyFrame *>::const_iterator vit = vCovKFs.begin(),
-                                                vend = vCovKFs.end();
-             vit != vend; vit++) {
+        for (std::vector<KeyFrame *>::const_iterator vit = vCovKFs.begin(), vend = vCovKFs.end(); vit != vend; vit++) {
           if ((*vit)->mnId < vpKFs[i]->mnId)
             continue;
           cv::Mat Ow2 = (*vit)->GetCameraCenter();
@@ -151,9 +149,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph) {
 
       // Loops
       set<KeyFrame *> sLoopKFs = vpKFs[i]->GetLoopEdges();
-      for (set<KeyFrame *>::iterator sit = sLoopKFs.begin(),
-                                     send = sLoopKFs.end();
-           sit != send; sit++) {
+      for (set<KeyFrame *>::iterator sit = sLoopKFs.begin(), send = sLoopKFs.end(); sit != send; sit++) {
         if ((*sit)->mnId < vpKFs[i]->mnId)
           continue;
         cv::Mat Owl = (*sit)->GetCameraCenter();

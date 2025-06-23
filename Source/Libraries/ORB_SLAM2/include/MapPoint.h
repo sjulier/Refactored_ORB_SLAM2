@@ -36,8 +36,11 @@ class Frame;
 
 class MapPoint {
 public:
-  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap);
-  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF);
+  const static int Ntype = 2; // Number of channels
+
+public:
+  MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ftype);
+  MapPoint(const cv::Mat &Pos, Map *pMap, Frame *pFrame, const int &idxF, const int Ftype);
 
   void SetWorldPos(const cv::Mat &Pos);
   cv::Mat GetWorldPos();
@@ -73,8 +76,11 @@ public:
 
   float GetMinDistanceInvariance();
   float GetMaxDistanceInvariance();
+  
   int PredictScale(const float &currentDist, KeyFrame *pKF);
   int PredictScale(const float &currentDist, Frame *pF);
+
+  int GetFeatureType();
 
 public:
   long unsigned int mnId;
@@ -82,6 +88,9 @@ public:
   long int mnFirstKFid;
   long int mnFirstFrame;
   int nObs;
+
+  // Define Flag, ORB:0, GCN:1
+  const int mFtype;
 
   // Variables used by the tracking
   float mTrackProjX;

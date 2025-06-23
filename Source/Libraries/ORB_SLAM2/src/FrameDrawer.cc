@@ -30,19 +30,18 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-FrameDrawer::FrameDrawer(Map *pMap) : mpMap(pMap) {
+FrameDrawer::FrameDrawer(Map *pMap, const int Ftype) : mpMap(pMap), mFtype(Ftype) {
   mState = Tracking::SYSTEM_NOT_READY;
   mIm = cv::Mat(480, 640, CV_8UC3, cv::Scalar(0, 0, 0));
 }
 
 cv::Mat FrameDrawer::DrawFrame() {
   cv::Mat im;
-  vector<cv::KeyPoint> vIniKeys; // Initialization: KeyPoints in reference frame
-  vector<int>
-      vMatches; // Initialization: correspondeces with reference keypoints
-  vector<cv::KeyPoint> vCurrentKeys; // KeyPoints in current frame
-  vector<bool> vbVO, vbMap;          // Tracked MapPoints in current frame
-  int state;                         // Tracking state
+  std::vector<cv::KeyPoint> vIniKeys; // Initialization: KeyPoints in reference frame
+  std::vector<int> vMatches; // Initialization: correspondeces with reference keypoints
+  std::vector<cv::KeyPoint> vCurrentKeys; // KeyPoints in current frame
+  std::vector<bool> vbVO, vbMap;          // Tracked MapPoints in current frame
+  int state;                              // Tracking state
 
   // Copy variables within scoped mutex
   {
@@ -70,16 +69,13 @@ cv::Mat FrameDrawer::DrawFrame() {
     cvtColor(im, im, cv::COLOR_GRAY2BGR);
 
   // Draw
-  if (state == Tracking::NOT_INITIALIZED) // INITIALIZING
-  {
+  if (state == Tracking::NOT_INITIALIZED) { // INITIALIZING
     for (unsigned int i = 0; i < vMatches.size(); i++) {
       if (vMatches[i] >= 0) {
-        cv::line(im, vIniKeys[i].pt, vCurrentKeys[vMatches[i]].pt,
-                 cv::Scalar(0, 255, 0));
+        cv::line(im, vIniKeys[i].pt, vCurrentKeys[vMatches[i]].pt, cv::Scalar(0, 255, 0));
       }
     }
-  } else if (state == Tracking::OK) // TRACKING
-  {
+  } else if (state == Tracking::OK) { // TRACKING
     mnTracked = 0;
     mnTrackedVO = 0;
     const float r = 5;
@@ -97,9 +93,7 @@ cv::Mat FrameDrawer::DrawFrame() {
           cv::rectangle(im, pt1, pt2, cv::Scalar(0, 255, 0));
           cv::circle(im, vCurrentKeys[i].pt, 2, cv::Scalar(0, 255, 0), -1);
           mnTracked++;
-        } else // This is match to a "visual odometry" MapPoint created in the
-               // last frame
-        {
+        } else { // This is match to a "visual odometry" MapPoint created in the last frame
           cv::rectangle(im, pt1, pt2, cv::Scalar(255, 0, 0));
           cv::circle(im, vCurrentKeys[i].pt, 2, cv::Scalar(255, 0, 0), -1);
           mnTrackedVO++;
@@ -126,7 +120,7 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
     else
       s << "LOCALIZATION | ";
     int nKFs = mpMap->KeyFramesInMap();
-    int nMPs = mpMap->MapPointsInMap();
+    int nMPs = mpMap->MapPointsInMap(mFtype); 
     s << "KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked;
     if (mnTrackedVO > 0)
       s << ", + VO matches: " << mnTrackedVO;
@@ -137,34 +131,31 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText) {
   }
 
   int baseline = 0;
-  cv::Size textSize =
-      cv::getTextSize(s.str(), cv::FONT_HERSHEY_PLAIN, 1, 1, &baseline);
+  cv::Size textSize = cv::getTextSize(s.str(), cv::FONT_HERSHEY_PLAIN, 1, 1, &baseline);
 
   imText = cv::Mat(im.rows + textSize.height + 10, im.cols, im.type());
   im.copyTo(imText.rowRange(0, im.rows).colRange(0, im.cols));
-  imText.rowRange(im.rows, imText.rows) =
-      cv::Mat::zeros(textSize.height + 10, im.cols, im.type());
-  cv::putText(imText, s.str(), cv::Point(5, imText.rows - 5),
-              cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 1, 8);
+  imText.rowRange(im.rows, imText.rows) = cv::Mat::zeros(textSize.height + 10, im.cols, im.type());
+  cv::putText(imText, s.str(), cv::Point(5, imText.rows - 5), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 1, 8);
 }
 
 void FrameDrawer::Update(Tracking *pTracker) {
   unique_lock<mutex> lock(mMutex);
   pTracker->mImGray.copyTo(mIm);
-  mvCurrentKeys = pTracker->mCurrentFrame.mvKeys;
+  mvCurrentKeys = pTracker->mCurrentFrame.Channels[mFtype].mvKeys;
   N = mvCurrentKeys.size();
-  mvbVO = vector<bool>(N, false);
-  mvbMap = vector<bool>(N, false);
+  mvbVO = std::vector<bool>(N, false);
+  mvbMap = std::vector<bool>(N, false);
   mbOnlyTracking = pTracker->mbOnlyTracking;
 
   if (pTracker->mLastProcessedState == Tracking::NOT_INITIALIZED) {
-    mvIniKeys = pTracker->mInitialFrame.mvKeys;
-    mvIniMatches = pTracker->mvIniMatches;
+    mvIniKeys = pTracker->mInitialFrame.Channels[mFtype].mvKeys;
+    mvIniMatches = pTracker->mvIniMatches[mFtype]; 
   } else if (pTracker->mLastProcessedState == Tracking::OK) {
     for (int i = 0; i < N; i++) {
-      MapPoint *pMP = pTracker->mCurrentFrame.mvpMapPoints[i];
+      MapPoint *pMP = pTracker->mCurrentFrame.Channels[mFtype].mvpMapPoints[i];
       if (pMP) {
-        if (!pTracker->mCurrentFrame.mvbOutlier[i]) {
+        if (!pTracker->mCurrentFrame.Channels[mFtype].mvbOutlier[i]) {
           if (pMP->Observations() > 0)
             mvbMap[i] = true;
           else

@@ -40,7 +40,10 @@ class KeyFrameDatabase;
 
 class KeyFrame {
 public:
-  KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB);
+  const static int Ntype = 2; // Number of channels
+  
+public:
+  KeyFrame(Frame &F, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB);
 
   // Pose functions
   void SetPose(const cv::Mat &Tcw);
@@ -52,12 +55,12 @@ public:
   cv::Mat GetTranslation();
 
   // Bag of Words Representation
-  void ComputeBoW();
+  void ComputeBoW(const int Ftype);
 
   // Covisibility graph functions
   void AddConnection(KeyFrame *pKF, const int &weight);
   void EraseConnection(KeyFrame *pKF);
-  void UpdateConnections();
+  void UpdateConnectionsMultiChannels();
   void UpdateBestCovisibles();
   std::set<KeyFrame *> GetConnectedKeyFrames();
   std::vector<KeyFrame *> GetVectorCovisibleKeyFrames();
@@ -78,19 +81,27 @@ public:
   std::set<KeyFrame *> GetLoopEdges();
 
   // MapPoint observation functions
-  void AddMapPoint(MapPoint *pMP, const std::size_t &idx);
-  void EraseMapPointMatch(const std::size_t &idx);
-  void EraseMapPointMatch(MapPoint *pMP);
-  void ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP);
-  std::set<MapPoint *> GetMapPoints();
-  std::vector<MapPoint *> GetMapPointMatches();
+  void AddMapPoint(MapPoint *pMP, const std::size_t &idx, const int Ftype);
+
+  void EraseMapPointMatch(const std::size_t &idx, const int Ftype);
+
+  void EraseMapPointMatch(MapPoint *pMP, const int Ftype);
+
+  void ReplaceMapPointMatch(const std::size_t &idx, MapPoint *pMP, const int Ftype);
+
+  std::set<MapPoint *> GetMapPoints(const int Ftype);
+
+  std::vector<MapPoint *> GetMapPointMatches(const int Ftype);
+
+  int TrackedMapPoints(const int &minObs, const int Ftype);
   int TrackedMapPoints(const int &minObs);
-  MapPoint *GetMapPoint(const std::size_t &idx);
+
+  MapPoint *GetMapPoint(const std::size_t &idx, const int Ftype);
 
   // KeyPoint functions
-  std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y,
-                                             const float &r) const;
-  cv::Mat UnprojectStereo(int i);
+  std::vector<std::size_t> GetFeaturesInArea(const float &x, const float &y, const float &r, const int Ftype) const;
+
+  cv::Mat UnprojectStereo(int i, const int Ftype);
 
   // Image
   bool IsInImage(const float &x, const float &y) const;
@@ -104,6 +115,7 @@ public:
   bool isBad();
 
   // Compute Scene Depth (q=2 median). Used in monocular.
+  float ComputeSceneMedianDepth(const int q, const int Ftype);
   float ComputeSceneMedianDepth(const int q);
 
   static bool weightComp(int a, int b) { return a > b; }
@@ -136,12 +148,12 @@ public:
   long unsigned int mnBAFixedForKF;
 
   // Variables used by the keyframe database
-  long unsigned int mnLoopQuery;
-  int mnLoopWords;
-  float mLoopScore;
-  long unsigned int mnRelocQuery;
-  int mnRelocWords;
-  float mRelocScore;
+  long unsigned int mnLoopQuery[Ntype];
+  int mnLoopWords[Ntype];
+  float mLoopScore[Ntype];
+  long unsigned int mnRelocQuery[Ntype];
+  int mnRelocWords[Ntype];
+  float mRelocScore[Ntype];
 
   // Variables used by loop closing
   cv::Mat mTcwGBA;
@@ -151,19 +163,7 @@ public:
   // Calibration parameters
   const float fx, fy, cx, cy, invfx, invfy, mbf, mb, mThDepth;
 
-  // Number of KeyPoints
-  const int N;
-
-  // KeyPoints, stereo coordinate and descriptors (all associated by an index)
-  const std::vector<cv::KeyPoint> mvKeys;
-  const std::vector<cv::KeyPoint> mvKeysUn;
-  const std::vector<float> mvuRight; // negative value for monocular points
-  const std::vector<float> mvDepth;  // negative value for monocular points
-  const cv::Mat mDescriptors;
-
-  // BoW
-  DBoW2::BowVector mBowVec;
-  DBoW2::FeatureVector mFeatVec;
+  FeaturePoint Channels[Ntype];
 
   // Pose relative to parent (this is computed when bad flag is activated)
   cv::Mat mTcp;
@@ -183,8 +183,7 @@ public:
   const int mnMaxY;
   const cv::Mat mK;
 
-  // The following variables need to be accessed trough a mutex to be thread
-  // safe.
+  // The following variables need to be accessed trough a mutex to be thread safe.
 protected:
   // SE3 Pose and camera center
   cv::Mat Tcw;
@@ -193,16 +192,11 @@ protected:
 
   cv::Mat Cw; // Stereo middel point. Only for visualization
 
-  // MapPoints associated to keypoints
-  std::vector<MapPoint *> mvpMapPoints;
-
   // BoW
-  KeyFrameDatabase *mpKeyFrameDB;
-  ORBVocabulary *mpORBvocabulary;
+  std::vector<KeyFrameDatabase *> mpKeyFrameDB;
+  std::vector<ORBVocabulary *> mpVocabulary;
 
-  // Grid over the image to speed up feature matching
-  std::vector<std::vector<std::vector<std::size_t>>> mGrid;
-
+  // Connected keyframe variables
   std::map<KeyFrame *, int> mConnectedKeyFrameWeights;
   std::vector<KeyFrame *> mvpOrderedConnectedKeyFrames;
   std::vector<int> mvOrderedWeights;

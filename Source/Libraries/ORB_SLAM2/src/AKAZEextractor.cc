@@ -3,9 +3,8 @@
 
 namespace ORB_SLAM2 {
 
-    AKAZEextractor::AKAZEextractor(int nfeatures)
-        : nfeatures_(nfeatures)
-    {
+    AKAZEextractor::AKAZEextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST)
+      : FeatureExtractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST) {
         mpAKAZE = cv::AKAZE::create(
             cv::AKAZE::DESCRIPTOR_MLDB,
             0,          // full length
@@ -21,17 +20,17 @@ namespace ORB_SLAM2 {
                                     std::vector<cv::KeyPoint>& keypoints,
                                     cv::OutputArray            descriptors)
     {
-        mvImagePyramid_[0] = image.getMat();
+        mvImagePyramid[0] = image.getMat();
 
         cv::Mat raw;
         mpAKAZE->detectAndCompute(image, mask, keypoints, raw, false);
 
         for(auto& kp : keypoints) kp.octave = 0;
 
-        if(static_cast<int>(keypoints.size()) > nfeatures_)
+        if(static_cast<int>(keypoints.size()) > nfeatures)
         {
-            cv::KeyPointsFilter::retainBest(keypoints, nfeatures_);
-            raw = raw.rowRange(0, nfeatures_).clone();
+            cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
+            raw = raw.rowRange(0, nfeatures).clone();
         }
 
         const int PAD = 64;

@@ -20,13 +20,14 @@ message(THIRD_PARTY_BUILT_LIBRARY_PREFIX=${THIRD_PARTY_BUILT_LIBRARY_PREFIX})
 list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}")
 
 # Default installation and search libraries where the yaml files will be stored
-set(DEFAULT_ORB_SETTINGS_DIR "${BUILD_INSTALL_PREFIX}/etc/orbslam2")
+set(DEFAULT_SETTINGS_DIR "${BUILD_INSTALL_PREFIX}/etc/orbslam2")
 
-# Set the vocabulary
-cmake_path(SET DEFAULT_ORB_VOCABULARY_DIR "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2")
-string(CONCAT DEFAULT_ORB_VOCABULARY ${DEFAULT_ORB_VOCABULARY_DIR} "/ORBvoc.txt")
-string(CONCAT DEFAULT_BINARY_ORB_VOCABULARY ${DEFAULT_ORB_VOCABULARY_DIR} "/ORBvoc.bin")
-add_compile_definitions(DEFAULT_ORB_VOCABULARY="${DEFAULT_ORB_VOCABULARY}")
+cmake_path(SET DEFAULT_RESOURCE_BASE "${BUILD_INSTALL_PREFIX}/var/lib/orbslam2")
+
+# ORB installation stuff
+set(DEFAULT_ORB_VOCABULARY_DIR "${DEFAULT_RESOURCE_BASE}/orb")
+set(DEFAULT_BINARY_ORB_VOCABULARY "${DEFAULT_ORB_VOCABULARY_DIR}/ORBvoc.bin")
+
 add_compile_definitions(DEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 
 # postfix, based on type
@@ -71,6 +72,14 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
 
+# Backwards compatibilty for eigen
+if (TARGET Eigen3::Eigen)
+  set(EIGEN3_EIGEN_LIBS Eigen3::Eigen)
+else()
+  set(EIGEN3_EIGEN_LIBS )
+  include_directories(${EIGEN3_INCLUDE_DIR})
+endif ()
+
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # Find the required packages; these are from ThirdParty
@@ -83,6 +92,6 @@ find_package(g2o REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT
 # Add the libraries and examples
 add_subdirectory(Libraries)
 add_subdirectory(Examples)
-add_subdirectory(Vocabulary)
+add_subdirectory(Resources)
 
 # Third party libraries are built separately to speed things up

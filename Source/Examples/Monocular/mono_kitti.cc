@@ -24,25 +24,21 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sysexits.h>
 
 #include <opencv2/core/core.hpp>
 
 #include "System.h"
 
-namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strSequence, vector<string> &vstrImageFilenames,
                 vector<double> &vTimestamps);
 
-string FindFile(const string& baseFileName, const string& pathHint);
-
 int main(int argc, char **argv) {
-  if (argc != 4) {
+  if (argc != 3) {
     cerr << endl
-          << "Usage: " << argv[0] << " settings_files path_to_sequence results_file" << endl;
-    return EX_USAGE;
+         << "Usage: ./mono_kitti path_to_settings path_to_sequence" << endl;
+    return 1;
   }
 
   // Retrieve paths to images
@@ -52,11 +48,20 @@ int main(int argc, char **argv) {
 
   int nImages = vstrImageFilenames.size();
 
+  // Settings
+  string settingsFile =
+      string(DEFAULT_MONO_SETTINGS_DIR) + string("/") + string(argv[1]);
+
+  // Load both ORB and AKAZE vocabulary file whether or not "USE_ORB" is detected
+  const int Ntype = 2;
+  string vocabularyFile[Ntype];
+
+  vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
+  vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
+
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
-
-  ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
+  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile,
                          ORB_SLAM2::System::MONOCULAR, true);
 
   // Vector for tracking time statistics
@@ -67,7 +72,7 @@ int main(int argc, char **argv) {
   cout << "Start processing sequence ..." << endl;
   cout << "Images in the sequence: " << nImages << endl << endl;
 
-  int main_error = EX_OK;
+  int main_error = 0;
   std::thread runthread([&]() { // Start in new thread
     // Main loop
     cv::Mat im;
@@ -79,14 +84,13 @@ int main(int argc, char **argv) {
       if (im.empty()) {
         cerr << endl
              << "Failed to load image at: " << vstrImageFilenames[ni] << endl;
-        main_error = EX_DATAERR;
-        break;
+        return 1;
       }
 
       if (SLAM.isFinished() == true) {
-	  break;
+        break;
       }
-      
+
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
@@ -111,15 +115,12 @@ int main(int argc, char **argv) {
     }
     SLAM.StopViewer();
   });
-
   SLAM.StartViewer();
 
   cout << "Viewer started, waiting for thread." << endl;
   runthread.join();
-  
-  if (main_error != EX_OK)
+  if (main_error != 0)
     return main_error;
-
   cout << "Tracking thread joined..." << endl;
 
   // Stop all threads
@@ -136,28 +137,16 @@ int main(int argc, char **argv) {
   cout << "mean tracking time: " << totaltime / nImages << endl;
 
   // Save camera trajectory
-  SLAM.SaveTrajectoryTUM(string(argv[3]));
-  return main_error;
+  SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+
+  return 0;
 }
 
 void LoadImages(const string &strPathToSequence,
                 vector<string> &vstrImageFilenames,
                 vector<double> &vTimestamps) {
-
-  // Check the file exists
-  if (fs::exists(strPathToSequence) == false) {
-    cerr << "FATAL: Could not find the timestamp file " << strPathToSequence
-         << endl;
-    exit(EX_DATAERR);
-  }
-
   ifstream fTimes;
   string strPathTimeFile = strPathToSequence + "/times.txt";
-  if (fs::exists(strPathTimeFile) == false) {
-    cerr << "FATAL: Could not find the timestamp file " << strPathTimeFile
-         << endl;
-    exit(EX_DATAERR);
-  }
   fTimes.open(strPathTimeFile.c_str());
   while (!fTimes.eof()) {
     string s;
@@ -181,27 +170,4 @@ void LoadImages(const string &strPathToSequence,
     ss << setfill('0') << setw(6) << i;
     vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
   }
-}
-
-
-string FindFile(const string& baseFileName, const string& pathHint)
-{
-  fs::path baseFilePath(baseFileName);
-  
-  // If we can find it, return it directly
-  if (fs::exists(baseFileName) == true)
-    {
-      return baseFileName;
-    }
-
-  // Apply the path hind and see if that works
-  string candidateFilename = pathHint + baseFileName;
-  
-  if (fs::exists(candidateFilename) == true)
-    {      
-      return candidateFilename;
-    }
-
-  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
-  return baseFileName;
 }

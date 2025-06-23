@@ -13,15 +13,6 @@ then
   exit 1
 fi
 
-# Check if the vocabulary file exists. If not, uncompress it
-
-if [ ! -f "Source/Vocabulary/ORBvoc.txt" ]
-then
-    echo "Uncompressing vocabulary file."
-    unzip Source/Vocabulary/ORBvoc.txt.zip
-    mv ORBvoc.txt Source/Vocabulary
-fi
-
 # Heuristic to suggest how many CPUs to use - take
 # total memory, divide by 4GB, and round up
 unameOut="$(uname -s)"

@@ -41,15 +41,14 @@ class KeyFrameDatabase;
 
 class LoopClosing {
 public:
-  typedef std::pair<std::set<KeyFrame *>, int> ConsistentGroup;
-  typedef std::map<
-      KeyFrame *, g2o::Sim3, std::less<KeyFrame *>,
-      Eigen::aligned_allocator<std::pair<KeyFrame *const, g2o::Sim3>>>
-      KeyFrameAndPose;
+  const static int Ntype = 2;
 
 public:
-  LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc,
-              const bool bFixScale);
+  typedef std::pair<std::set<KeyFrame *>, int> ConsistentGroup;
+  typedef std::map<KeyFrame *, g2o::Sim3, std::less<KeyFrame *>, Eigen::aligned_allocator<std::pair<KeyFrame *const, g2o::Sim3>>> KeyFrameAndPose;
+
+public:
+  LoopClosing(Map *pMap, KeyFrameDatabase *pDB[Ntype], ORBVocabulary *pVoc[Ntype], const bool bFixScale);
 
   void SetTracker(Tracking *pTracker);
 
@@ -63,7 +62,7 @@ public:
   void RequestReset();
 
   // This function will run in a separate thread
-  void RunGlobalBundleAdjustment(unsigned long nLoopKF);
+  void RunGlobalBundleAdjustmentMultiChannels(unsigned long nLoopKF);
 
   bool isRunningGBA() {
     std::unique_lock<std::mutex> lock(mMutexGBA);
@@ -83,13 +82,11 @@ public:
 protected:
   bool CheckNewKeyFrames();
 
-  bool DetectLoop();
+  bool DetectLoop(const int Ftype);
+  bool ComputeSim3(const int Ftype);
+  void CorrectLoop(const int Ftype);
 
-  bool ComputeSim3();
-
-  void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap);
-
-  void CorrectLoop();
+  void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, const int Ftype);
 
   void ResetIfRequested();
   bool mbResetRequested;
@@ -104,8 +101,8 @@ protected:
   Map *mpMap;
   Tracking *mpTracker;
 
-  KeyFrameDatabase *mpKeyFrameDB;
-  ORBVocabulary *mpORBVocabulary;
+  std::vector<KeyFrameDatabase *> mpKeyFrameDB;
+  std::vector<ORBVocabulary *> mpVocabulary;
 
   LocalMapping *mpLocalMapper;
 

@@ -37,7 +37,9 @@ class System;
 
 class Viewer {
 public:
-  Viewer(System *pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer,
+  const static int Ntype = 2;
+public:
+  Viewer(System *pSystem, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
          Tracking *pTracking, const std::string &strSettingPath);
 
   // Main thread function. Draw points, keyframes, the current camera pose and
@@ -61,7 +63,7 @@ private:
   bool Stop();
 
   System *mpSystem;
-  FrameDrawer *mpFrameDrawer;
+  std::vector<FrameDrawer *> mpFrameDrawer;
   MapDrawer *mpMapDrawer;
   Tracking *mpTracker;
 

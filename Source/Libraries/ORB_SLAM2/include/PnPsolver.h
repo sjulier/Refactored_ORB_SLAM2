@@ -62,7 +62,7 @@ namespace ORB_SLAM2 {
 
 class PnPsolver {
 public:
-  PnPsolver(const Frame &F, const std::vector<MapPoint *> &vpMapPointMatches);
+  PnPsolver(const Frame &F, const std::vector<MapPoint *> &vpMapPointMatches, const int Ftype);
 
   ~PnPsolver();
 

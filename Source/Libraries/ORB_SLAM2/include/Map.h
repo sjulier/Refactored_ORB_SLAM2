@@ -34,6 +34,9 @@ class KeyFrame;
 
 class Map {
 public:
+  const static int Ntype = 2;
+
+public:
   Map();
 
   void AddKeyFrame(KeyFrame *pKF);
@@ -46,9 +49,11 @@ public:
 
   std::vector<KeyFrame *> GetAllKeyFrames();
   std::vector<MapPoint *> GetAllMapPoints();
+  std::vector<MapPoint *> GetAllMapPoints(const int Ftype);
   std::vector<MapPoint *> GetReferenceMapPoints();
 
   long unsigned int MapPointsInMap();
+  long unsigned int MapPointsInMap(const int Ftype);
   long unsigned KeyFramesInMap();
 
   long unsigned int GetMaxKFid();
@@ -64,7 +69,7 @@ public:
   std::mutex mMutexPointCreation;
 
 protected:
-  std::set<MapPoint *> mspMapPoints;
+  std::set<MapPoint *> mspMapPoints[Ntype];
   std::set<KeyFrame *> mspKeyFrames;
 
   std::vector<MapPoint *> mvpReferenceMapPoints;

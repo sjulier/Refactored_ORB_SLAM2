@@ -31,71 +31,60 @@ class Initializer {
   typedef std::pair<int, int> Match;
 
 public:
-  // Fix the reference frame
-  Initializer(const Frame &ReferenceFrame, float sigma = 1.0,
-              int iterations = 200);
+  const static int Ntype = 2;
 
-  // Computes in parallel a fundamental matrix and a homography
-  // Selects a model and tries to recover the motion and the structure from
-  // motion
-  bool Initialize(const Frame &CurrentFrame, const std::vector<int> &vMatches12,
-                  cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
-                  std::vector<bool> &vbTriangulated);
+public:
+  // Fix the reference frame
+  Initializer(const Frame &ReferenceFrame, float sigma = 1.0, int iterations = 200);
+
+  // Computes in parallel a fundamental matrix and a homography. Selects a model and tries to recover the motion and the structure from motion
+  bool Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<std::vector<cv::Point3f>> &vP3D, std::vector<std::vector<bool>> &vbTriangulated);
+  bool Initialize2(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<std::vector<cv::Point3f>> &vP3D, std::vector<std::vector<bool>> &vbTriangulated);
 
 private:
-  void FindHomography(std::vector<bool> &vbMatchesInliers, float &score,
-                      cv::Mat &H21);
-  void FindFundamental(std::vector<bool> &vbInliers, float &score,
-                       cv::Mat &F21);
+  void FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                      std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21, std::vector<std::vector<std::size_t>> vSets);
 
-  cv::Mat ComputeH21(const std::vector<cv::Point2f> &vP1,
-                     const std::vector<cv::Point2f> &vP2);
-  cv::Mat ComputeF21(const std::vector<cv::Point2f> &vP1,
-                     const std::vector<cv::Point2f> &vP2);
+  void FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                       std::vector<bool> &vbInliers, float &score, cv::Mat &F21, std::vector<std::vector<std::size_t>> vSets);
 
-  float CheckHomography(const cv::Mat &H21, const cv::Mat &H12,
-                        std::vector<bool> &vbMatchesInliers, float sigma);
+  cv::Mat ComputeH21(const std::vector<cv::Point2f> &vP1, const std::vector<cv::Point2f> &vP2);
 
-  float CheckFundamental(const cv::Mat &F21,
-                         std::vector<bool> &vbMatchesInliers, float sigma);
+  cv::Mat ComputeF21(const std::vector<cv::Point2f> &vP1, const std::vector<cv::Point2f> &vP2);
 
-  bool ReconstructF(std::vector<bool> &vbMatchesInliers, cv::Mat &F21,
-                    cv::Mat &K, cv::Mat &R21, cv::Mat &t21,
-                    std::vector<cv::Point3f> &vP3D,
-                    std::vector<bool> &vbTriangulated, float minParallax,
-                    int minTriangulated);
+  float CheckHomography(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                        const cv::Mat &H21, const cv::Mat &H12, std::vector<bool> &vbMatchesInliers, float sigma);
 
-  bool ReconstructH(std::vector<bool> &vbMatchesInliers, cv::Mat &H21,
-                    cv::Mat &K, cv::Mat &R21, cv::Mat &t21,
-                    std::vector<cv::Point3f> &vP3D,
-                    std::vector<bool> &vbTriangulated, float minParallax,
-                    int minTriangulated);
+  float CheckFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                         const cv::Mat &F21, std::vector<bool> &vbMatchesInliers, float sigma);
 
-  void Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2,
-                   const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D);
+  bool ReconstructF(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                    std::vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
+                    std::vector<bool> &vbTriangulated, float minParallax, int minTriangulated);
 
-  void Normalize(const std::vector<cv::KeyPoint> &vKeys,
-                 std::vector<cv::Point2f> &vNormalizedPoints, cv::Mat &T);
+  bool ReconstructH(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
+                    std::vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K, cv::Mat &R21, cv::Mat &t21, std::vector<cv::Point3f> &vP3D,
+                    std::vector<bool> &vbTriangulated, float minParallax, int minTriangulated);
 
-  int CheckRT(const cv::Mat &R, const cv::Mat &t,
-              const std::vector<cv::KeyPoint> &vKeys1,
-              const std::vector<cv::KeyPoint> &vKeys2,
-              const std::vector<Match> &vMatches12,
-              std::vector<bool> &vbInliers, const cv::Mat &K,
-              std::vector<cv::Point3f> &vP3D, float th2,
+  void Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D);
+
+  void Normalize(const std::vector<cv::KeyPoint> &vKeys, std::vector<cv::Point2f> &vNormalizedPoints, cv::Mat &T);
+
+  int CheckRT(const cv::Mat &R, const cv::Mat &t, const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2,
+              const std::vector<Match> &vMatches12, std::vector<bool> &vbInliers, const cv::Mat &K, std::vector<cv::Point3f> &vP3D, float th2,
               std::vector<bool> &vbGood, float &parallax);
 
   void DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat &t);
 
   // Keypoints from Reference Frame (Frame 1)
-  std::vector<cv::KeyPoint> mvKeys1;
+  std::vector<cv::KeyPoint> mvKeys1[Ntype];
 
   // Keypoints from Current Frame (Frame 2)
-  std::vector<cv::KeyPoint> mvKeys2;
+  std::vector<cv::KeyPoint> mvKeys2[Ntype];
 
   // Current Matches from Reference to Current
-  std::vector<Match> mvMatches12;
-  std::vector<bool> mvbMatched1;
+  std::vector<Match> mvMatches12[Ntype];
+  std::vector<bool> mvbMatched1[Ntype];
 
   // Calibration
   cv::Mat mK;
@@ -107,7 +96,7 @@ private:
   int mMaxIterations;
 
   // Ransac sets
-  std::vector<std::vector<std::size_t>> mvSets;
+  std::vector<std::vector<std::size_t>> mvSets[Ntype];
 };
 
 } // namespace ORB_SLAM2

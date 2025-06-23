@@ -62,16 +62,12 @@
 
 #include "ORBextractor.h"
 
+#include <iostream>
+
 using namespace cv;
 using namespace std;
 
-using namespace ::std;
-
 namespace ORB_SLAM2 {
-
-const int PATCH_SIZE = 31;
-const int HALF_PATCH_SIZE = 15;
-const int EDGE_THRESHOLD = 19;
 
 static float IC_Angle(const Mat &image, Point2f pt, const vector<int> &u_max) {
   int m_01 = 0, m_10 = 0;
@@ -79,12 +75,13 @@ static float IC_Angle(const Mat &image, Point2f pt, const vector<int> &u_max) {
   const uchar *center = &image.at<uchar>(cvRound(pt.y), cvRound(pt.x));
 
   // Treat the center line differently, v=0
-  for (int u = -HALF_PATCH_SIZE; u <= HALF_PATCH_SIZE; ++u)
+  for (int u = -FeatureExtractor::HALF_PATCH_SIZE;
+       u <= FeatureExtractor::HALF_PATCH_SIZE; ++u)
     m_10 += u * center[u];
 
   // Go line by line in the circuI853lar patch
   int step = (int)image.step1();
-  for (int v = 1; v <= HALF_PATCH_SIZE; ++v) {
+  for (int v = 1; v <= FeatureExtractor::HALF_PATCH_SIZE; ++v) {
     // Proceed over the two lines
     int v_sum = 0;
     int d = u_max[v];
@@ -406,43 +403,11 @@ static int bit_pattern_31_[256 * 4] = {
 
 ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
                            int _iniThFAST, int _minThFAST)
-    : nfeatures(_nfeatures), scaleFactor(_scaleFactor), nlevels(_nlevels),
-      iniThFAST(_iniThFAST), minThFAST(_minThFAST) {
-  mvScaleFactor.resize(nlevels);
-  mvLevelSigma2.resize(nlevels);
-  mvScaleFactor[0] = 1.0f;
-  mvLevelSigma2[0] = 1.0f;
-  for (int i = 1; i < nlevels; i++) {
-    mvScaleFactor[i] = mvScaleFactor[i - 1] * scaleFactor;
-    mvLevelSigma2[i] = mvScaleFactor[i] * mvScaleFactor[i];
-  }
-
-  mvInvScaleFactor.resize(nlevels);
-  mvInvLevelSigma2.resize(nlevels);
-  for (int i = 0; i < nlevels; i++) {
-    mvInvScaleFactor[i] = 1.0f / mvScaleFactor[i];
-    mvInvLevelSigma2[i] = 1.0f / mvLevelSigma2[i];
-  }
-
-  mvImagePyramid.resize(nlevels);
-
-  mnFeaturesPerLevel.resize(nlevels);
-  float factor = 1.0f / scaleFactor;
-  float nDesiredFeaturesPerScale =
-      nfeatures * (1 - factor) /
-      (1 - (float)pow((double)factor, (double)nlevels));
-
-  int sumFeatures = 0;
-  for (int level = 0; level < nlevels - 1; level++) {
-    mnFeaturesPerLevel[level] = cvRound(nDesiredFeaturesPerScale);
-    sumFeatures += mnFeaturesPerLevel[level];
-    nDesiredFeaturesPerScale *= factor;
-  }
-  mnFeaturesPerLevel[nlevels - 1] = max(nfeatures - sumFeatures, 0);
-
+    : FeatureExtractor(_nfeatures, _scaleFactor, _nlevels, _iniThFAST,
+                       _minThFAST) {
   const int npoints = 512;
   const Point *pattern0 = (const Point *)bit_pattern_31_;
-  copy(pattern0, pattern0 + npoints, back_inserter(pattern));
+  std::copy(pattern0, pattern0 + npoints, std::back_inserter(pattern));
 
   // This is for orientation
   // pre-compute the end of a row in a circular patch
@@ -454,13 +419,8 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
   for (v = 0; v <= vmax; ++v)
     umax[v] = cvRound(sqrt(hp2 - v * v));
 
-  // Make sure we are symmetric
-  for (v = HALF_PATCH_SIZE, v0 = 0; v >= vmin; --v) {
-    while (umax[v0] == umax[v0 + 1])
-      ++v0;
-    umax[v] = v0;
-    ++v0;
-  }
+  // std:cout << "ORBextractor Initlization" << std::endl;
+
 }
 
 static void computeOrientation(const Mat &image, vector<KeyPoint> &keypoints,
@@ -814,7 +774,8 @@ void ORBextractor::ComputeKeyPointsOctTree(
     computeOrientation(mvImagePyramid[level], allKeypoints[level], umax);
 }
 
-void ORBextractor::ComputeKeyPointsOld(vector<vector<KeyPoint>> &allKeypoints) {
+void ORBextractor::ComputeKeyPointsOld(
+    std::vector<std::vector<KeyPoint>> &allKeypoints) {
   allKeypoints.resize(nlevels);
 
   float imageRatio = (float)mvImagePyramid[0].cols / mvImagePyramid[0].rows;
@@ -1036,6 +997,9 @@ void ORBextractor::operator()(InputArray _image, InputArray _mask,
     // And add the keypoints to the output
     _keypoints.insert(_keypoints.end(), keypoints.begin(), keypoints.end());
   }
+
+  // std::cout << "Using ORBextractor......" << std::endl;
+  
 }
 
 void ORBextractor::ComputePyramid(cv::Mat image) {

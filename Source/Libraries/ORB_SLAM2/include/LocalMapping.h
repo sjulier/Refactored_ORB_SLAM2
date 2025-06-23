@@ -37,6 +37,9 @@ class Map;
 
 class LocalMapping {
 public:
+  const static int Ntype = 2; // Number of channels
+
+public:
   LocalMapping(Map *pMap, const float bMonocular);
 
   void SetLoopCloser(LoopClosing *pLoopCloser);
@@ -70,14 +73,16 @@ public:
   }
 
 protected:
+
+  void ProcessNewKeyFrameMultiChannels();
+  void KeyFrameCullingMultiChannels();
+
+  void CreateNewMapPoints(const int Ftype);
+  void SearchInNeighbors(const int Ftype);
+
+
   bool CheckNewKeyFrames();
-  void ProcessNewKeyFrame();
-  void CreateNewMapPoints();
-
   void MapPointCulling();
-  void SearchInNeighbors();
-
-  void KeyFrameCulling();
 
   cv::Mat ComputeF12(KeyFrame *&pKF1, KeyFrame *&pKF2);
 

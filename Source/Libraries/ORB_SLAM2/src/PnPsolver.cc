@@ -65,32 +65,37 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-PnPsolver::PnPsolver(const Frame &F,
-                     const vector<MapPoint *> &vpMapPointMatches)
-    : pws(0), us(0), alphas(0), pcs(0), maximum_number_of_correspondences(0),
-      number_of_correspondences(0), mnInliersi(0), mnIterations(0),
-      mnBestInliers(0), N(0) {
+PnPsolver::PnPsolver(const Frame &F, const std::vector<MapPoint *> &vpMapPointMatches, const int Ftype)
+    : pws(0), 
+      us(0), 
+      alphas(0), 
+      pcs(0), 
+      maximum_number_of_correspondences(0),
+      number_of_correspondences(0), 
+      mnInliersi(0), 
+      mnIterations(0),
+      mnBestInliers(0), 
+      N(0) {
   mvpMapPointMatches = vpMapPointMatches;
-  mvP2D.reserve(F.mvpMapPoints.size());
-  mvSigma2.reserve(F.mvpMapPoints.size());
-  mvP3Dw.reserve(F.mvpMapPoints.size());
-  mvKeyPointIndices.reserve(F.mvpMapPoints.size());
-  mvAllIndices.reserve(F.mvpMapPoints.size());
+  mvP2D.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvSigma2.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvP3Dw.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvKeyPointIndices.reserve(F.Channels[Ftype].mvpMapPoints.size());
+  mvAllIndices.reserve(F.Channels[Ftype].mvpMapPoints.size());
 
   int idx = 0;
-  for (size_t i = 0, iend = vpMapPointMatches.size(); i < iend; i++) {
+  for (std::size_t i = 0, iend = vpMapPointMatches.size(); i < iend; i++) {
     MapPoint *pMP = vpMapPointMatches[i];
 
     if (pMP) {
       if (!pMP->isBad()) {
-        const cv::KeyPoint &kp = F.mvKeysUn[i];
+        const cv::KeyPoint &kp = F.Channels[Ftype].mvKeysUn[i];
 
         mvP2D.push_back(kp.pt);
         mvSigma2.push_back(F.mvLevelSigma2[kp.octave]);
 
         cv::Mat Pos = pMP->GetWorldPos();
-        mvP3Dw.push_back(
-            cv::Point3f(Pos.at<float>(0), Pos.at<float>(1), Pos.at<float>(2)));
+        mvP3Dw.push_back(cv::Point3f(Pos.at<float>(0), Pos.at<float>(1), Pos.at<float>(2)));
 
         mvKeyPointIndices.push_back(i);
         mvAllIndices.push_back(idx);
@@ -151,17 +156,17 @@ void PnPsolver::SetRansacParameters(double probability, int minInliers,
   mRansacMaxIts = max(1, min(nIterations, mRansacMaxIts));
 
   mvMaxError.resize(mvSigma2.size());
-  for (size_t i = 0; i < mvSigma2.size(); i++)
+  for (std::size_t i = 0; i < mvSigma2.size(); i++)
     mvMaxError[i] = mvSigma2[i] * th2;
 }
 
-cv::Mat PnPsolver::find(vector<bool> &vbInliers, int &nInliers) {
+cv::Mat PnPsolver::find(std::vector<bool> &vbInliers, int &nInliers) {
   bool bFlag;
   return iterate(mRansacMaxIts, bFlag, vbInliers, nInliers);
 }
 
 cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore,
-                           vector<bool> &vbInliers, int &nInliers) {
+                           std::vector<bool> &vbInliers, int &nInliers) {
   bNoMore = false;
   vbInliers.clear();
   nInliers = 0;
@@ -173,7 +178,7 @@ cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore,
     return cv::Mat();
   }
 
-  vector<size_t> vAvailableIndices;
+  std::vector<std::size_t> vAvailableIndices;
 
   int nCurrentIterations = 0;
   while (mnIterations < mRansacMaxIts || nCurrentIterations < nIterations) {
@@ -219,7 +224,7 @@ cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore,
 
       if (Refine()) {
         nInliers = mnRefinedInliers;
-        vbInliers = vector<bool>(mvpMapPointMatches.size(), false);
+        vbInliers = std::vector<bool>(mvpMapPointMatches.size(), false);
         for (int i = 0; i < N; i++) {
           if (mvbRefinedInliers[i])
             vbInliers[mvKeyPointIndices[i]] = true;
@@ -233,7 +238,7 @@ cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore,
     bNoMore = true;
     if (mnBestInliers >= mRansacMinInliers) {
       nInliers = mnBestInliers;
-      vbInliers = vector<bool>(mvpMapPointMatches.size(), false);
+      vbInliers = std::vector<bool>(mvpMapPointMatches.size(), false);
       for (int i = 0; i < N; i++) {
         if (mvbBestInliers[i])
           vbInliers[mvKeyPointIndices[i]] = true;
@@ -246,10 +251,10 @@ cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore,
 }
 
 bool PnPsolver::Refine() {
-  vector<int> vIndices;
+  std::vector<int> vIndices;
   vIndices.reserve(mvbBestInliers.size());
 
-  for (size_t i = 0; i < mvbBestInliers.size(); i++) {
+  for (std::size_t i = 0; i < mvbBestInliers.size(); i++) {
     if (mvbBestInliers[i]) {
       vIndices.push_back(i);
     }
@@ -259,7 +264,7 @@ bool PnPsolver::Refine() {
 
   reset_correspondences();
 
-  for (size_t i = 0; i < vIndices.size(); i++) {
+  for (std::size_t i = 0; i < vIndices.size(); i++) {
     int idx = vIndices[i];
     add_correspondence(mvP3Dw[idx].x, mvP3Dw[idx].y, mvP3Dw[idx].z,
                        mvP2D[idx].x, mvP2D[idx].y);

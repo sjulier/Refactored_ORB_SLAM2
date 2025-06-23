@@ -20,19 +20,22 @@
 
 #include "System.h"
 #include "Converter.h"
-#include <boost/filesystem.hpp>
 #include <chrono>
-#include <ctime>
 #include <iomanip>
 #include <pangolin/pangolin.h>
 #include <thread>
+#include <time.h>
 
-namespace fs = ::boost::filesystem;
 using namespace ::std;
+
+bool has_suffix(const std::string &str, const std::string &suffix) {
+  std::size_t index = str.find(suffix, str.size() - suffix.size());
+  return (index != std::string::npos);
+}
 
 namespace ORB_SLAM2 {
 
-System::System(const string &strVocFile, const string &strSettingsFile,
+System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
                const eSensor sensor, const bool bUseViewer)
     : mSensor(sensor), mpViewer(static_cast<Viewer *>(NULL)), mbReset(false),
       mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false) {
@@ -41,7 +44,6 @@ System::System(const string &strVocFile, const string &strSettingsFile,
        << "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of "
           "Zaragoza."
        << endl
-       << "(modifications carried out at UCL, 2022)" << endl
        << "This program comes with ABSOLUTELY NO WARRANTY;" << endl
        << "This is free software, and you are welcome to redistribute it"
        << endl
@@ -64,93 +66,74 @@ System::System(const string &strVocFile, const string &strSettingsFile,
     exit(-1);
   }
 
-  // Load ORB Vocabulary
-  cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
-  clock_t tStart = clock();
-  mpVocabulary = new ORBVocabulary();
+  // Name of feature types
+  //const std::string FeatName[Ntype] = {"ORB", "GCN"};
+  const std::string FeatName[Ntype] = {"ORB"};
 
-  bool bVocLoad = false;
+  for (int i = 0; i < Ntype; i++)
+  {
+    // Load Vocabulary
+    cout << endl
+         << "Loading Vocabulary : " << strVocFile[i] << endl
+         << "This could take a while..." << endl;
+    clock_t tStart = clock();
+    mpVocabulary[i] = new ORBVocabulary();
 
-  // First check if a cached binary version of the vocabulary file exists.
-  size_t lastTxtInstance = strVocFile.find_last_of(".");
+    // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
 
-  string strBinaryVocFile;
+    bool bVocLoad = false;
 
-  // Create the binary file name
-  if (lastTxtInstance == string::npos) {
-    strBinaryVocFile = strVocFile + ".bin";
-  } else {
-    strBinaryVocFile = strVocFile.substr(0, lastTxtInstance) + ".bin";
-  }
-
-  // Check if the binary file exists.
-  bool binaryVocFileExists = fs::exists(strBinaryVocFile);
-
-  // If the binary file exists, load it. If the file exists but won't load,
-  // pretend it isn't there to force text file load and binary save
-  if (binaryVocFileExists) {
-    cout << "Using the binary cache file" << endl;
-    bVocLoad = mpVocabulary->loadFromBinaryFile(strBinaryVocFile);
+    if (has_suffix(strVocFile[i], ".txt")) {
+      bVocLoad = mpVocabulary[i]->loadFromTextFile(strVocFile[i]);
+      cout << "Loading " << FeatName[i] << " Vocabulary in txt mode." << endl;
+    } else {
+      bVocLoad = mpVocabulary[i]->loadFromBinaryFile(strVocFile[i]);
+      cout << "Loading " << FeatName[i] << " Vocabulary in binary mode." << endl;
+    }
     if (!bVocLoad) {
-      cout << "Binary cache file load failed; trying text version" << endl;
-      binaryVocFileExists = false;
+      cerr << "Wrong path to " << FeatName[i] <<" vocabulary. " << endl;
+      cerr << "Falied to open " << FeatName[i] << " at: " << strVocFile[i] << endl;
+      exit(-1);
     }
+    
+    cout << FeatName[i];
+    printf(" Vocabulary loaded in %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+    cout << endl;
+    // Create KeyFrame Database
+    mpKeyFrameDatabase[i] = new KeyFrameDatabase(*mpVocabulary[i]);
   }
-
-  // Load the text file if necessary - happens if either the binary file does
-  // not exist, or it can't be loaded
-  if (!bVocLoad) {
-    cout << "Using the text file. This could take a while..." << endl;
-    bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
-  }
-
-  if (!bVocLoad) {
-    cerr << "Wrong path to vocabulary. " << endl;
-    cerr << "Failed to open at: " << strVocFile << endl;
-    exit(-1);
-  }
-
-  // If we loaded the vocabulary and the binary version doesn't exist, write it
-  // out.
-
-  if (!binaryVocFileExists) {
-    cout << "Saving the binary cache to " << strBinaryVocFile << endl;
-    if (!mpVocabulary->saveToBinaryFile(strBinaryVocFile)) {
-      cerr << "Cannot save the binary cache file" << endl;
-    }
-  }
-
-  printf("Vocabulary loaded in %.2fs\n",
-         (double)(clock() - tStart) / CLOCKS_PER_SEC);
-  // Create KeyFrame Database
-  mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
-
+    
   // Create the Map
   mpMap = new Map();
 
   // Create Drawers. These are used by the Viewer
-  mpFrameDrawer = new FrameDrawer(mpMap);
+  
+  mpFrameDrawer.resize(Ntype);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++)
+    mpFrameDrawer[Ftype] = new FrameDrawer(mpMap, Ftype);
+
   mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
-  // Initialize the Tracking thread
-  //(it will live in the main thread of execution, the one that called this
-  // constructor)
-  mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                           mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+  // Initialize the Tracking thread (it will live in the main thread of execution, the one that called this constructor)
+  mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+
 
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
+
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 
   // Initialize the Loop Closing thread and launch
-  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary,
-                                 mSensor != MONOCULAR);
+  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor != MONOCULAR);
+
   mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
-  // Initialize the Viewer thread
+  // Initialize the Viewer thread and launch
   if (bUseViewer) {
-    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker,
-                          strSettingsFile);
+
+    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile);
+
+    // mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);
   }
 
@@ -163,10 +146,12 @@ System::System(const string &strVocFile, const string &strSettingsFile,
 
   mpLoopCloser->SetTracker(mpTracker);
   mpLoopCloser->SetLocalMapper(mpLocalMapper);
+
+  tempStop = false;
+
 }
 
-cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
-                            const double &timestamp) {
+cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp) {
   if (mSensor != STEREO) {
     cerr << "ERROR: you called TrackStereo but input sensor was not set to "
             "STEREO."
@@ -208,13 +193,12 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi Channels
+  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
   return Tcw;
 }
 
-cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
-                          const double &timestamp) {
+cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp) {
   if (mSensor != RGBD) {
     cerr << "ERROR: you called TrackRGBD but input sensor was not set to RGBD."
          << endl;
@@ -253,10 +237,11 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
 
   cv::Mat Tcw = mpTracker->GrabImageRGBD(im, depthmap, timestamp);
 
+
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi-Channels
+  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
   return Tcw;
 }
 
@@ -302,8 +287,13 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp) {
 
   unique_lock<mutex> lock2(mMutexState);
   mTrackingState = mpTracker->mState;
-  mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
-  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
+  mTrackedMapPoints = mpTracker->mCurrentFrame.Channels[0].mvpMapPoints; //TO-DO Multi Channels
+  mTrackedKeyPointsUn = mpTracker->mCurrentFrame.Channels[0].mvKeysUn;
+
+  // if (mpTracker->mCurrentFrame.mnId == (mpTracker->mInitlizedID + 20)) {
+  //   tempStop = true;
+  //   cout << "The stoped frame ID " << mpTracker->mCurrentFrame.mnId << endl; 
+  // }
 
   return Tcw;
 }
@@ -348,20 +338,20 @@ void System::Shutdown() {
     this_thread::sleep_for(chrono::milliseconds(1));
   }
 
-  //  if (mpViewer)
-  //    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
+  if (mpViewer)
+    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
 }
 
 void System::SaveTrajectoryTUM(const string &filename) {
   cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
+  // if(mSensor==MONOCULAR)
+  // {
+  //     cerr << "ERROR: SaveTrajectoryTUM cannot be used for monocular." <<
+  //     endl; return;
+  // }
 
   vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
   sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
-
-  if (vpKFs.size() == 0) {
-    cout << "The map is empty; nothing to save" << endl;
-    return;
-  }
 
   // Transform all keyframes so that the first keyframe is at the origin.
   // After a loop closure the first keyframe might not be at the origin.
@@ -381,9 +371,7 @@ void System::SaveTrajectoryTUM(const string &filename) {
   list<ORB_SLAM2::KeyFrame *>::iterator lRit = mpTracker->mlpReferences.begin();
   list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
   list<bool>::iterator lbL = mpTracker->mlbLost.begin();
-  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(),
-                               lend = mpTracker->mlRelativeFramePoses.end();
-       lit != lend; lit++, lRit++, lT++, lbL++) {
+  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(), lend = mpTracker->mlRelativeFramePoses.end(); lit != lend; lit++, lRit++, lT++, lbL++) {
     if (*lbL)
       continue;
 
@@ -391,8 +379,7 @@ void System::SaveTrajectoryTUM(const string &filename) {
 
     cv::Mat Trw = cv::Mat::eye(4, 4, CV_32F);
 
-    // If the reference keyframe was culled, traverse the spanning tree to get a
-    // suitable keyframe.
+    // If the reference keyframe was culled, traverse the spanning tree to get a suitable keyframe.
     while (pKF->isBad()) {
       Trw = Trw * pKF->mTcp;
       pKF = pKF->GetParent();
@@ -476,9 +463,7 @@ void System::SaveTrajectoryKITTI(const string &filename) {
   // a flag which is true when tracking failed (lbL).
   list<ORB_SLAM2::KeyFrame *>::iterator lRit = mpTracker->mlpReferences.begin();
   list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(),
-                               lend = mpTracker->mlRelativeFramePoses.end();
-       lit != lend; lit++, lRit++, lT++) {
+  for (list<cv::Mat>::iterator lit = mpTracker->mlRelativeFramePoses.begin(), lend = mpTracker->mlRelativeFramePoses.end(); lit != lend; lit++, lRit++, lT++) {
     ORB_SLAM2::KeyFrame *pKF = *lRit;
 
     cv::Mat Trw = cv::Mat::eye(4, 4, CV_32F);
@@ -527,8 +512,10 @@ void System::StartViewer() {
 }
 
 void System::StopViewer() {
+  cout << "System::StopViewer()" << endl;
   if (mpViewer)
     mpViewer->RequestFinish();
+  cout << "System::StopViewer() done" << endl;
 }
 
 bool System::isFinished() {

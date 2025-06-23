@@ -14,32 +14,34 @@ endif()
 project(ORB_SLAM2)
 
 add_library(${PROJECT_NAME} ${LIB_TYPE}
-  src/System.cc
-  src/Tracking.cc
-  src/LocalMapping.cc
-  src/LoopClosing.cc
-  src/ORBextractor.cc
-  src/ORBmatcher.cc
-  src/ORBVocabulary.cc
-  src/FrameDrawer.cc
-  src/Converter.cc
-  src/MapPoint.cc
-  src/KeyFrame.cc
-  src/Map.cc
-  src/MapDrawer.cc
-  src/Optimizer.cc
-  src/PnPsolver.cc
-  src/Frame.cc
-  src/KeyFrameDatabase.cc
-  src/Sim3Solver.cc
-  src/Initializer.cc
-  src/Viewer.cc
-  src/AbstractExtractor.cc
-  )
+src/Associater.cc
+src/Converter.cc
+src/FeatureExtractor.cc
+src/FeatureExtractorFactory.cc
+src/FeaturePoint.cc
+src/Frame.cc
+src/FrameDrawer.cc
+src/Initializer.cc
+src/KeyFrame.cc
+src/KeyFrameDatabase.cc
+src/LocalMapping.cc
+src/LoopClosing.cc
+src/Map.cc
+src/MapDrawer.cc
+src/MapPoint.cc
+src/Optimizer.cc
+src/ORBextractor.cc
+src/ORBVocabulary.cc
+src/PnPsolver.cc
+src/Sim3Solver.cc
+src/System.cc
+src/Tracking.cc
+src/Viewer.cc
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_DIRECTORY})
-
 target_link_libraries(${PROJECT_NAME} PUBLIC
+
 ${OpenCV_LIBS}
 Eigen3::Eigen
 pango_opengl

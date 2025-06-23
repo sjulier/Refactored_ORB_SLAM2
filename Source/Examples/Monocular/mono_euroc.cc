@@ -23,44 +23,50 @@
 #include <fstream>
 #include <iostream>
 #include <opencv2/core/core.hpp>
-#include <sysexits.h>
-#include <boost/filesystem.hpp>
 
 #include "System.h"
 
-namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps);
 
-string FindFile(const string& baseFileName, const string& pathHint);
-
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl
-          << "Usage: " << argv[0] << " settings_files path_to_image_folder path_to_times_file" << endl;
-    return EX_USAGE;
+         << "Usage: " << argv[0]
+         << " settings_files path_to_image_folder path_to_times_file "
+            "results_file"
+         << endl;
+    return 1;
   }
 
   // Retrieve paths to images
   vector<string> vstrImageFilenames;
   vector<double> vTimestamps;
-  string timeStampsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[3]);
-  LoadImages(string(argv[2]), timeStampsFile, vstrImageFilenames, vTimestamps);
+  LoadImages(string(argv[2]), string(argv[3]), vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
 
   if (nImages <= 0) {
     cerr << "ERROR: Failed to load images" << endl;
-    return EX_DATAERR;
+    return 1;
   }
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
+  string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string(argv[1]);
 
-  ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
+  // Load both ORB and AKAZE vocabulary file whether or not "USE_ORB" is detected
+  const int Ntype = 2;
+  string vocabularyFile[Ntype];
+
+  vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
+  vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
+
+  // Create SLAM system. It initializes all system threads and gets ready to
+  // process frames.
+  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile,
                          ORB_SLAM2::System::MONOCULAR, true);
 
   // Vector for tracking time statistics
@@ -71,8 +77,8 @@ int main(int argc, char **argv) {
   cout << "Start processing sequence ..." << endl;
   cout << "Images in the sequence: " << nImages << endl << endl;
 
-  int main_error = EX_OK;
-  thread runthread([&]() { // Start in new thread
+  int main_error = 0;
+  std::thread runthread([&]() { // Start in new thread
     // Main loop
     cv::Mat im;
     for (int ni = 0; ni < nImages; ni++) {
@@ -83,12 +89,12 @@ int main(int argc, char **argv) {
       if (im.empty()) {
         cerr << endl
              << "Failed to load image at: " << vstrImageFilenames[ni] << endl;
-        main_error = EX_DATAERR;
+        main_error = 1;
         break;
       }
 
       if (SLAM.isFinished() == true) {
-	  break;
+        break;
       }
 
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
@@ -116,11 +122,9 @@ int main(int argc, char **argv) {
     SLAM.StopViewer();
   });
 
-  SLAM.StartViewer();
   cout << "Viewer started, waiting for thread." << endl;
-
   runthread.join();
-  if (main_error != EX_OK)
+  if (main_error != 0)
     return main_error;
   cout << "Tracking thread joined..." << endl;
 
@@ -140,17 +144,11 @@ int main(int argc, char **argv) {
   // Save camera trajectory
   SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
-  return main_error;
+  return 0;
 }
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps) {
-  // Check the file exists
-  if (fs::exists(strPathTimes) == false) {
-    cerr << "FATAL: Could not find the EuRoC Timestamp file file " << strPathTimes << endl;
-    exit(EX_DATAERR);
-  }
-
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);
@@ -167,27 +165,4 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
       vTimeStamps.push_back(t / 1e9);
     }
   }
-}
-
-
-string FindFile(const string& baseFileName, const string& pathHint)
-{
-  fs::path baseFilePath(baseFileName);
-  
-  // If we can find it, return it directly
-  if (fs::exists(baseFileName) == true)
-    {
-      return baseFileName;
-    }
-
-  // Apply the path hind and see if that works
-  string candidateFilename = pathHint + baseFileName;
-  
-  if (fs::exists(candidateFilename) == true)
-    {      
-      return candidateFilename;
-    }
-
-  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
-  return baseFileName;
 }

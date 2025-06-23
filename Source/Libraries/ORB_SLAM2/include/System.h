@@ -46,27 +46,29 @@ class LoopClosing;
 
 class System {
 public:
-  // Input sensor
-  enum eSensor { MONOCULAR = 0, STEREO = 1, RGBD = 2 };
+  enum eSensor { MONOCULAR = 0, STEREO = 1, RGBD = 2 }; // Input sensers
+
+  static const int Ntype = 2; // Number of channels
 
 public:
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and
   // Viewer threads.
-  System(const std::string &strVocFile, const std::string &strSettingsFile,
-         const eSensor sensor, const bool bUseViewer = true);
+  System(const std::string (&strVocFile)[Ntype], const std::string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
 
   // Proccess the given stereo frame. Images must be synchronized and rectified.
   // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to
   // grayscale. Returns the camera pose (empty if tracking fails).
-  cv::Mat TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
-                      const double &timestamp);
+  cv::Mat TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp);
 
   // Process the given rgbd frame. Depthmap must be registered to the RGB frame.
   // Input image: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to
   // grayscale. Input depthmap: Float (CV_32F). Returns the camera pose (empty
   // if tracking fails).
-  cv::Mat TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap,
-                    const double &timestamp);
+  cv::Mat TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp);
+
+  // Process rgbd frame with given features seems to be unimplemented?
+  // cv::Mat TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const cv::Mat
+  // &featmap, const double &timestamp);
 
   // Proccess the given monocular frame
   // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to
@@ -128,16 +130,22 @@ public:
 
   bool isFinished();
 
+  // temp stop value
+  bool tempStop;
+
 private:
   // Input sensor
   eSensor mSensor;
 
-  // ORB vocabulary used for place recognition and feature matching.
-  ORBVocabulary *mpVocabulary;
+  // ORB and GCN vocabulary used for place recognition and feature matching.
+  ORBVocabulary *mpORBVocabulary;
+  ORBVocabulary *mpGCNVocabulary;
+
+  ORBVocabulary *mpVocabulary[Ntype];
 
   // KeyFrame database for place recognition (relocalization and loop
   // detection).
-  KeyFrameDatabase *mpKeyFrameDatabase;
+  KeyFrameDatabase *mpKeyFrameDatabase[Ntype];
 
   // Map structure that stores the pointers to all KeyFrames and MapPoints.
   Map *mpMap;
@@ -159,7 +167,7 @@ private:
   // The viewer draws the map and the current camera pose. It uses Pangolin.
   Viewer *mpViewer;
 
-  FrameDrawer *mpFrameDrawer;
+  std::vector<FrameDrawer *> mpFrameDrawer;
   MapDrawer *mpMapDrawer;
 
   // System threads: Local Mapping, Loop Closing, Viewer.
