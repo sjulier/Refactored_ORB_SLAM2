@@ -19,7 +19,7 @@ FeatureExtractor *createFeatureExtractor(int nfeatures, float scaleFactor,
 //  }
 //#endif
     if (flag == 1) {
-        return new AKAZEextractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST);
+        return new AKAZEextractor(4000, scaleFactor, nlevels, iniThFAST, minThFAST);
     }
   //return new ORBextractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST);
     return new ORBextractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST);

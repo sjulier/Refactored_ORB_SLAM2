@@ -23,20 +23,24 @@
 #include <fstream>
 #include <iostream>
 #include <opencv2/core/core.hpp>
+#include <sysexits.h>
+#include <boost/filesystem.hpp>
 
 #include "System.h"
 
+namespace fs = ::boost::filesystem;
 using namespace std;
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps);
+
+string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
   if (argc != 4) {
     cerr << endl
          << "Usage: " << argv[0]
          << " settings_files path_to_image_folder path_to_times_file "
-            "results_file"
          << endl;
     return 1;
   }
@@ -44,7 +48,10 @@ int main(int argc, char **argv) {
   // Retrieve paths to images
   vector<string> vstrImageFilenames;
   vector<double> vTimestamps;
-  LoadImages(string(argv[2]), string(argv[3]), vstrImageFilenames, vTimestamps);
+  std::cout << "Loading images..." << std::endl;
+  string timeStampsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[3]);
+  LoadImages(string(argv[2]), timeStampsFile, vstrImageFilenames, vTimestamps);
+  std::cout << "Loaded " << vstrImageFilenames.size() << " images." << std::endl;
 
   int nImages = vstrImageFilenames.size();
 
@@ -55,7 +62,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  string settingsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string(argv[1]);
+  std::cout << "Creating SLAM system..." << std::endl;
+  string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
 
   // Load both ORB and AKAZE vocabulary file whether or not "USE_ORB" is detected
   const int Ntype = 2;
@@ -122,6 +130,7 @@ int main(int argc, char **argv) {
     SLAM.StopViewer();
   });
 
+  SLAM.StartViewer();
   cout << "Viewer started, waiting for thread." << endl;
   runthread.join();
   if (main_error != 0)
@@ -149,6 +158,12 @@ int main(int argc, char **argv) {
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps) {
+  // Check the file exists
+  if (fs::exists(strPathTimes) == false) {
+    cerr << "FATAL: Could not find the EuRoC Timestamp file file " << strPathTimes << endl;
+    exit(EX_DATAERR);
+  }
+
   ifstream fTimes;
   fTimes.open(strPathTimes.c_str());
   vTimeStamps.reserve(5000);
@@ -165,4 +180,27 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
       vTimeStamps.push_back(t / 1e9);
     }
   }
+}
+
+
+string FindFile(const string& baseFileName, const string& pathHint)
+{
+  fs::path baseFilePath(baseFileName);
+
+  // If we can find it, return it directly
+  if (fs::exists(baseFileName) == true)
+    {
+      return baseFileName;
+    }
+
+  // Apply the path hind and see if that works
+  string candidateFilename = pathHint + baseFileName;
+
+  if (fs::exists(candidateFilename) == true)
+    {
+      return candidateFilename;
+    }
+
+  // Couldn't find; return the path directly and maybe the ORBSLAM instance can still find it
+  return baseFileName;
 }
