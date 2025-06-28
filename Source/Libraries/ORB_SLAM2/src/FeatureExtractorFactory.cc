@@ -13,7 +13,7 @@ void FeatureExtractorFactory::Register(const std::string& name, CreatorFunc crea
     mRegistry[name] = creator;
 }
 
-std::shared_ptr<FeatureExtractor> FeatureExtractorFactory::Create(const std::string& name, const cv::FileNode& config, const bool init) const {
+FeatureExtractor *FeatureExtractorFactory::Create(const std::string& name, const cv::FileNode& config, const bool init) const {
     auto it = mRegistry.find(name);
     if (it != mRegistry.end()) {
         return it->second(config, init);

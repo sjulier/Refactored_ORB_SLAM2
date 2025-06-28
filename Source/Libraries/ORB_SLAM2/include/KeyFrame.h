@@ -40,10 +40,7 @@ class KeyFrameDatabase;
 
 class KeyFrame {
 public:
-  const static int Ntype = 1; // Number of channels
-  
-public:
-  KeyFrame(Frame &F, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB);
+  KeyFrame(Frame &F, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB, int Ntype);
 
   // Pose functions
   void SetPose(const cv::Mat &Tcw);
@@ -127,6 +124,8 @@ public:
   // The following variables are accesed from only 1 thread or never change (no
   // mutex needed).
 public:
+  int Ntype;
+
   static long unsigned int nNextId;
   long unsigned int mnId;
   const long unsigned int mnFrameId;
@@ -148,12 +147,12 @@ public:
   long unsigned int mnBAFixedForKF;
 
   // Variables used by the keyframe database
-  long unsigned int mnLoopQuery[Ntype];
-  int mnLoopWords[Ntype];
-  float mLoopScore[Ntype];
-  long unsigned int mnRelocQuery[Ntype];
-  int mnRelocWords[Ntype];
-  float mRelocScore[Ntype];
+  std::vector<long unsigned int> mnLoopQuery;
+  std::vector<int> mnLoopWords;
+  std::vector<float> mLoopScore;
+  std::vector<long unsigned int> mnRelocQuery;
+  std::vector<int> mnRelocWords;
+  std::vector<float> mRelocScore;
 
   // Variables used by loop closing
   cv::Mat mTcwGBA;
@@ -163,7 +162,7 @@ public:
   // Calibration parameters
   const float fx, fy, cx, cy, invfx, invfy, mbf, mb, mThDepth;
 
-  FeaturePoint Channels[Ntype];
+  std::vector<FeaturePoint> Channels;
 
   // Pose relative to parent (this is computed when bad flag is activated)
   cv::Mat mTcp;

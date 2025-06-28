@@ -126,7 +126,7 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
   mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
   // Initialize the Tracking thread (it will live in the main thread of execution, the one that called this constructor)
-  mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
+  mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor, Ntype);
 
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);

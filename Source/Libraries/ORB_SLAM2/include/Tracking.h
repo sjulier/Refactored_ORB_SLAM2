@@ -50,11 +50,11 @@ class System;
 
 class Tracking {
 public:
-  const static int Ntype = 1; // Number of channels
+  int Ntype; // Number of channels
 
 public:
   Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
-           Map *pMap, std::vector<KeyFrameDatabase *> pKFDB, const std::string &strSettingPath, const int sensor);
+           Map *pMap, std::vector<KeyFrameDatabase *> pKFDB, const std::string &strSettingPath, const int sensor, int Ntype);
 
   // Preprocess the input and call Track(). Extract features and performs stereo matching.
   cv::Mat GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp);
@@ -169,14 +169,10 @@ protected:
   FeatureExtractor *mpFeatureExtractor[Ntype];
   */
 
-  FeatureExtractor* lptrs[Ntype];
-  FeatureExtractor* rptrs[Ntype];
-  FeatureExtractor* iptrs[Ntype];
-
-  std::vector<std::shared_ptr<FeatureExtractor>> mpFeatureExtractorLeft;
-  std::vector<std::shared_ptr<FeatureExtractor>> mpFeatureExtractorRight;
-  std::vector<std::shared_ptr<FeatureExtractor>> mpIniFeatureExtractor;
-  FeatureExtractor *mpFeatureExtractor[Ntype];
+  std::vector<FeatureExtractor *> mpFeatureExtractorLeft;
+  std::vector<FeatureExtractor *> mpFeatureExtractorRight;
+  std::vector<FeatureExtractor *> mpIniFeatureExtractor;
+  //FeatureExtractor *mpFeatureExtractor[Ntype];
 
   // BoW
   std::vector<ORBVocabulary *> mpVocabulary;

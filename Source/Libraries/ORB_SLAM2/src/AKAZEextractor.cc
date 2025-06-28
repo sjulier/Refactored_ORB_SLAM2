@@ -74,7 +74,7 @@ namespace {
             std::cout << "Registering AKAZEextractor..." << std::endl;
             ORB_SLAM2::FeatureExtractorFactory::Instance().Register("AKAZE",
                 [](const cv::FileNode& config, const bool init) {
-                    return std::make_shared<ORB_SLAM2::AKAZEextractor>(config, init);
+                    return new ORB_SLAM2::AKAZEextractor(config, init);
                 });
         }
     };

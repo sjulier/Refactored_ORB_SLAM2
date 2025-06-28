@@ -15,13 +15,13 @@ namespace ORB_SLAM2 {
 
 class FeatureExtractorFactory {
 public:
-    using CreatorFunc = std::function<std::shared_ptr<FeatureExtractor>(const cv::FileNode&, const bool init)>;
+    using CreatorFunc = std::function<FeatureExtractor *(const cv::FileNode&, const bool init)>;
 
     static FeatureExtractorFactory& Instance();
 
     void Register(const std::string& name, CreatorFunc creator);
 
-    std::shared_ptr<FeatureExtractor> Create(const std::string& name, const cv::FileNode& config, const bool init) const;
+    FeatureExtractor *Create(const std::string& name, const cv::FileNode& config, const bool init) const;
 
 private:
     std::map<std::string, CreatorFunc> mRegistry;

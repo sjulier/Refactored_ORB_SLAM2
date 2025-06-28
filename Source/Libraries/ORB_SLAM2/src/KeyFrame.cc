@@ -29,7 +29,7 @@ namespace ORB_SLAM2 {
 
 long unsigned int KeyFrame::nNextId = 0;
 
-KeyFrame::KeyFrame(Frame &F, Map *pMap, vector<KeyFrameDatabase *> pKFDB)
+KeyFrame::KeyFrame(Frame &F, Map *pMap, vector<KeyFrameDatabase *> pKFDB, int Ntype)
     : mnFrameId(F.mnId), 
       mTimeStamp(F.mTimeStamp), 
       mnGridCols(FRAME_GRID_COLS),
@@ -70,8 +70,17 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, vector<KeyFrameDatabase *> pKFDB)
       mbToBeErased(false), 
       mbBad(false),
       mHalfBaseline(F.mb / 2), 
-      mpMap(pMap) {
+      mpMap(pMap),
+      Ntype(Ntype) {
   mnId = nNextId++;
+  // Resize for vectors
+  mnLoopQuery.resize(Ntype);
+  mnLoopWords.resize(Ntype);
+  mLoopScore.resize(Ntype);
+  mnRelocQuery.resize(Ntype);
+  mnRelocWords.resize(Ntype);
+  mRelocScore.resize(Ntype);
+  Channels.resize(Ntype);
 
   // Initlizer for Reloc
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {

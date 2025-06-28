@@ -1062,7 +1062,7 @@ namespace {
       std::cout << "Registering ORBextractor..." << std::endl;
       ORB_SLAM2::FeatureExtractorFactory::Instance().Register("ORB",
           [](const cv::FileNode& config, const bool init) {
-              return std::make_shared<ORB_SLAM2::ORBextractor>(config, init);
+              return new ORB_SLAM2::ORBextractor(config, init);
           });
     }
   };

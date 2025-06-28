@@ -53,12 +53,17 @@ Frame::Frame(const Frame &frame)
       mvScaleFactors(frame.mvScaleFactors),
       mvInvScaleFactors(frame.mvInvScaleFactors),
       mvLevelSigma2(frame.mvLevelSigma2),
-      mvInvLevelSigma2(frame.mvInvLevelSigma2) {
+      mvInvLevelSigma2(frame.mvInvLevelSigma2),
+      mpFeatureExtractorLeft(frame.mpFeatureExtractorLeft),
+      mpFeatureExtractorRight(frame.mpFeatureExtractorRight),
+      Ntype(frame.Ntype) {
 
+  /*
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     mpFeatureExtractorLeft[Ftype] = frame.mpFeatureExtractorLeft[Ftype];
     mpFeatureExtractorRight[Ftype] = frame.mpFeatureExtractorRight[Ftype];
   }
+  */
 
   if (!frame.mTcw.empty())
     SetPose(frame.mTcw);
@@ -66,24 +71,23 @@ Frame::Frame(const Frame &frame)
 
 // Stereo
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, 
-             FeatureExtractor *extractorLeft[Ntype], FeatureExtractor *extractorRight[Ntype],
+             std::vector<FeatureExtractor *> extractorLeft, std::vector<FeatureExtractor *> extractorRight,
              vector<ORBVocabulary *> voc, cv::Mat &K,
-             cv::Mat &distCoef, const float &bf, const float &thDepth)
+             cv::Mat &distCoef, const float &bf, const float &thDepth, int Ntype)
     : mpVocabulary(voc), 
       mTimeStamp(timeStamp),
       mK(K.clone()), 
       mDistCoef(distCoef.clone()), 
       mbf(bf), 
       mThDepth(thDepth),
-      mpReferenceKF(static_cast<KeyFrame *>(NULL)) {
+      mpReferenceKF(static_cast<KeyFrame *>(NULL)),
+      mpFeatureExtractorLeft(extractorLeft),
+      mpFeatureExtractorRight(extractorRight),
+      Ntype(Ntype) {
+  Channels.resize(Ntype);
+
   // Frame ID
   mnId = nNextId++;
-
-  // Feature Extractor Initlization
-  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    mpFeatureExtractorLeft[Ftype] = extractorLeft[Ftype];
-    mpFeatureExtractorRight[Ftype] = extractorRight[Ftype];
-  }
 
   // Scale Level Info
   mnScaleLevels = mpFeatureExtractorLeft[0]->GetLevels();
@@ -128,21 +132,27 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 // RGB-D
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
              const double &timeStamp, 
-             FeatureExtractor *extractor[Ntype],
+             std::vector<FeatureExtractor *> extractor,
              vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
-             const float &thDepth)
+             const float &thDepth, int Ntype)
     : mpVocabulary(voc), 
       mTimeStamp(timeStamp), 
       mK(K.clone()), 
       mDistCoef(distCoef.clone()),
       mbf(bf), 
-      mThDepth(thDepth) {
+      mThDepth(thDepth),
+      mpFeatureExtractorLeft(extractor),
+      Ntype(Ntype) {
+  // Resize the vectors
+  Channels.resize(Ntype);
+  mpFeatureExtractorRight.resize(Ntype);
+
   // Frame ID
   mnId = nNextId++;
 
   // Feature extractor initlization
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
+    // mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
     mpFeatureExtractorRight[Ftype] = static_cast<FeatureExtractor *>(NULL);
   }
 
@@ -186,21 +196,27 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 
 // Mono
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             FeatureExtractor *extractor[Ntype],
+             std::vector<FeatureExtractor *> extractor,
              vector<ORBVocabulary *> voc, cv::Mat &K,
-             cv::Mat &distCoef, const float &bf, const float &thDepth)
+             cv::Mat &distCoef, const float &bf, const float &thDepth, int Ntype)
     : mpVocabulary(voc),
       mTimeStamp(timeStamp), 
       mK(K.clone()), 
       mDistCoef(distCoef.clone()),
       mbf(bf), 
-      mThDepth(thDepth) {
+      mThDepth(thDepth),
+      mpFeatureExtractorLeft(extractor),
+      Ntype(Ntype) {
+  // Resize the vectors
+  Channels.resize(Ntype);
+  mpFeatureExtractorRight.resize(Ntype);
+
   // Frame ID
   mnId = nNextId++;
 
   // Feature extractor initlization
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
+    //mpFeatureExtractorLeft[Ftype] = extractor[Ftype];
     mpFeatureExtractorRight[Ftype] = static_cast<FeatureExtractor *>(NULL);
   }
 

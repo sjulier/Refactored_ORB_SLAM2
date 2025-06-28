@@ -44,7 +44,7 @@ namespace ORB_SLAM2 {
 
 Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer,
                    MapDrawer *pMapDrawer, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB,
-                   const string &strSettingPath, const int sensor)
+                   const string &strSettingPath, const int sensor, int Ntype)
     : mState(NO_IMAGES_YET), 
       mSensor(sensor), 
       mbOnlyTracking(false),
@@ -57,7 +57,8 @@ Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<
       mpMap(pMap), 
       mnLastRelocFrameId(0),
       mpVocabulary(pVoc),
-      mpKeyFrameDB(pKFDB) {
+      mpKeyFrameDB(pKFDB),
+      Ntype(Ntype) {
 
   /*
   // Initlize vocabulary vector
@@ -189,17 +190,6 @@ Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<
       mpIniFeatureExtractor[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, true);
   }
 
-
-  for (int i = 0; i < Ntype; ++i)
-    lptrs[i] = mpFeatureExtractorLeft[i].get();
-
-  for (int i = 0; i < Ntype; ++i)
-    rptrs[i] = mpFeatureExtractorRight[i].get();
-
-  for (int i = 0; i < Ntype; ++i)
-    iptrs[i] = mpIniFeatureExtractor[i].get();
-
-
   if (sensor == System::STEREO || sensor == System::RGBD) {
     mThDepth = mbf * (float)fSettings["ThDepth"] / fx;
     cout << endl << "Depth Threshold (Close/Far Points): " << mThDepth << endl;
@@ -252,8 +242,8 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
   //  cv::resize(imGrayRight, imGrayRight, cv::Size(320, 240), 0, 0, cv::INTER_NEAREST);
   //}
 
-  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, lptrs, rptrs,
-                        mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, mpFeatureExtractorLeft, mpFeatureExtractorRight,
+                        mpVocabulary, mK, mDistCoef, mbf, mThDepth, Ntype);
 
   Track();
 
@@ -285,7 +275,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const 
   if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
-  mCurrentFrame = Frame(mImGray, imDepth, timestamp, lptrs, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth, Ntype);
 
   Track();
 
@@ -313,9 +303,9 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
   //}
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
-    mCurrentFrame = Frame(mImGray, timestamp, iptrs, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+    mCurrentFrame = Frame(mImGray, timestamp, mpIniFeatureExtractor, mpVocabulary, mK, mDistCoef, mbf, mThDepth, Ntype);
   else
-    mCurrentFrame = Frame(mImGray, timestamp, lptrs, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+    mCurrentFrame = Frame(mImGray, timestamp, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth, Ntype);
 
   Track();
 
@@ -605,7 +595,7 @@ void Tracking::StereoInitialization(const int Ftype) {
     }
 
     // Create KeyFrame
-    KeyFrame *pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+    KeyFrame *pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB, Ntype);
 
     // Insert KeyFrame in the map
     mpMap->AddKeyFrame(pKFini);
@@ -928,7 +918,7 @@ void Tracking::StereoInitializationMultiChannels() {
   }
 
   // step 4 : Create KeyFrame
-  KeyFrame *pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+  KeyFrame *pKFini = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB, Ntype);
 
   // step 5 : Insert KeyFrame in the map
   mpMap->AddKeyFrame(pKFini);
@@ -1074,8 +1064,8 @@ void Tracking::MonocularInitializationMultiChannels() {
 
 void Tracking::CreateInitialMapMonocularMultiChannels() {
   // Create KeyFrames
-  KeyFrame *pKFini = new KeyFrame(mInitialFrame, mpMap, mpKeyFrameDB);
-  KeyFrame *pKFcur = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+  KeyFrame *pKFini = new KeyFrame(mInitialFrame, mpMap, mpKeyFrameDB, Ntype);
+  KeyFrame *pKFcur = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB, Ntype);
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     pKFini->ComputeBoW(Ftype);
@@ -1832,7 +1822,7 @@ void Tracking::CreateNewKeyFrameMultiChannels() {
     return;
 
   // step 1 : create keyframe
-  KeyFrame *pKF = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB);
+  KeyFrame *pKF = new KeyFrame(mCurrentFrame, mpMap, mpKeyFrameDB, Ntype);
 
   // step 2 : reference keyframe 
   mpReferenceKF = pKF;

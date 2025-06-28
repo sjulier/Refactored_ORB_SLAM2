@@ -45,9 +45,7 @@ class KeyFrame;
 
 class Frame {
 public:
-  const static int Ntype = 1; // Number of channels
 
-public:
   Frame();
   
   // Copy constructor.
@@ -55,21 +53,21 @@ public:
 
   // Constructor for stereo cameras.
   Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp,
-        FeatureExtractor *extractorLeft[Ntype], FeatureExtractor *extractorRight[Ntype],
+        std::vector<FeatureExtractor *> extractorLeft, std::vector<FeatureExtractor *> extractorRight,
         std::vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
-        const float &thDepth);
+        const float &thDepth, int Ntype);
 
   // Constructor for RGB-D cameras.
   Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp,
-        FeatureExtractor *extractor[Ntype],
-        std::vector<ORBVocabulary *> voc, cv::Mat &K,
-        cv::Mat &distCoef, const float &bf, const float &thDepth);
+        std::vector<FeatureExtractor *> extractor,
+        std::vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+        const float &thDepth, int Ntype);
 
   // Constructor for Monocular cameras.
   Frame(const cv::Mat &imGray, const double &timeStamp,
-        FeatureExtractor *extractor[Ntype],
-        std::vector<ORBVocabulary *> voc, cv::Mat &K,
-        cv::Mat &distCoef, const float &bf, const float &thDepth);
+        std::vector<FeatureExtractor *> extractor,
+        std::vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+        const float &thDepth, int Ntype);
 
   // Extract features, Ftype: ORB(0), GCN(1), imageFlag: left image (0), right image (1).
   void ExtractFeatures(const int Ftype, int imageFlag, const cv::Mat &im);
@@ -112,12 +110,14 @@ public:
   cv::Mat UnprojectStereo(const int &i, const std::vector<float> &Depth, const std::vector<cv::KeyPoint> &KeysUn);
 
 public:
+  int Ntype;
+
   // Vocabulary vector used for relocalization
   std::vector<ORBVocabulary *> mpVocabulary;
 
   // Feature extractor. The right is used only in the stereo case.
-  FeatureExtractor *mpFeatureExtractorLeft[Ntype];
-  FeatureExtractor *mpFeatureExtractorRight[Ntype];
+  std::vector<FeatureExtractor *> mpFeatureExtractorLeft;
+  std::vector<FeatureExtractor *> mpFeatureExtractorRight;
 
   // Frame timestamp.
   double mTimeStamp;
@@ -142,7 +142,7 @@ public:
   float mThDepth;
 
   // Feature data used to store feature points
-  FeaturePoint Channels[Ntype];
+  std::vector<FeaturePoint> Channels;
 
   // Keypoints are assigned to cells in a grid to reduce matching complexity when projecting MapPoints.
   static float mfGridElementWidthInv;
