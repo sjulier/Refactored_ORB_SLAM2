@@ -37,7 +37,7 @@ class Map;
 
 class LocalMapping {
 public:
-  const static int Ntype = 1; // Number of channels
+  const static int Ntype = 2; // Number of channels
 
 public:
   LocalMapping(Map *pMap, const float bMonocular);

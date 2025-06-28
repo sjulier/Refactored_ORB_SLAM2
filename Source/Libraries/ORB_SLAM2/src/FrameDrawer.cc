@@ -150,7 +150,7 @@ void FrameDrawer::Update(Tracking *pTracker) {
 
   if (pTracker->mLastProcessedState == Tracking::NOT_INITIALIZED) {
     mvIniKeys = pTracker->mInitialFrame.Channels[mFtype].mvKeys;
-    mvIniMatches = pTracker->mvIniMatches[mFtype]; 
+    mvIniMatches = pTracker->mvIniMatches[mFtype];
   } else if (pTracker->mLastProcessedState == Tracking::OK) {
     for (int i = 0; i < N; i++) {
       MapPoint *pMP = pTracker->mCurrentFrame.Channels[mFtype].mvpMapPoints[i];

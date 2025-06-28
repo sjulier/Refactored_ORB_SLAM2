@@ -33,7 +33,11 @@ float Frame::cx, Frame::cy, Frame::fx, Frame::fy, Frame::invfx, Frame::invfy;
 float Frame::mnMinX, Frame::mnMinY, Frame::mnMaxX, Frame::mnMaxY;
 float Frame::mfGridElementWidthInv, Frame::mfGridElementHeightInv;
 
-Frame::Frame() {}
+Frame::Frame(int Ntype) {
+  Channels.resize(Ntype);
+  mpFeatureExtractorLeft.resize(Ntype);
+  mpFeatureExtractorRight.resize(Ntype);
+}
 
 // Copy Constructor
 Frame::Frame(const Frame &frame)
@@ -57,7 +61,7 @@ Frame::Frame(const Frame &frame)
       mpFeatureExtractorLeft(frame.mpFeatureExtractorLeft),
       mpFeatureExtractorRight(frame.mpFeatureExtractorRight),
       Ntype(frame.Ntype) {
-
+  Channels.resize(Ntype);
   /*
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     mpFeatureExtractorLeft[Ftype] = frame.mpFeatureExtractorLeft[Ftype];

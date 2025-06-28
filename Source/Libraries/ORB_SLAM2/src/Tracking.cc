@@ -46,7 +46,10 @@ Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<
                    MapDrawer *pMapDrawer, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB,
                    const string &strSettingPath, const int sensor, int Ntype)
     : mState(NO_IMAGES_YET), 
-      mSensor(sensor), 
+      mSensor(sensor),
+      mCurrentFrame(Ntype),
+      mLastFrame(Ntype),
+      mInitialFrame(Ntype),
       mbOnlyTracking(false),
       mbVO(false),
       mpSystem(pSys),

@@ -35,7 +35,7 @@ class LoopClosing;
 
 class Optimizer {
 public:
-  const static int Ntype = 1; // Number of Channels
+  const static int Ntype = 2; // Number of Channels
   
 public:  
   void static BundleAdjustment(const std::vector<KeyFrame *> &vpKF, const std::vector<MapPoint *> &vpMP, int nIterations = 5, bool *pbStopFlag = NULL,

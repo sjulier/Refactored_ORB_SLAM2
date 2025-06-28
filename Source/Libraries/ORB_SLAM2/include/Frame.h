@@ -46,7 +46,7 @@ class KeyFrame;
 class Frame {
 public:
 
-  Frame();
+  Frame(int Ntype);
   
   // Copy constructor.
   Frame(const Frame &frame);

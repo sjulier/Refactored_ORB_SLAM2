@@ -81,24 +81,70 @@ RIGHT.P:  !!opencv-matrix
    data: [435.2046959714599, 0, 367.4517211914062, -47.90639384423901, 0, 435.2046959714599, 252.2008514404297, 0, 0, 0, 1, 0]
 
 #--------------------------------------------------------------------------------------------
+# Multi-Feature System Parameters
+#--------------------------------------------------------------------------------------------
+
+# List of feature extractors to be used in the system
+# You can specify one or more extractors (e.g., [ ORB, AKAZE ])
+# The system will initialize and run each extractor in parallel
+
+Extractors: [ ORB, AKAZE ]
+
+
+Vocabularies:
+   # Vocabulary paths are relative to the DEFAULT_RESOURCE_BASE defined in CMake:
+   # /Install/var/lib/orbslam2  ("/" is required at start of the voc file path)
+   AKAZE: "/orb/ORBvoc.bin"
+   ORB: "/orb/ORBvoc.bin"
+
+#--------------------------------------------------------------------------------------------
 # ORB Parameters
 #--------------------------------------------------------------------------------------------
 
-# ORB Extractor: Number of features per image
-ORBextractor.nFeatures: 1200
+ORB:
 
-# ORB Extractor: Scale factor between levels in the scale pyramid 	
-ORBextractor.scaleFactor: 1.2
+   # Essential: Number of features per image
+   nFeatures: 2000
 
-# ORB Extractor: Number of levels in the scale pyramid	
-ORBextractor.nLevels: 8
+   # Essential: Number of levels in the scale pyramid
+   nLevels: 8
 
-# ORB Extractor: Fast threshold
-# Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
-# Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
-# You can lower these values if your images have low contrast			
-ORBextractor.iniThFAST: 20
-ORBextractor.minThFAST: 7
+   # Essential: Scale factor between levels in the scale pyramid
+   scaleFactor: 1.2
+
+   # ORB Extractor: Fast threshold
+   # Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
+   # Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
+   # You can lower these values if your images have low contrast
+   iniThFAST: 20
+   minThFAST: 7
+
+#--------------------------------------------------------------------------------------------
+# AKAZE Parameters
+#--------------------------------------------------------------------------------------------
+
+AKAZE:
+
+   # Essential: Number of features to retain per image
+   nFeatures: 4000
+
+   # Essential: Number of levels in the scale pyramid
+   nLevels: 1
+
+   # Essential: Scale factor between levels in the scale pyramid
+   scaleFactor: 1.0
+
+   # AKAZE Extractor: Detector response threshold
+   # The detector's response threshold determines which points are key points
+   threshold: 1e-3
+
+   # AKAZE Extractor: Number of octaves
+   # The number of "octaves" of the multi-scale pyramid (affects the image resolution range)
+   nOctaves: 4
+
+   # AKAZE Extractor: Number of sublevels per octave
+   # How many layers of images are generated in each octave (refinement scale)
+   nOctaveLayers: 4
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
