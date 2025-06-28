@@ -31,11 +31,11 @@ class Initializer {
   typedef std::pair<int, int> Match;
 
 public:
-  const static int Ntype = 2;
+  int Ntype;
 
 public:
   // Fix the reference frame
-  Initializer(const Frame &ReferenceFrame, float sigma = 1.0, int iterations = 200);
+  Initializer(const Frame &ReferenceFrame, int Ntype, float sigma = 1.0, int iterations = 200);
 
   // Computes in parallel a fundamental matrix and a homography. Selects a model and tries to recover the motion and the structure from motion
   bool Initialize(const Frame &CurrentFrame, const std::vector<std::vector<int>> &vMatches12, cv::Mat &R21, cv::Mat &t21, std::vector<std::vector<cv::Point3f>> &vP3D, std::vector<std::vector<bool>> &vbTriangulated);
@@ -77,14 +77,14 @@ private:
   void DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat &t);
 
   // Keypoints from Reference Frame (Frame 1)
-  std::vector<cv::KeyPoint> mvKeys1[Ntype];
+  std::vector<std::vector<cv::KeyPoint>> mvKeys1;
 
   // Keypoints from Current Frame (Frame 2)
-  std::vector<cv::KeyPoint> mvKeys2[Ntype];
+  std::vector<std::vector<cv::KeyPoint>> mvKeys2;
 
   // Current Matches from Reference to Current
-  std::vector<Match> mvMatches12[Ntype];
-  std::vector<bool> mvbMatched1[Ntype];
+  std::vector<std::vector<Match>> mvMatches12;
+  std::vector<std::vector<bool>> mvbMatched1;
 
   // Calibration
   cv::Mat mK;
@@ -96,7 +96,7 @@ private:
   int mMaxIterations;
 
   // Ransac sets
-  std::vector<std::vector<std::size_t>> mvSets[Ntype];
+  std::vector<std::vector<std::vector<std::size_t>>> mvSets;
 };
 
 } // namespace ORB_SLAM2

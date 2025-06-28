@@ -992,7 +992,7 @@ void Tracking::MonocularInitializationMultiChannels() {
       if (mpInitializer) 
           delete mpInitializer;
 
-      mpInitializer = new Initializer(mCurrentFrame, 1.0, 200);
+      mpInitializer = new Initializer(mCurrentFrame, Ntype, 1.0, 200);
       
       for (int Ftype = 0; Ftype < Ntype; Ftype++)
         fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1); 

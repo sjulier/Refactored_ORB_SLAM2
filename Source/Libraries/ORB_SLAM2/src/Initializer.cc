@@ -30,7 +30,14 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iterations) {
+Initializer::Initializer(const Frame &ReferenceFrame, int Ntype, float sigma, int iterations) : Ntype(Ntype) {
+  // Resize vectors
+  mvKeys1.resize(Ntype);
+  mvKeys2.resize(Ntype);
+  mvMatches12.resize(Ntype);
+  mvbMatched1.resize(Ntype);
+  mvSets.resize(Ntype);
+
   mK = ReferenceFrame.mK.clone();
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
