@@ -53,8 +53,8 @@ public:
   const static int Ntype = 1; // Number of channels
 
 public:
-  Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
-           const std::string &strSettingPath, const int sensor);
+  Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
+           Map *pMap, std::vector<KeyFrameDatabase *> pKFDB, const std::string &strSettingPath, const int sensor);
 
   // Preprocess the input and call Track(). Extract features and performs stereo matching.
   cv::Mat GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp);

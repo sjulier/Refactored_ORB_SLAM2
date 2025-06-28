@@ -35,8 +35,7 @@ bool has_suffix(const std::string &str, const std::string &suffix) {
 
 namespace ORB_SLAM2 {
 
-System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
-               const eSensor sensor, const bool bUseViewer)
+System::System(const string &strSettingsFile, const eSensor sensor, const bool bUseViewer)
     : mSensor(sensor), mpViewer(static_cast<Viewer *>(NULL)), mbReset(false),
       mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false) {
   // Output welcome message
@@ -66,37 +65,52 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
     exit(-1);
   }
 
-  // Name of feature types
-  //const std::string FeatName[Ntype] = {"ORB", "GCN"};
-  const std::string FeatName[Ntype] = {"ORB"};
+  // Read setting config from the .yaml file
+  cv::FileStorage fSettings(strSettingsFile, cv::FileStorage::READ);
+  cv::FileNode extractorList = fSettings["Extractors"];
+  Ntype = extractorList.size();
+  ExtractorNames.resize(Ntype);
 
+  for (size_t i = 0; i < extractorList.size(); ++i)
+  { ExtractorNames[i] = (std::string)extractorList[i]; }
+
+  // Resize dynamic vector to number of features
+  mpVocabulary.resize(Ntype);
+  mpKeyFrameDatabase.resize(Ntype);
+
+  cv::FileNode vocNode = fSettings["Vocabularies"];
   for (int i = 0; i < Ntype; i++)
   {
+    std::string vocPath = DEFAULT_RESOURCE_BASE + (std::string)vocNode[ExtractorNames[i]];
     // Load Vocabulary
     cout << endl
-         << "Loading Vocabulary : " << strVocFile[i] << endl
+         << "Loading Vocabulary : " << vocPath << endl
          << "This could take a while..." << endl;
+
+    cout << "SyS 1" << endl; // TEST ===================
     clock_t tStart = clock();
+    cout << "SyS 2" << endl; // TEST ===================
     mpVocabulary[i] = new ORBVocabulary();
+    cout << "SyS 3" << endl; // TEST ===================
 
     // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
 
     bool bVocLoad = false;
 
-    if (has_suffix(strVocFile[i], ".txt")) {
-      bVocLoad = mpVocabulary[i]->loadFromTextFile(strVocFile[i]);
-      cout << "Loading " << FeatName[i] << " Vocabulary in txt mode." << endl;
+    if (has_suffix(vocPath, ".txt")) {
+      bVocLoad = mpVocabulary[i]->loadFromTextFile(vocPath);
+      cout << "Loading " << ExtractorNames[i] << " Vocabulary in txt mode." << endl;
     } else {
-      bVocLoad = mpVocabulary[i]->loadFromBinaryFile(strVocFile[i]);
-      cout << "Loading " << FeatName[i] << " Vocabulary in binary mode." << endl;
+      bVocLoad = mpVocabulary[i]->loadFromBinaryFile(vocPath);
+      cout << "Loading " << ExtractorNames[i] << " Vocabulary in binary mode." << endl;
     }
     if (!bVocLoad) {
-      cerr << "Wrong path to " << FeatName[i] <<" vocabulary. " << endl;
-      cerr << "Falied to open " << FeatName[i] << " at: " << strVocFile[i] << endl;
+      cerr << "Wrong path to " << ExtractorNames[i] <<" vocabulary. " << endl;
+      cerr << "Falied to open " << ExtractorNames[i] << " at: " << vocPath << endl;
       exit(-1);
     }
     
-    cout << FeatName[i];
+    cout << ExtractorNames[i];
     printf(" Vocabulary loaded in %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
     cout << endl;
     // Create KeyFrame Database
@@ -117,14 +131,13 @@ System::System(const string (&strVocFile)[Ntype], const string &strSettingsFile,
   // Initialize the Tracking thread (it will live in the main thread of execution, the one that called this constructor)
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
 
-
   // Initialize the Local Mapping thread and launch
   mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
 
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 
   // Initialize the Loop Closing thread and launch
-  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor != MONOCULAR);
+  mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor != MONOCULAR, Ntype);
 
   mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 

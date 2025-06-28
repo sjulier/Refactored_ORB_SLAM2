@@ -40,15 +40,16 @@ class LocalMapping;
 class KeyFrameDatabase;
 
 class LoopClosing {
-public:
-  const static int Ntype = 1;
 
 public:
   typedef std::pair<std::set<KeyFrame *>, int> ConsistentGroup;
   typedef std::map<KeyFrame *, g2o::Sim3, std::less<KeyFrame *>, Eigen::aligned_allocator<std::pair<KeyFrame *const, g2o::Sim3>>> KeyFrameAndPose;
 
 public:
-  LoopClosing(Map *pMap, KeyFrameDatabase *pDB[Ntype], ORBVocabulary *pVoc[Ntype], const bool bFixScale);
+  int Ntype;
+
+  LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::vector<ORBVocabulary *> pVoc,
+              const bool bFixScale, int Ntype);
 
   void SetTracker(Tracking *pTracker);
 

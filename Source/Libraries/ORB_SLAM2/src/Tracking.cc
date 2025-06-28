@@ -42,8 +42,8 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer *> pFrameDrawer,
-                   MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
+Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer,
+                   MapDrawer *pMapDrawer, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB,
                    const string &strSettingPath, const int sensor)
     : mState(NO_IMAGES_YET), 
       mSensor(sensor), 
@@ -55,20 +55,22 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
       mpFrameDrawer(pFrameDrawer), 
       mpMapDrawer(pMapDrawer),
       mpMap(pMap), 
-      mnLastRelocFrameId(0) {
-  
+      mnLastRelocFrameId(0),
+      mpVocabulary(pVoc),
+      mpKeyFrameDB(pKFDB) {
+
+  /*
   // Initlize vocabulary vector
   mpVocabulary.resize(Ntype);
   mpKeyFrameDB.resize(Ntype);
-  mvbPrevMatched.resize(Ntype);
-  mvIniMatches.resize(Ntype);
-  mvIniP3D.resize(Ntype);
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     mpVocabulary[Ftype] = pVoc[Ftype];
     mpKeyFrameDB[Ftype] = pKFDB[Ftype];
   }
-
-  
+  */
+  mvbPrevMatched.resize(Ntype);
+  mvIniMatches.resize(Ntype);
+  mvIniP3D.resize(Ntype);
   
   // Load camera parameters from settings file
   cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
@@ -178,20 +180,15 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
     std::string& name = extractor_names[i];
     const cv::FileNode& extractor_config = fSettings[name];
 
-    std::cout << "TK 01" << std::endl;
     mpFeatureExtractorLeft[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, false);
-    std::cout << "TK 02" << std::endl;
 
     if (sensor == System::STEREO)
       mpFeatureExtractorRight[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, false);
 
-    std::cout << "TK 03" << std::endl;
     if (sensor == System::MONOCULAR)
       mpIniFeatureExtractor[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, true);
-    std::cout << "TK 04" << std::endl;
   }
 
-  cout << "TK 1" << endl;
 
   for (int i = 0; i < Ntype; ++i)
     lptrs[i] = mpFeatureExtractorLeft[i].get();
@@ -201,9 +198,6 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
 
   for (int i = 0; i < Ntype; ++i)
     iptrs[i] = mpIniFeatureExtractor[i].get();
-
-  cout << "TK 2" << endl;
-
 
 
   if (sensor == System::STEREO || sensor == System::RGBD) {

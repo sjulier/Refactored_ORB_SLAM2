@@ -30,6 +30,12 @@ set(DEFAULT_BINARY_ORB_VOCABULARY "${DEFAULT_ORB_VOCABULARY_DIR}/ORBvoc.bin")
 
 add_compile_definitions(DEFAULT_BINARY_ORB_VOCABULARY="${DEFAULT_BINARY_ORB_VOCABULARY}")
 
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+  add_compile_definitions(DEFAULT_RESOURCE_BASE="${DEFAULT_RESOURCE_BASE}")
+else()
+  add_definitions(-DDEFAULT_RESOURCE_BASE="${DEFAULT_RESOURCE_BASE}")
+endif()
+
 # postfix, based on type
 set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "postfix applied to debug build of libraries")
 set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "postfix applied to release build of libraries")

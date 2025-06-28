@@ -31,6 +31,10 @@ Camera.RGB: 1
 
 Extractors: [ AKAZEextractor ]
 
+Vocabularies:
+  AKAZEextractor: "/orb/ORBvoc.bin"
+  ORBextractor: "/orb/ORBvoc.bin"
+
 #--------------------------------------------------------------------------------------------
 # ORB Parameters
 #--------------------------------------------------------------------------------------------

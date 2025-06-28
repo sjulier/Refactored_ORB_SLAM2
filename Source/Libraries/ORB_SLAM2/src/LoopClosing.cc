@@ -35,20 +35,24 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB[Ntype], ORBVocabulary *pVoc[Ntype], const bool bFixScale)
+LoopClosing::LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::vector<ORBVocabulary *> pVoc,
+                         const bool bFixScale, int Ntype)
     : mbResetRequested(false), mbFinishRequested(false), mbFinished(true),
       mpMap(pMap), mpMatchedKF(NULL),
       mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
       mbStopGBA(false), mpThreadGBA(NULL), mbFixScale(bFixScale),
-      mnFullBAIdx(0) {
+      mnFullBAIdx(0), mpKeyFrameDB(pDB), mpVocabulary(pVoc), Ntype(Ntype) {
   mnCovisibilityConsistencyTh = 3;
 
+  /*
   mpKeyFrameDB.resize(Ntype);
   mpVocabulary.resize(Ntype);
+
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
     mpKeyFrameDB[Ftype] = pDB[Ftype];
     mpVocabulary[Ftype] = pVoc[Ftype];
   }
+  */
 
 }
 

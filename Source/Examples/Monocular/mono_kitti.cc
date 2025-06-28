@@ -53,16 +53,15 @@ int main(int argc, char **argv) {
       string(DEFAULT_MONO_SETTINGS_DIR) + string("/") + string(argv[1]);
 
   // Load both ORB and AKAZE vocabulary file whether or not "USE_ORB" is detected
-  const int Ntype = 1;
-  string vocabularyFile[Ntype];
+  //const int Ntype = 1;
+  //string vocabularyFile[Ntype];
 
-  vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
+  //vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
   //vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM2::System SLAM(vocabularyFile, settingsFile,
-                         ORB_SLAM2::System::MONOCULAR, true);
+  ORB_SLAM2::System SLAM(settingsFile, ORB_SLAM2::System::MONOCULAR, true);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

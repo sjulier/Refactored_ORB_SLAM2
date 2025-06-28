@@ -48,12 +48,18 @@ class System {
 public:
   enum eSensor { MONOCULAR = 0, STEREO = 1, RGBD = 2 }; // Input sensers
 
-  static const int Ntype = 1; // Number of channels
+  // static const int Ntype = 1; // Number of channels
+
+  // Number of feature type (for resizing vector)
+  int Ntype;
+
+  // Feature type names
+  std::vector<std::string> ExtractorNames;
 
 public:
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and
   // Viewer threads.
-  System(const std::string (&strVocFile)[Ntype], const std::string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
+  System(const std::string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
 
   // Proccess the given stereo frame. Images must be synchronized and rectified.
   // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to
@@ -137,15 +143,12 @@ private:
   // Input sensor
   eSensor mSensor;
 
-  // ORB and GCN vocabulary used for place recognition and feature matching.
-  ORBVocabulary *mpORBVocabulary;
-  ORBVocabulary *mpGCNVocabulary;
-
-  ORBVocabulary *mpVocabulary[Ntype];
+  // Vocabulary used for place recognition and feature matching.
+  std::vector<ORBVocabulary *> mpVocabulary;
 
   // KeyFrame database for place recognition (relocalization and loop
   // detection).
-  KeyFrameDatabase *mpKeyFrameDatabase[Ntype];
+  std::vector<KeyFrameDatabase *> mpKeyFrameDatabase;
 
   // Map structure that stores the pointers to all KeyFrames and MapPoints.
   Map *mpMap;

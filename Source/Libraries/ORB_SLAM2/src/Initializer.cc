@@ -146,7 +146,6 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
   }
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    std::cout << Ftype << " FLAG: " << flag[Ftype] << std::endl;
     if (flag[Ftype] == true) {
 
       cout << Ftype << endl;
