@@ -28,7 +28,7 @@ using namespace ::std;
 namespace ORB_SLAM2 {
 
 Viewer::Viewer(System *pSystem, vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer, 
-               Tracking *pTracking, const string &strSettingPath)
+               Tracking *pTracking, const string &strSettingPath, std::vector<std::string> extractorNames)
     : mpSystem(pSystem), 
       mpFrameDrawer(pFrameDrawer), 
       mpMapDrawer(pMapDrawer),
@@ -36,7 +36,10 @@ Viewer::Viewer(System *pSystem, vector<FrameDrawer *> pFrameDrawer, MapDrawer *p
       mbFinishRequested(false),
       mbFinished(true),
       mbStopped(true),
-      mbStopRequested(false) {
+      mbStopRequested(false),
+      ExtractorNames(extractorNames) {
+  Ntype = ExtractorNames.size();
+
   cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
   float fps = fSettings["Camera.fps"];
@@ -103,14 +106,10 @@ void Viewer::Run() {
   pangolin::OpenGlMatrix Twc;
   Twc.SetIdentity();
 
-  //string featureName[Ntype] = {"ORB", "GCN"};
-  //string featureName[Ntype] = {"ORB", "AKAZE"};
-  string featureName[Ntype] = {"Feature"};
-
   std::vector<string> currentFrameWindowName;
   currentFrameWindowName.resize(Ntype);
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    currentFrameWindowName[Ftype] = "ORB-SLAM2: Current Frame (" + featureName[Ftype] + " Features)";
+    currentFrameWindowName[Ftype] = "ORB-SLAM2: Current Frame (" + ExtractorNames[Ftype] + " Features)";
     cv::namedWindow(currentFrameWindowName[Ftype]);
   }
     

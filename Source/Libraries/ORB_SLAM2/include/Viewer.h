@@ -36,11 +36,14 @@ class MapDrawer;
 class System;
 
 class Viewer {
+
 public:
-  const static int Ntype = 1;
-public:
+  int Ntype;
+
+  std::vector<std::string> ExtractorNames;
+
   Viewer(System *pSystem, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
-         Tracking *pTracking, const std::string &strSettingPath);
+         Tracking *pTracking, const std::string &strSettingPath, std::vector<std::string> extractorNames);
 
   // Main thread function. Draw points, keyframes, the current camera pose and
   // the last processed frame. Drawing is refreshed according to the camera fps.

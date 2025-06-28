@@ -87,11 +87,8 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
          << "Loading Vocabulary : " << vocPath << endl
          << "This could take a while..." << endl;
 
-    cout << "SyS 1" << endl; // TEST ===================
     clock_t tStart = clock();
-    cout << "SyS 2" << endl; // TEST ===================
     mpVocabulary[i] = new ORBVocabulary();
-    cout << "SyS 3" << endl; // TEST ===================
 
     // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
 
@@ -118,7 +115,7 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
   }
     
   // Create the Map
-  mpMap = new Map();
+  mpMap = new Map(Ntype);
 
   // Create Drawers. These are used by the Viewer
   
@@ -144,7 +141,7 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
   // Initialize the Viewer thread and launch
   if (bUseViewer) {
 
-    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile);
+    mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile, ExtractorNames);
 
     // mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);

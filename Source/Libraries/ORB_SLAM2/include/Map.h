@@ -33,11 +33,11 @@ class MapPoint;
 class KeyFrame;
 
 class Map {
-public:
-  const static int Ntype = 1;
 
 public:
-  Map();
+  int Ntype;
+
+  Map(int Ntype);
 
   void AddKeyFrame(KeyFrame *pKF);
   void AddMapPoint(MapPoint *pMP);
@@ -69,7 +69,7 @@ public:
   std::mutex mMutexPointCreation;
 
 protected:
-  std::set<MapPoint *> mspMapPoints[Ntype];
+  std::vector<std::set<MapPoint *>> mspMapPoints;
   std::set<KeyFrame *> mspKeyFrames;
 
   std::vector<MapPoint *> mvpReferenceMapPoints;
