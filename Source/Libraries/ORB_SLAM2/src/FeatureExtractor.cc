@@ -8,6 +8,28 @@ FeatureExtractor::FeatureExtractor(int _nfeatures, float _scaleFactor,
                                    int _nlevels, int _iniThFAST, int _minThFAST)
     : nfeatures(_nfeatures), scaleFactor(_scaleFactor), nlevels(_nlevels),
       iniThFAST(_iniThFAST), minThFAST(_minThFAST) {
+  FeatureExtractor::InitPyramidParameters();
+}
+
+FeatureExtractor::FeatureExtractor(const cv::FileNode& config, bool init) {
+  nfeatures   = config["nFeatures"].empty()    ? 1000 : (int)config["nFeatures"];
+  scaleFactor = config["scaleFactor"].empty()  ? 1.2f : (float)config["scaleFactor"];
+  nlevels     = config["nLevels"].empty()      ? 8    : (int)config["nLevels"];
+  iniThFAST   = config["iniThFAST"].empty()    ? 20   : (int)config["iniThFAST"];
+  minThFAST   = config["minThFAST"].empty()    ? 7    : (int)config["minThFAST"];
+
+  cout << "- Number of Features: " << nfeatures << endl;
+  cout << "- Scale Levels: " << nlevels << endl;
+  cout << "- Scale Factor: " << scaleFactor << endl;
+
+  // Double num of feature when the extractor is for initialization.
+  if (init == true) nfeatures *= 2;
+
+  FeatureExtractor::InitPyramidParameters();
+}
+
+void FeatureExtractor::InitPyramidParameters() {
+
   mvScaleFactor.resize(nlevels);
   mvLevelSigma2.resize(nlevels);
   mvScaleFactor[0] = 1.0f;
@@ -57,5 +79,7 @@ FeatureExtractor::FeatureExtractor(int _nfeatures, float _scaleFactor,
     umax[v] = v0;
     ++v0;
   }
+
 }
+
 } // namespace ORB_SLAM2

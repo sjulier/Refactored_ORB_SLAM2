@@ -34,7 +34,7 @@ class KeyFrame;
 
 class Map {
 public:
-  const static int Ntype = 2;
+  const static int Ntype = 1;
 
 public:
   Map();

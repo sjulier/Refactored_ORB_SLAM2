@@ -1,27 +1,24 @@
 #include "FeatureExtractorFactory.h"
 
-#include "ORBextractor.h"
-#include "AKAZEextractor.h"
-
-//#ifdef USE_GCN
-//#include "GCNextractor.h"
-//#endif
-
 namespace ORB_SLAM2 {
 
-FeatureExtractor *createFeatureExtractor(int nfeatures, float scaleFactor,
-                                         int nlevels, int iniThFAST,
-                                         int minThFAST, int flag) {
-//#ifdef USE_GCN
-//  if (flag == 1) {
-//    return new GCNextractor(nfeatures, scaleFactor, nlevels, iniThFAST,
-//                            minThFAST);
-//  }
-//#endif
-    if (flag == 1) {
-        return new AKAZEextractor(4000, scaleFactor, nlevels, iniThFAST, minThFAST);
+FeatureExtractorFactory& FeatureExtractorFactory::Instance() {
+    AKAZEextractor::ForceLinking();
+    ORBextractor::ForceLinking();
+    static FeatureExtractorFactory instance;
+    return instance;
+}
+
+void FeatureExtractorFactory::Register(const std::string& name, CreatorFunc creator) {
+    mRegistry[name] = creator;
+}
+
+std::shared_ptr<FeatureExtractor> FeatureExtractorFactory::Create(const std::string& name, const cv::FileNode& config, const bool init) const {
+    auto it = mRegistry.find(name);
+    if (it != mRegistry.end()) {
+        return it->second(config, init);
+    } else {
+        throw std::runtime_error("[FeatureExtractorFactory] Not Registered: " + name);
     }
-  //return new ORBextractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST);
-    return new ORBextractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST);
 }
 } // namespace ORB_SLAM2

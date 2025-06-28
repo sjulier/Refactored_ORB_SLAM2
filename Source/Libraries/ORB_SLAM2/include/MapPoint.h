@@ -36,7 +36,7 @@ class Frame;
 
 class MapPoint {
 public:
-  const static int Ntype = 2; // Number of channels
+  const static int Ntype = 1; // Number of channels
 
 public:
   MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map *pMap, const int Ftype);

@@ -130,6 +130,8 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
   else
     cout << "- color order: BGR (ignored if grayscale)" << endl;
 
+  /*
+
   // Load ORB parameters
 
   int nFeatures = fSettings["ORBextractor.nFeatures"];
@@ -160,6 +162,49 @@ Tracking::Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], vector<FrameDrawer 
   cout << "- Scale Factor: " << fScaleFactor << endl;
   cout << "- Initial Fast Threshold: " << fIniThFAST << endl;
   cout << "- Minimum Fast Threshold: " << fMinThFAST << endl;
+
+  */
+
+  mpFeatureExtractorLeft.resize(Ntype);
+  mpFeatureExtractorRight.resize(Ntype);
+  mpIniFeatureExtractor.resize(Ntype);
+
+  std::vector<std::string> extractor_names;
+  cv::FileNode extractor_list = fSettings["Extractors"];
+  for (auto it = extractor_list.begin(); it != extractor_list.end(); ++it)
+      extractor_names.push_back((std::string)*it);
+
+  for (int i = 0; i < Ntype; ++i) {
+    std::string& name = extractor_names[i];
+    const cv::FileNode& extractor_config = fSettings[name];
+
+    std::cout << "TK 01" << std::endl;
+    mpFeatureExtractorLeft[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, false);
+    std::cout << "TK 02" << std::endl;
+
+    if (sensor == System::STEREO)
+      mpFeatureExtractorRight[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, false);
+
+    std::cout << "TK 03" << std::endl;
+    if (sensor == System::MONOCULAR)
+      mpIniFeatureExtractor[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, true);
+    std::cout << "TK 04" << std::endl;
+  }
+
+  cout << "TK 1" << endl;
+
+  for (int i = 0; i < Ntype; ++i)
+    lptrs[i] = mpFeatureExtractorLeft[i].get();
+
+  for (int i = 0; i < Ntype; ++i)
+    rptrs[i] = mpFeatureExtractorRight[i].get();
+
+  for (int i = 0; i < Ntype; ++i)
+    iptrs[i] = mpIniFeatureExtractor[i].get();
+
+  cout << "TK 2" << endl;
+
+
 
   if (sensor == System::STEREO || sensor == System::RGBD) {
     mThDepth = mbf * (float)fSettings["ThDepth"] / fx;
@@ -213,7 +258,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
   //  cv::resize(imGrayRight, imGrayRight, cv::Size(320, 240), 0, 0, cv::INTER_NEAREST);
   //}
 
-  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, mpFeatureExtractorLeft, mpFeatureExtractorRight,
+  mCurrentFrame = Frame(mImGray, imGrayRight, timestamp, lptrs, rptrs,
                         mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
@@ -246,7 +291,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, const 
   if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
     imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
 
-  mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+  mCurrentFrame = Frame(mImGray, imDepth, timestamp, lptrs, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
 
@@ -274,9 +319,9 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
   //}
 
   if (mState == NOT_INITIALIZED || mState == NO_IMAGES_YET)
-    mCurrentFrame = Frame(mImGray, timestamp, mpIniFeatureExtractor, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+    mCurrentFrame = Frame(mImGray, timestamp, iptrs, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
   else
-    mCurrentFrame = Frame(mImGray, timestamp, mpFeatureExtractorLeft, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
+    mCurrentFrame = Frame(mImGray, timestamp, lptrs, mpVocabulary, mK, mDistCoef, mbf, mThDepth);
 
   Track();
 

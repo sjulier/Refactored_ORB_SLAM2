@@ -66,11 +66,11 @@ int main(int argc, char **argv) {
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
 
   // Load both ORB and AKAZE vocabulary file whether or not "USE_ORB" is detected
-  const int Ntype = 2;
+  const int Ntype = 1;
   string vocabularyFile[Ntype];
 
   vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
-  vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
+  //vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.

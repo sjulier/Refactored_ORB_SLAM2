@@ -1,4 +1,5 @@
 #include "AKAZEextractor.h"
+#include "FeatureExtractorFactory.h"
 #include <iostream>
 
 namespace ORB_SLAM2 {
@@ -12,6 +13,28 @@ namespace ORB_SLAM2 {
             1e-3f,      // threshold
             4,          // num octaves
             4,          // num octave layers
+            cv::KAZE::DIFF_PM_G2);
+    }
+
+    AKAZEextractor::AKAZEextractor(const cv::FileNode& config, bool init)
+      : FeatureExtractor(config, init) {
+
+        float threshold     = config["threshold"].empty()      ? 1e-3f : (float)config["threshold"];
+        int nOctaves        = config["nOctaves"].empty()       ? 4     : (int)config["nOctaves"];
+        int nOctaveLayers   = config["nOctaveLayers"].empty()  ? 4     : (int)config["nOctaveLayers"];
+
+        std::cout << std::endl << "AKAZE Extractor Parameters: " << std::endl;
+        std::cout << "- Threshold: " << threshold << std::endl;
+        std::cout << "- Num of Octaves: " << nOctaves << std::endl;
+        std::cout << "- Num of Octave Layers: " << nOctaveLayers << std::endl;
+
+        mpAKAZE = cv::AKAZE::create(
+            cv::AKAZE::DESCRIPTOR_MLDB,
+            0,          // full length
+            3,          // descriptor_channels
+            threshold,      // threshold
+            nOctaves,       // num octaves
+            nOctaveLayers,  // num octave layers
             cv::KAZE::DIFF_PM_G2);
     }
 
@@ -38,13 +61,24 @@ namespace ORB_SLAM2 {
         raw.copyTo(aligned.colRange(0, raw.cols));
         aligned.copyTo(descriptors);
 
-        std::cout << "[AKAZEextractor] Keypoints: "
-                  << keypoints.size()
-                  << ", Descriptors shape: "
-                  << descriptors.getMat().rows << "x"
-                  << descriptors.getMat().cols << std::endl;
     }
 
+    void AKAZEextractor::ForceLinking() {}
+
 } // namespace ORB_SLAM2
+
+namespace {
+
+    struct AKAZERegister {
+        AKAZERegister() {
+            std::cout << "Registering AKAZEextractor..." << std::endl;
+            ORB_SLAM2::FeatureExtractorFactory::Instance().Register("AKAZEextractor",
+                [](const cv::FileNode& config, const bool init) {
+                    return std::make_shared<ORB_SLAM2::AKAZEextractor>(config, init);
+                });
+        }
+    };
+    static AKAZERegister _akazeRegisterInstance;
+}
 
 

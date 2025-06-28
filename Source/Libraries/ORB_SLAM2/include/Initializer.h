@@ -31,7 +31,7 @@ class Initializer {
   typedef std::pair<int, int> Match;
 
 public:
-  const static int Ntype = 2;
+  const static int Ntype = 1;
 
 public:
   // Fix the reference frame

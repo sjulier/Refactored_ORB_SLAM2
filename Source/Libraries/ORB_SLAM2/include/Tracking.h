@@ -50,7 +50,7 @@ class System;
 
 class Tracking {
 public:
-  const static int Ntype = 2; // Number of channels
+  const static int Ntype = 1; // Number of channels
 
 public:
   Tracking(System *pSys, ORBVocabulary *pVoc[Ntype], std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase *pKFDB[Ntype],
@@ -162,9 +162,20 @@ protected:
   LoopClosing *mpLoopClosing;
 
   // Feature extractor arrays
+  /*
   FeatureExtractor *mpFeatureExtractorLeft[Ntype];
   FeatureExtractor *mpFeatureExtractorRight[Ntype];
   FeatureExtractor *mpIniFeatureExtractor[Ntype];
+  FeatureExtractor *mpFeatureExtractor[Ntype];
+  */
+
+  FeatureExtractor* lptrs[Ntype];
+  FeatureExtractor* rptrs[Ntype];
+  FeatureExtractor* iptrs[Ntype];
+
+  std::vector<std::shared_ptr<FeatureExtractor>> mpFeatureExtractorLeft;
+  std::vector<std::shared_ptr<FeatureExtractor>> mpFeatureExtractorRight;
+  std::vector<std::shared_ptr<FeatureExtractor>> mpIniFeatureExtractor;
   FeatureExtractor *mpFeatureExtractor[Ntype];
 
   // BoW

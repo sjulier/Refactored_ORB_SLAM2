@@ -18,6 +18,9 @@ public:
   FeatureExtractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST,
                    int minThFAST);
 
+  // Constructor with .yaml node config as input
+  FeatureExtractor(const cv::FileNode& config, bool init = false);
+
   virtual ~FeatureExtractor() {}
 
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
@@ -46,6 +49,8 @@ protected:
   int nlevels;
   int iniThFAST;
   int minThFAST;
+
+  void InitPyramidParameters();
 
   std::vector<int> mnFeaturesPerLevel;
 

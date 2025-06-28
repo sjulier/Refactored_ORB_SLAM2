@@ -61,11 +61,14 @@
 #include <vector>
 
 #include "ORBextractor.h"
+#include "FeatureExtractorFactory.h"
 
 #include <iostream>
 
 using namespace cv;
 using namespace std;
+
+
 
 namespace ORB_SLAM2 {
 
@@ -405,6 +408,26 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
                            int _iniThFAST, int _minThFAST)
     : FeatureExtractor(_nfeatures, _scaleFactor, _nlevels, _iniThFAST,
                        _minThFAST) {
+  const int npoints = 512;
+  const Point *pattern0 = (const Point *)bit_pattern_31_;
+  std::copy(pattern0, pattern0 + npoints, std::back_inserter(pattern));
+
+  // This is for orientation
+  // pre-compute the end of a row in a circular patch
+  umax.resize(HALF_PATCH_SIZE + 1);
+
+  int v, v0, vmax = cvFloor(HALF_PATCH_SIZE * sqrt(2.f) / 2 + 1);
+  int vmin = cvCeil(HALF_PATCH_SIZE * sqrt(2.f) / 2);
+  const double hp2 = HALF_PATCH_SIZE * HALF_PATCH_SIZE;
+  for (v = 0; v <= vmax; ++v)
+    umax[v] = cvRound(sqrt(hp2 - v * v));
+
+  // std:cout << "ORBextractor Initlization" << std::endl;
+
+}
+
+  ORBextractor::ORBextractor(const cv::FileNode& config, bool init)
+      : FeatureExtractor(config, init) {
   const int npoints = 512;
   const Point *pattern0 = (const Point *)bit_pattern_31_;
   std::copy(pattern0, pattern0 + npoints, std::back_inserter(pattern));
@@ -1028,4 +1051,20 @@ void ORBextractor::ComputePyramid(cv::Mat image) {
   }
 }
 
+  void ORBextractor::ForceLinking() {}
+
 } // namespace ORB_SLAM2
+
+namespace {
+
+  struct ORBRegister {
+    ORBRegister() {
+      std::cout << "Registering ORBextractor..." << std::endl;
+      ORB_SLAM2::FeatureExtractorFactory::Instance().Register("ORBextractor",
+          [](const cv::FileNode& config, const bool init) {
+              return std::make_shared<ORB_SLAM2::ORBextractor>(config, init);
+          });
+    }
+  };
+  static ORBRegister _orbRegisterInstance;
+}

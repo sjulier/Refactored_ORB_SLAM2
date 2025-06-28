@@ -67,11 +67,11 @@ int main(int argc, char **argv) {
   // Create SLAM system. It initializes all system threads and gets ready to process frames.
 
   // Load both ORB and GCN vocabulary file whether or not "USE_ORB" is detected  
-  const int Ntype = 2;
+  const int Ntype = 1;
   string vocabularyFile[Ntype];
 
   vocabularyFile[0] = DEFAULT_BINARY_ORB_VOCABULARY;
-  vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
+  //vocabularyFile[1] = DEFAULT_BINARY_ORB_VOCABULARY;
   
   ORB_SLAM2::System SLAM(vocabularyFile, settingsFile, ORB_SLAM2::System::RGBD, true);
 

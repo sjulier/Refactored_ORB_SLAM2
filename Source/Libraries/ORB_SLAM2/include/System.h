@@ -48,7 +48,7 @@ class System {
 public:
   enum eSensor { MONOCULAR = 0, STEREO = 1, RGBD = 2 }; // Input sensers
 
-  static const int Ntype = 2; // Number of channels
+  static const int Ntype = 1; // Number of channels
 
 public:
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and

@@ -22,6 +22,7 @@
 #define ORBEXTRACTOR_H
 
 #include "FeatureExtractor.h"
+#include <opencv2/opencv.hpp>
 
 namespace ORB_SLAM2 {
 
@@ -40,8 +41,12 @@ public:
 
 class ORBextractor : public FeatureExtractor {
 public:
-  ORBextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST,
-               int minThFAST);
+
+  std::string name = "ORBextractor";
+
+  ORBextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST);
+
+  ORBextractor(const cv::FileNode& config, bool init = false);
 
   virtual ~ORBextractor() {}
 
@@ -51,6 +56,8 @@ public:
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
                           std::vector<cv::KeyPoint> &keypoints,
                           cv::OutputArray descriptors);
+
+   static void ForceLinking();
 
 protected:
   void ComputePyramid(cv::Mat image);

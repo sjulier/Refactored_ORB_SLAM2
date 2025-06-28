@@ -104,7 +104,8 @@ void Viewer::Run() {
   Twc.SetIdentity();
 
   //string featureName[Ntype] = {"ORB", "GCN"};
-  string featureName[Ntype] = {"ORB", "AKAZE"};
+  //string featureName[Ntype] = {"ORB", "AKAZE"};
+  string featureName[Ntype] = {"Feature"};
 
   std::vector<string> currentFrameWindowName;
   currentFrameWindowName.resize(Ntype);

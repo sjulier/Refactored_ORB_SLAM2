@@ -37,7 +37,7 @@ class System;
 
 class Viewer {
 public:
-  const static int Ntype = 2;
+  const static int Ntype = 1;
 public:
   Viewer(System *pSystem, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
          Tracking *pTracking, const std::string &strSettingPath);

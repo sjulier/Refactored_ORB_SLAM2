@@ -41,7 +41,7 @@ class KeyFrameDatabase;
 
 class LoopClosing {
 public:
-  const static int Ntype = 2;
+  const static int Ntype = 1;
 
 public:
   typedef std::pair<std::set<KeyFrame *>, int> ConsistentGroup;
