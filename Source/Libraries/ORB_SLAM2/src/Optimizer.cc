@@ -38,6 +38,12 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
+int Optimizer::Ntype = 0;
+
+void Optimizer::SetNtype(int n) {
+  Ntype = n;
+}
+
 void Optimizer::GlobalBundleAdjustemnt(Map *pMap, int nIterations, bool *pbStopFlag, const unsigned long nLoopKF, const bool bRobust) {
   std::vector<KeyFrame *> vpKFs = pMap->GetAllKeyFrames();
   std::vector<MapPoint *> vpMP = pMap->GetAllMapPoints();

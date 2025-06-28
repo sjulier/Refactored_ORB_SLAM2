@@ -37,10 +37,10 @@ class Map;
 
 class LocalMapping {
 public:
-  const static int Ntype = 2; // Number of channels
+  int Ntype; // Number of channels
 
 public:
-  LocalMapping(Map *pMap, const float bMonocular);
+  LocalMapping(Map *pMap, const float bMonocular, int Ntype);
 
   void SetLoopCloser(LoopClosing *pLoopCloser);
 

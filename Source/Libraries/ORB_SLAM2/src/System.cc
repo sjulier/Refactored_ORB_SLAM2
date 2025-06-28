@@ -129,7 +129,7 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
   mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor, Ntype);
 
   // Initialize the Local Mapping thread and launch
-  mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR);
+  mpLocalMapper = new LocalMapping(mpMap, mSensor == MONOCULAR, Ntype);
 
   mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run, mpLocalMapper);
 

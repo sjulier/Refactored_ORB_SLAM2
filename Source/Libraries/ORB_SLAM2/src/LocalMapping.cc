@@ -29,7 +29,7 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-LocalMapping::LocalMapping(Map *pMap, const float bMonocular)
+LocalMapping::LocalMapping(Map *pMap, const float bMonocular, int Ntype)
     : mbMonocular(bMonocular), 
       mbResetRequested(false),
       mbFinishRequested(false),
@@ -39,7 +39,8 @@ LocalMapping::LocalMapping(Map *pMap, const float bMonocular)
       mbStopped(false), 
       mbStopRequested(false),
       mbNotStop(false),
-      mbAcceptKeyFrames(true) {}
+      mbAcceptKeyFrames(true),
+      Ntype(Ntype) {}
 
 void LocalMapping::SetLoopCloser(LoopClosing *pLoopCloser) {
   mpLoopCloser = pLoopCloser;

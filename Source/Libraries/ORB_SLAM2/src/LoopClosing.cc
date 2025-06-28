@@ -53,6 +53,8 @@ LoopClosing::LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::ve
     mpVocabulary[Ftype] = pVoc[Ftype];
   }
   */
+  // Set Ntype for Optimizer
+  Optimizer::SetNtype(Ntype);
 
 }
 
