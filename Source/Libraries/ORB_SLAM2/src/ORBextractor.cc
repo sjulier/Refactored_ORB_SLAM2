@@ -72,6 +72,14 @@ using namespace std;
 
 namespace ORB_SLAM2 {
 
+void ORBextractor::InfoConfigs() {
+  std::cout << "- Number of Features: " << nfeatures << std::endl;
+  std::cout << "- Scale Levels: " << nlevels << std::endl;
+  std::cout << "- Scale Factor: " << scaleFactor << std::endl;
+  std::cout << "- Initial Fast Threshold: " << iniThFAST << std::endl;
+  std::cout << "- Minimum Fast Threshold: " << minThFAST  << std::endl;
+}
+
 static float IC_Angle(const Mat &image, Point2f pt, const vector<int> &u_max) {
   int m_01 = 0, m_10 = 0;
 
@@ -1066,5 +1074,5 @@ namespace {
           });
     }
   };
-  static ORBRegister _orbRegisterInstance;
+  ORBRegister OrbRegisterInstance;
 }

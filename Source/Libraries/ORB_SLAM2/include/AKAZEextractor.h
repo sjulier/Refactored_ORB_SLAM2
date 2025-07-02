@@ -9,8 +9,6 @@ namespace ORB_SLAM2 {
 
 class AKAZEextractor : public FeatureExtractor {
    public:
-	  std::string name = "AKAZEextractor";
-
       AKAZEextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST);
 
       AKAZEextractor(const cv::FileNode& config, bool init = false);
@@ -20,10 +18,15 @@ class AKAZEextractor : public FeatureExtractor {
                  std::vector<cv::KeyPoint>& keypoints,
                  cv::OutputArray descriptors) override;
 
-       static void ForceLinking();
+	  void InfoConfigs() override;
+
+      static void ForceLinking();
 
    private:
       cv::Ptr<cv::AKAZE> mpAKAZE;
+      float threshold;
+      int nOctaves;
+      int nOctaveLayers;
 };
 
 } // namespace ORB_SLAM2

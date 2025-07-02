@@ -23,6 +23,8 @@ public:
 
   virtual ~FeatureExtractor() {}
 
+  virtual void InfoConfigs() = 0;
+
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
                           std::vector<cv::KeyPoint> &keypoints,
                           cv::OutputArray descriptors) = 0;

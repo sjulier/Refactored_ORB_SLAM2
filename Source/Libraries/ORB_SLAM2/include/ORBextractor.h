@@ -41,21 +41,20 @@ public:
 
 class ORBextractor : public FeatureExtractor {
 public:
-
-  std::string name = "ORBextractor";
-
   ORBextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST);
 
   ORBextractor(const cv::FileNode& config, bool init = false);
 
   virtual ~ORBextractor() {}
 
+  virtual void InfoConfigs() override;
+
   // Compute the ORB features and descriptors on an image.
   // ORB are dispersed on the image using an octree.
   // Mask is ignored in the current implementation.
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
                           std::vector<cv::KeyPoint> &keypoints,
-                          cv::OutputArray descriptors);
+                          cv::OutputArray descriptors) override;
 
    static void ForceLinking();
 

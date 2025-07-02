@@ -109,7 +109,7 @@ void Viewer::Run() {
   std::vector<string> currentFrameWindowName;
   currentFrameWindowName.resize(Ntype);
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
-    currentFrameWindowName[Ftype] = "ORB-SLAM2: Current Frame (" + ExtractorNames[Ftype] + " Features)";
+    currentFrameWindowName[Ftype] = "ORB-SLAM2: Current Frame ( " + std::to_string(Ftype) + "-" + ExtractorNames[Ftype] + " Features)";
     cv::namedWindow(currentFrameWindowName[Ftype]);
   }
     

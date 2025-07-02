@@ -18,10 +18,6 @@ FeatureExtractor::FeatureExtractor(const cv::FileNode& config, bool init) {
   iniThFAST   = config["iniThFAST"].empty()    ? 20   : (int)config["iniThFAST"];
   minThFAST   = config["minThFAST"].empty()    ? 7    : (int)config["minThFAST"];
 
-  cout << "- Number of Features: " << nfeatures << endl;
-  cout << "- Scale Levels: " << nlevels << endl;
-  cout << "- Scale Factor: " << scaleFactor << endl;
-
   // Double num of feature when the extractor is for initialization.
   if (init == true) nfeatures *= 2;
 

@@ -4,6 +4,15 @@
 
 namespace ORB_SLAM2 {
 
+    void AKAZEextractor::InfoConfigs() {
+      std::cout << "- Number of Features: " << nfeatures << std::endl;
+      std::cout << "- Scale Levels: " << nlevels << std::endl;
+      std::cout << "- Scale Factor: " << scaleFactor << std::endl;
+      std::cout << "- Threshold: " << threshold << std::endl;
+      std::cout << "- Num of Octaves: " << nOctaves << std::endl;
+      std::cout << "- Num of Octave Layers: " << nOctaveLayers << std::endl;
+    }
+
     AKAZEextractor::AKAZEextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST, int minThFAST)
       : FeatureExtractor(nfeatures, scaleFactor, nlevels, iniThFAST, minThFAST) {
         mpAKAZE = cv::AKAZE::create(
@@ -19,14 +28,9 @@ namespace ORB_SLAM2 {
     AKAZEextractor::AKAZEextractor(const cv::FileNode& config, bool init)
       : FeatureExtractor(config, init) {
 
-        float threshold     = config["threshold"].empty()      ? 1e-3f : (float)config["threshold"];
-        int nOctaves        = config["nOctaves"].empty()       ? 4     : (int)config["nOctaves"];
-        int nOctaveLayers   = config["nOctaveLayers"].empty()  ? 4     : (int)config["nOctaveLayers"];
-
-        std::cout << std::endl << "AKAZE Extractor Parameters: " << std::endl;
-        std::cout << "- Threshold: " << threshold << std::endl;
-        std::cout << "- Num of Octaves: " << nOctaves << std::endl;
-        std::cout << "- Num of Octave Layers: " << nOctaveLayers << std::endl;
+        threshold     = config["threshold"].empty()      ? 1e-3f : (float)config["threshold"];
+        nOctaves        = config["nOctaves"].empty()       ? 4     : (int)config["nOctaves"];
+        nOctaveLayers   = config["nOctaveLayers"].empty()  ? 4     : (int)config["nOctaveLayers"];
 
         mpAKAZE = cv::AKAZE::create(
             cv::AKAZE::DESCRIPTOR_MLDB,
@@ -78,7 +82,7 @@ namespace {
                 });
         }
     };
-    static AKAZERegister _akazeRegisterInstance;
+    AKAZERegister AkazeRegisterInstance;
 }
 
 

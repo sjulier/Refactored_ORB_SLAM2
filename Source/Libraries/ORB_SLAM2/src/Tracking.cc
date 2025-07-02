@@ -191,6 +191,9 @@ Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<
 
     if (sensor == System::MONOCULAR)
       mpIniFeatureExtractor[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, true);
+
+    cout << endl << "[Feature " + std::to_string(i) + "] " + name + " Extractor Parameters: " << endl;
+    mpFeatureExtractorLeft[i]->InfoConfigs();
   }
 
   if (sensor == System::STEREO || sensor == System::RGBD) {
