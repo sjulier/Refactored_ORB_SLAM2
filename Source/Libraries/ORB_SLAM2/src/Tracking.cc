@@ -38,9 +38,117 @@
 #include <mutex>
 #include <thread>
 
+// ====================== HDF5 Key Point Output ======================== //
+#include <array>
+// ====================== HDF5 Key Point Output ======================== //
+
 using namespace ::std;
 
 namespace ORB_SLAM2 {
+
+// ====================== HDF5 Key Point Output ======================== //
+void Tracking::InitLogFile()
+{
+  	if(!mbDoLog) return;
+
+    std::string fname = "slam_log_" + std::to_string(std::time(nullptr)) + ".h5";
+    mpLogFile = std::make_unique<HighFive::File>(
+        fname,
+        HighFive::File::Overwrite | HighFive::File::Create
+    );
+}
+
+void Tracking::BuildMatchesWithLastPerChannel(int ch, std::vector<std::pair<int,int>>& vMatches) const
+{
+    const auto& CL = mLastFrame.Channels[ch];
+    const auto& CC = mCurrentFrame.Channels[ch];
+
+    if (CL.N == 0 || CC.N == 0) return;
+
+    std::unordered_map<MapPoint*, int> mp2idxLast;
+    for (int j = 0; j < CL.N; ++j)
+        if (auto* p = CL.mvpMapPoints[j]; p && !CL.mvbOutlier[j])
+            mp2idxLast[p] = j;
+
+    for (int i = 0; i < CC.N; ++i)
+        if (auto* p = CC.mvpMapPoints[i]; p && !CC.mvbOutlier[i])
+            if (auto it = mp2idxLast.find(p); it != mp2idxLast.end())
+                vMatches.emplace_back(i, it->second);
+}
+
+
+void Tracking::LogFrame()
+{
+    if(!mbDoLog) return;
+    if(!mpLogFile) InitLogFile();
+
+    const std::string gFrame = "/frames/" + std::to_string(mCurrentFrame.mnId);
+    mpLogFile->createGroup(gFrame);
+
+    for(int ch = 0; ch < Ntype; ++ch)                   // Channel Loop Recursive
+    {
+        const auto& C = mCurrentFrame.Channels[ch];
+        if(C.N == 0) continue;
+
+        const std::string g = gFrame + "/ch" + std::to_string(ch);
+        mpLogFile->createGroup(g);
+
+        /* 1) keypoints [N,7] */
+        std::vector<std::array<float,7>> kpbuf;
+        kpbuf.reserve(C.N);
+        for(int i = 0; i < C.N; ++i){
+            const cv::KeyPoint& kp = C.mvKeys[i];
+            float mpid = (C.mvpMapPoints[i] && !C.mvbOutlier[i])
+                        ? static_cast<float>(C.mvpMapPoints[i]->mnId)
+                        : -1.f;
+            kpbuf.push_back({kp.pt.x, kp.pt.y,
+                             static_cast<float>(kp.octave),
+                             kp.angle, kp.size, kp.response,
+                             mpid});
+        }
+        mpLogFile->createDataSet<float>(g+"/keypoints",
+                                        {kpbuf.size(),7}).write(kpbuf);
+
+        /* 2) descriptors [N,32] */
+        std::vector<std::array<uint8_t,32>> desc(C.N);
+        for(int i=0;i<C.N;++i)
+            std::memcpy(desc[i].data(),
+                        C.mDescriptors.ptr<uint8_t>(i),32);
+        mpLogFile->createDataSet<uint8_t>(g+"/descriptors",
+                                          {desc.size(),32}).write(desc);
+
+        /* 3) matches to last frame */
+        std::vector<std::pair<int,int>> vMatches;
+        if (mState == NOT_INITIALIZED) {
+            const auto& vIni = mvIniMatches[ch];     // Initial mapping
+            for (size_t idxIni = 0; idxIni < vIni.size(); ++idxIni) {
+                int idxCur = vIni[idxIni];
+                if(idxCur >= 0) vMatches.emplace_back(idxCur, static_cast<int>(idxIni));
+            }
+        } else {
+            BuildMatchesWithLastPerChannel(ch, vMatches);
+        }
+        if (!vMatches.empty()) {
+            std::vector<std::array<int,2>> mbuf;
+            for(auto &p:vMatches) mbuf.push_back({p.first,p.second});
+            mpLogFile->createDataSet<int>(g+"/matches_prev",
+                                          {mbuf.size(),2}).write(mbuf);
+            mpLogFile->getGroup(g)
+                     .createAttribute<int>("prev_id",
+                         HighFive::DataSpace(1))
+                     .write(mCurrentFrame.mnId-1);
+        }
+    }
+}
+
+void Tracking::CloseLogFile(){
+    if(mpLogFile){
+        mpLogFile->flush();
+        mpLogFile.reset();
+    }
+}
+// ====================== HDF5 Key Point Output ======================== //
+
 
 Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer,
                    MapDrawer *pMapDrawer, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB,
@@ -358,6 +466,12 @@ void Tracking::Track() {
       }
     }
 
+// ====================== HDF5 Key Point Output ======================== //
+    /* ---------- HDF5 Log Hooker begin ---------- */
+    LogFrame();
+    /* ---------- HDF5 Log Hooker end ------------ */
+// ====================== HDF5 Key Point Output ======================== //
+
     for (int Ftype = 0; Ftype < Ntype; Ftype++)
       mpFrameDrawer[Ftype]->Update(this);
 
@@ -492,6 +606,12 @@ void Tracking::Track() {
       mState = OK;
     else
       mState = LOST;
+
+// ====================== HDF5 Key Point Output ======================== //
+    /* ---------- HDF5 Log Hooker begin ---------- */
+    LogFrame();
+    /* ---------- HDF5 Log Hooker end ------------ */
+// ====================== HDF5 Key Point Output ======================== //
 
     // Update drawer
     for (int Ftype = 0; Ftype < Ntype; Ftype++)

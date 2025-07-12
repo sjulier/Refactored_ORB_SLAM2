@@ -58,6 +58,9 @@ if (POLICY CMP0072)
    set(OpenGL_GL_PREFERENCE LEGACY)
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/HighFive/include)
+
+
 # Find OpenCV 4.0; the fallback is OpenCV 3.0
 find_package(OpenCV 4.0 QUIET)
 if(NOT OpenCV_FOUND)
@@ -86,6 +89,13 @@ else()
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif ()
 
+# Suppress warning. From:
+# https://stackoverflow.com/questions/79146083/finding-boost-without-cmake-find-module-cmp0167
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
+
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
 # Find the required packages; these are from ThirdParty
@@ -94,6 +104,9 @@ find_package(Pangolin REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DE
 find_package(DBoW2 REQUIRED)
 find_package(DLib REQUIRED)
 find_package(g2o REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
+
+find_package(HDF5 COMPONENTS C HL REQUIRED)
+include_directories(${HDF5_INCLUDE_DIRS})
 
 # Add the libraries and examples
 add_subdirectory(Libraries)

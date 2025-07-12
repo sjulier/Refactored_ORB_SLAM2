@@ -112,6 +112,9 @@ int main(int argc, char **argv) {
       if (ttrack < T)
         this_thread::sleep_for(chrono::duration<double>(T - ttrack));
     }
+// ====================== HDF5 Key Point Output ======================== //
+	SLAM.CloseLogFile();
+// ====================== HDF5 Key Point Output ======================== //
     SLAM.StopViewer();
   });
   SLAM.StartViewer();

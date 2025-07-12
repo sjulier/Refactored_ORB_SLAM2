@@ -37,6 +37,11 @@
 #include "System.h"
 #include "Viewer.h"
 
+// ====================== HDF5 Key Point Output ======================== //
+#include <highfive/H5File.hpp>
+#include <memory>
+// ====================== HDF5 Key Point Output ======================== //
+
 #include <mutex>
 
 namespace ORB_SLAM2 {
@@ -49,8 +54,22 @@ class LoopClosing;
 class System;
 
 class Tracking {
+
+// ====================== HDF5 Key Point Output ======================== //
+// JDF5 Matching Log Attributes
+bool mbDoLog = true;                        // Trigger
+std::unique_ptr<HighFive::File> mpLogFile;  // HDF5
+
+void InitLogFile();
+void BuildMatchesWithLastPerChannel(int ch, std::vector<std::pair<int,int>>& vMatches) const;
+void LogFrame();
+// ====================== HDF5 Key Point Output ======================== //
+
 public:
   int Ntype; // Number of channels
+// ====================== HDF5 Key Point Output ======================== //
+  void CloseLogFile();
+// ====================== HDF5 Key Point Output ======================== //
 
 public:
   Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,

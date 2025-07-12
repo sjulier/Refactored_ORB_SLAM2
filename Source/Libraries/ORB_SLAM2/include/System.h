@@ -139,6 +139,11 @@ public:
   // temp stop value
   bool tempStop;
 
+// ====================== HDF5 Key Point Output ======================== //
+  /// Flush & close HDF5 log early (safe even if already closed)
+  void CloseLogFile();
+// ====================== HDF5 Key Point Output ======================== //
+
 private:
   // Input sensor
   eSensor mSensor;

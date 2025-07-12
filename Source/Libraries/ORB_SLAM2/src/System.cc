@@ -35,6 +35,12 @@ bool has_suffix(const std::string &str, const std::string &suffix) {
 
 namespace ORB_SLAM2 {
 
+// ====================== HDF5 Key Point Output ======================== //
+void System::CloseLogFile() {
+    if (mpTracker) mpTracker->CloseLogFile();
+}
+// ====================== HDF5 Key Point Output ======================== //
+
 System::System(const string &strSettingsFile, const eSensor sensor, const bool bUseViewer)
     : mSensor(sensor), mpViewer(static_cast<Viewer *>(NULL)), mbReset(false),
       mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false) {
@@ -142,8 +148,6 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
   if (bUseViewer) {
 
     mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile, ExtractorNames);
-
-    // mptViewer = new thread(&Viewer::Run, mpViewer);
     mpTracker->SetViewer(mpViewer);
   }
 
@@ -348,8 +352,8 @@ void System::Shutdown() {
     this_thread::sleep_for(chrono::milliseconds(1));
   }
 
-  if (mpViewer)
-    pangolin::BindToContext("ORB-SLAM2: Map Viewer");
+  // if (mpViewer) pangolin::BindToContext("ORB-SLAM2: Map Viewer");
+
 }
 
 void System::SaveTrajectoryTUM(const string &filename) {

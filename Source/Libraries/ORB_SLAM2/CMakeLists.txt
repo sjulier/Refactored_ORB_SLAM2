@@ -51,6 +51,9 @@ g2o::types_sba
 g2o::types_sim3
 g2o::core
 Boost::filesystem
+# ====================== HDF5 Key Point Output ======================== #
+${HDF5_C_LIBRARIES}
+# ====================== HDF5 Key Point Output ======================== #
 )
 
 # For some reason this isn't propagating over; I think this might be related to a LIST issue,
@@ -60,6 +63,9 @@ if(APPLE)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
+# ====================== HDF5 Key Point Output ======================== #
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ThirdParty/HighFive/include>
+# ====================== HDF5 Key Point Output ======================== #
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   $<BUILD_INTERFACE:${DBoW2_INCLUDE_DIR}>
