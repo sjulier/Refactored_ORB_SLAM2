@@ -1,10 +1,15 @@
 #include "FeatureExtractorFactory.h"
 
+#include "ORBextractor.h"
+#include "AKAZEextractor.h"
+#include "BRISKextractor.h"
+
 namespace ORB_SLAM2 {
 
 FeatureExtractorFactory& FeatureExtractorFactory::Instance() {
     AKAZEextractor::ForceLinking();
     ORBextractor::ForceLinking();
+    BRISKextractor::ForceLinking();
     static FeatureExtractorFactory instance;
     return instance;
 }

@@ -8,9 +8,6 @@
 #include <opencv2/core/core.hpp>
 #include "FeatureExtractor.h"
 
-#include "ORBextractor.h"
-#include "AKAZEextractor.h"
-
 namespace ORB_SLAM2 {
 
 class FeatureExtractorFactory {

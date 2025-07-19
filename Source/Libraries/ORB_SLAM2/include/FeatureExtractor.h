@@ -54,6 +54,8 @@ protected:
 
   void InitPyramidParameters();
 
+  void ComputePyramid(cv::Mat image);
+
   std::vector<int> mnFeaturesPerLevel;
 
   std::vector<int> umax;

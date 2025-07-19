@@ -27,12 +27,15 @@
 
 #include <mutex>
 #include <opencv2/core/core.hpp>
+#include <unordered_map>
 
 namespace ORB_SLAM2 {
 
 class KeyFrame;
 class Map;
 class Frame;
+
+struct Edge; // CorrelationEdge.h -> Edge
 
 class MapPoint {
 public:
@@ -79,6 +82,10 @@ public:
 
   int GetFeatureType();
 
+  // CorrelationEdge Related
+  uint32_t AddEdge(MapPoint *pOther);
+  uint32_t GetEdgeCount(MapPoint *pOther) const;
+
 public:
   long unsigned int mnId;
   static long unsigned int nNextId;
@@ -112,6 +119,9 @@ public:
 
   static std::mutex mGlobalMutex;
 
+  // CorrelationEdge Related
+  std::unordered_map<MapPoint*, std::shared_ptr<Edge>> mAdjEdges;
+
 protected:
   // Position in absolute coordinates
   cv::Mat mWorldPos;
@@ -144,6 +154,7 @@ protected:
 
   std::mutex mMutexPos;
   std::mutex mMutexFeatures;
+  mutable std::mutex mMutexEdge;
 };
 
 } // namespace ORB_SLAM2

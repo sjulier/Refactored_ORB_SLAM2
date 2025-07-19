@@ -57,7 +57,6 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 
 #include "ORBextractor.h"
@@ -977,7 +976,7 @@ void ORBextractor::operator()(InputArray _image, InputArray _mask,
   assert(image.type() == CV_8UC1);
 
   // Pre-compute the scale pyramid
-  ComputePyramid(image);
+  FeatureExtractor::ComputePyramid(image);
 
   vector<vector<KeyPoint>> allKeypoints;
   ComputeKeyPointsOctTree(allKeypoints);
@@ -1033,33 +1032,7 @@ void ORBextractor::operator()(InputArray _image, InputArray _mask,
   
 }
 
-void ORBextractor::ComputePyramid(cv::Mat image) {
-  for (int level = 0; level < nlevels; ++level) {
-    float scale = mvInvScaleFactor[level];
-    Size sz(cvRound((float)image.cols * scale),
-            cvRound((float)image.rows * scale));
-    Size wholeSize(sz.width + EDGE_THRESHOLD * 2,
-                   sz.height + EDGE_THRESHOLD * 2);
-    Mat temp(wholeSize, image.type()), masktemp;
-    mvImagePyramid[level] =
-        temp(Rect(EDGE_THRESHOLD, EDGE_THRESHOLD, sz.width, sz.height));
-
-    // Compute the resized image
-    if (level != 0) {
-      resize(mvImagePyramid[level - 1], mvImagePyramid[level], sz, 0, 0,
-             INTER_LINEAR);
-
-      copyMakeBorder(mvImagePyramid[level], temp, EDGE_THRESHOLD,
-                     EDGE_THRESHOLD, EDGE_THRESHOLD, EDGE_THRESHOLD,
-                     BORDER_REFLECT_101 + BORDER_ISOLATED);
-    } else {
-      copyMakeBorder(image, temp, EDGE_THRESHOLD, EDGE_THRESHOLD,
-                     EDGE_THRESHOLD, EDGE_THRESHOLD, BORDER_REFLECT_101);
-    }
-  }
-}
-
-  void ORBextractor::ForceLinking() {}
+ void ORBextractor::ForceLinking() {}
 
 } // namespace ORB_SLAM2
 

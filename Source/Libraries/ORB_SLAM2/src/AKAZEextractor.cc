@@ -28,7 +28,7 @@ namespace ORB_SLAM2 {
     AKAZEextractor::AKAZEextractor(const cv::FileNode& config, bool init)
       : FeatureExtractor(config, init) {
 
-        threshold     = config["threshold"].empty()      ? 1e-3f : (float)config["threshold"];
+        threshold       = config["threshold"].empty()      ? 1e-3f : (float)config["threshold"];
         nOctaves        = config["nOctaves"].empty()       ? 4     : (int)config["nOctaves"];
         nOctaveLayers   = config["nOctaveLayers"].empty()  ? 4     : (int)config["nOctaveLayers"];
 
@@ -47,12 +47,13 @@ namespace ORB_SLAM2 {
                                     std::vector<cv::KeyPoint>& keypoints,
                                     cv::OutputArray            descriptors)
     {
-        mvImagePyramid[0] = image.getMat();
+        cv::Mat im = image.getMat();
+        FeatureExtractor::ComputePyramid(im);
 
         cv::Mat raw;
         mpAKAZE->detectAndCompute(image, mask, keypoints, raw, false);
 
-        for(auto& kp : keypoints) kp.octave = 0;
+        //for(auto& kp : keypoints) kp.octave = 0;
 
         if(static_cast<int>(keypoints.size()) > nfeatures)
         {
@@ -67,7 +68,7 @@ namespace ORB_SLAM2 {
 
     }
 
-    void AKAZEextractor::ForceLinking() {}
+void AKAZEextractor::ForceLinking() {}
 
 } // namespace ORB_SLAM2
 

@@ -32,6 +32,12 @@
 #include "FeatureExtractorFactory.h"
 #include "Optimizer.h"
 #include "PnPsolver.h"
+#include "CorrelationMatcher.h"
+
+// DEBUG
+#include <map>
+#include "CorrelationEdge.h"
+#include "MapPoint.h"
 
 #include <chrono>
 #include <iostream>
@@ -640,7 +646,44 @@ void Tracking::Track() {
             mCurrentFrame.Channels[Ftype].mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
           }
         }
-      } 
+      }
+
+/*
+
+      // Correlation Matching
+      const float th_px = 2.0f;  // Threshold
+
+      for (int a = 0; a < Ntype; ++a)
+        for (int b = a + 1; b < Ntype; ++b)
+            BuildCorrelationEdges(mCurrentFrame, a, b, th_px);
+
+
+std::map<int, size_t> counterHist;
+size_t countAbove5 = 0;
+
+const auto& vpMapPoints = mpMap->GetAllMapPoints();
+for (ORB_SLAM2::MapPoint* p : vpMapPoints) {
+    if (!p || p->isBad()) continue;
+
+    for (const auto& kv : p->mAdjEdges) {
+        const auto& edge = kv.second;
+        if (edge->pA != p) continue;
+
+        int c = edge->counter.load();
+        counterHist[c]++;
+        if (c > 5)
+            ++countAbove5;
+    }
+}
+
+std::cout << "[TRACK STAT] Edges with counter > 5 across map: " << countAbove5 << std::endl;
+
+std::cout << "[TRACK STAT] Edge Counter Histogram:" << std::endl;
+for (const auto& kv : counterHist) {
+    std::cout << "  counter = " << kv.first << " → " << kv.second << " edges" << std::endl;
+}
+
+*/
 
       // Delete temporal MapPoints
       for (list<MapPoint *>::iterator lit = mlpTemporalPoints.begin(), lend = mlpTemporalPoints.end(); lit != lend; lit++) {

@@ -20,6 +20,7 @@
 
 #include "MapPoint.h"
 #include "Associater.h"
+#include "CorrelationEdge.h"
 
 #include <mutex>
 
@@ -419,6 +420,38 @@ int MapPoint::PredictScale(const float &currentDist, Frame *pF) {
     nScale = pF->mnScaleLevels - 1;
 
   return nScale;
+}
+
+uint32_t MapPoint::AddEdge(MapPoint *pOther) {
+    // Prevent nullptr or self checking
+    if (!pOther || pOther==this) return 0;
+
+    // Asign by mpID order
+    MapPoint* pA = (mnId < pOther->mnId) ? this   : pOther;
+    MapPoint* pB = (mnId < pOther->mnId) ? pOther : this;
+
+    // Lock
+    std::unique_lock<std::mutex> lk1(pA->mMutexEdge);
+    std::unique_lock<std::mutex> lk2(pB->mMutexEdge);
+
+    // If edge exists, atomic increase counter for the edge
+    auto it = mAdjEdges.find(pOther);
+    if (it != mAdjEdges.end()) {
+        ++(it->second->counter);
+        return it->second->counter.load();
+    }
+
+    // If not exists, create new edge and add into both mappoint
+    auto spEdge = std::make_shared<Edge>(pA, pB);
+    mAdjEdges[pOther] = spEdge;
+    pOther->mAdjEdges[this] = spEdge;
+    return 1;
+}
+
+uint32_t MapPoint::GetEdgeCount(MapPoint *pOther) const {
+    std::lock_guard<std::mutex> lk(mMutexEdge);
+    auto it = mAdjEdges.find(pOther);
+    return (it==mAdjEdges.end()) ? 0 : it->second->counter.load();
 }
 
 } // namespace ORB_SLAM2

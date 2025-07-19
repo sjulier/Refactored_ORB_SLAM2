@@ -57,7 +57,7 @@ class Tracking {
 
 // ====================== HDF5 Key Point Output ======================== //
 // JDF5 Matching Log Attributes
-bool mbDoLog = true;                        // Trigger
+bool mbDoLog = false;                        // Trigger
 std::unique_ptr<HighFive::File> mpLogFile;  // HDF5
 
 void InitLogFile();
