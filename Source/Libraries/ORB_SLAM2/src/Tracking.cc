@@ -285,18 +285,28 @@ Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<
 
   */
 
+  // Config loading and initialization for each feature extractor
   mpFeatureExtractorLeft.resize(Ntype);
   mpFeatureExtractorRight.resize(Ntype);
   mpIniFeatureExtractor.resize(Ntype);
 
+  // Read the number of extractor and their corrisponding name
   std::vector<std::string> extractor_names;
   cv::FileNode extractor_list = fSettings["Extractors"];
   for (auto it = extractor_list.begin(); it != extractor_list.end(); ++it)
       extractor_names.push_back((std::string)*it);
 
+  // Associator: Resize/Initialize TH vectors
+  Associater::mvTH_LOW.resize(Ntype);
+  Associater::mvTH_HIGH.resize(Ntype);
+
+  // Read and initialize parameters for each extractor
   for (int i = 0; i < Ntype; ++i) {
     std::string& name = extractor_names[i];
     const cv::FileNode& extractor_config = fSettings[name];
+
+    Associater::mvTH_LOW[i] = static_cast<float>(extractor_config["TH_LOW"]);
+    Associater::mvTH_HIGH[i] = static_cast<float>(extractor_config["TH_HIGH"]);
 
     mpFeatureExtractorLeft[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, false);
 
@@ -307,6 +317,8 @@ Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<
       mpIniFeatureExtractor[i] = FeatureExtractorFactory::Instance().Create(name, extractor_config, true);
 
     cout << endl << "[Feature " + std::to_string(i) + "] " + name + " Extractor Parameters: " << endl;
+	cout << " ( TH_LOW: " << static_cast<float>(extractor_config["TH_LOW"]) <<
+	", TH_HIGH: " << static_cast<float>(extractor_config["TH_HIGH"]) << " )" << endl;
     mpFeatureExtractorLeft[i]->InfoConfigs();
   }
 

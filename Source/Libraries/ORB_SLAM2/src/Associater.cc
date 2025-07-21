@@ -10,9 +10,11 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-const int Associater::TH_HIGH = 100;
-const int Associater::TH_LOW = 50;
+//const int Associater::TH_HIGH = 100;
+//const int Associater::TH_LOW = 50;
 const int Associater::HISTO_LENGTH = 30;
+std::vector<float> Associater::mvTH_LOW;
+std::vector<float> Associater::mvTH_HIGH;
 
 Associater::Associater(float nnratio, bool checkOri)
     : mfNNratio(nnratio), mbCheckOrientation(checkOri) {}
@@ -92,7 +94,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
 
         const cv::Mat dMP = pMP->GetDescriptor();
 
-        int bestDist = 256;
+        float bestDist = 256.0f;
         int bestIdx2 = -1;
 
         for (vector<size_t>::const_iterator vit = vIndices2.begin(), vend = vIndices2.end(); vit != vend; vit++) {
@@ -110,7 +112,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
 
           const cv::Mat &d = CurrentFrame.Channels[Ftype].mDescriptors.row(i2);
 
-          const int dist = DescriptorDistance(dMP, d);
+          const float dist = DescriptorDistance(dMP, d);
 
           if (dist < bestDist) {
             bestDist = dist;
@@ -118,7 +120,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
           }
         }
 
-        if (bestDist <= TH_HIGH) {
+        if (bestDist <= mvTH_HIGH[Ftype]) {
           CurrentFrame.Channels[Ftype].mvpMapPoints[bestIdx2] = pMP;
           nmatches++;
 
@@ -192,9 +194,9 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 
     const cv::Mat MPdescriptor = pMP->GetDescriptor();
 
-    int bestDist = 256;
+    float bestDist = 256.0f;
     int bestLevel = -1;
-    int bestDist2 = 256;
+    float bestDist2 = 256.0f;
     int bestLevel2 = -1;
     int bestIdx = -1;
 
@@ -214,7 +216,7 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 
       const cv::Mat &d = F.Channels[Ftype].mDescriptors.row(idx);
 
-      const int dist = DescriptorDistance(MPdescriptor, d);
+      const float dist = DescriptorDistance(MPdescriptor, d);
 
       if (dist < bestDist) {
         bestDist2 = bestDist;
@@ -230,7 +232,7 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 
     // Apply ratio to second match (only if best and second are in the same
     // scale level)
-    if (bestDist <= TH_HIGH) {
+    if (bestDist <= mvTH_HIGH[Ftype]) {
       if (bestLevel == bestLevel2 && bestDist > mfNNratio * bestDist2)
         continue;
 
@@ -324,7 +326,7 @@ int Associater::SearchByProjection(KeyFrame *pKF, cv::Mat Scw, const vector<MapP
     // Match to the most similar keypoint in the radius
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    int bestDist = 256;
+    float bestDist = 256.0f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
@@ -338,7 +340,7 @@ int Associater::SearchByProjection(KeyFrame *pKF, cv::Mat Scw, const vector<MapP
 
       const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(idx);
 
-      const int dist = DescriptorDistance(dMP, dKF);
+      const float dist = DescriptorDistance(dMP, dKF);
 
       if (dist < bestDist) {
         bestDist = dist;
@@ -346,7 +348,7 @@ int Associater::SearchByProjection(KeyFrame *pKF, cv::Mat Scw, const vector<MapP
       }
     }
 
-    if (bestDist <= TH_LOW) {
+    if (bestDist <= mvTH_LOW[Ftype]) {
       vpMatched[bestIdx] = pMP;
       nmatches++;
     }
@@ -415,7 +417,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set
 
         const cv::Mat dMP = pMP->GetDescriptor();
 
-        int bestDist = 256;
+        float bestDist = 256.0f;
         int bestIdx2 = -1;
 
         for (vector<size_t>::const_iterator vit = vIndices2.begin(); vit != vIndices2.end(); vit++) {
@@ -425,7 +427,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set
 
           const cv::Mat &d = CurrentFrame.Channels[Ftype].mDescriptors.row(i2);
 
-          const int dist = DescriptorDistance(dMP, d);
+          const float dist = DescriptorDistance(dMP, d);
 
           if (dist < bestDist) {
             bestDist = dist;
@@ -512,9 +514,9 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
 
         const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(realIdxKF);
 
-        int bestDist1 = 256;
+        float bestDist1 = 256.0f;
         int bestIdxF = -1;
-        int bestDist2 = 256;
+        float bestDist2 = 256.0f;
 
         for (size_t iF = 0; iF < vIndicesF.size(); iF++) {
           const unsigned int realIdxF = vIndicesF[iF];
@@ -524,7 +526,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
 
           const cv::Mat &dF = F.Channels[Ftype].mDescriptors.row(realIdxF);
 
-          const int dist = DescriptorDistance(dKF, dF);
+          const float dist = DescriptorDistance(dKF, dF);
 
           if (dist < bestDist1) {
             bestDist2 = bestDist1;
@@ -535,7 +537,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
           }
         }
 
-        if (bestDist1 <= TH_LOW) {
+        if (bestDist1 <= mvTH_LOW[Ftype]) {
           if (static_cast<float>(bestDist1) <
               mfNNratio * static_cast<float>(bestDist2)) {
             vpMapPointMatches[bestIdxF] = pMP;
@@ -629,9 +631,9 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 
         const cv::Mat &d1 = Descriptors1.row(idx1);
 
-        int bestDist1 = 256;
+        float bestDist1 = 256.0f;
         int bestIdx2 = -1;
-        int bestDist2 = 256;
+        float bestDist2 = 256.0f;
 
         for (size_t i2 = 0, iend2 = f2it->second.size(); i2 < iend2; i2++) {
           const size_t idx2 = f2it->second[i2];
@@ -646,7 +648,7 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 
           const cv::Mat &d2 = Descriptors2.row(idx2);
 
-          int dist = DescriptorDistance(d1, d2);
+          float dist = DescriptorDistance(d1, d2);
 
           if (dist < bestDist1) {
             bestDist2 = bestDist1;
@@ -657,7 +659,7 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
           }
         }
 
-        if (bestDist1 < TH_LOW) {
+        if (bestDist1 < mvTH_LOW[Ftype]) {
           if (static_cast<float>(bestDist1) <mfNNratio * static_cast<float>(bestDist2)) {
             vpMatches12[idx1] = vpMapPoints2[bestIdx2];
             vbMatched2[bestIdx2] = true;
@@ -718,7 +720,7 @@ int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const in
     int realIdxKF = matches[i].queryIdx;
     int bestIdxF = matches[i].trainIdx;
 
-    if (matches[i].distance > TH_LOW)
+    if (matches[i].distance > mvTH_LOW[Ftype])
       continue;
     
     MapPoint *pMP = LastFrame.Channels[Ftype].mvpMapPoints[realIdxKF];
@@ -757,7 +759,7 @@ int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpM
     int realIdxKF = matches[i].queryIdx;
     int bestIdxF = matches[i].trainIdx;
 
-    if (matches[i].distance > TH_HIGH)
+    if (matches[i].distance > mvTH_HIGH[FType])
       continue;
 
     MapPoint *pMP = vpMapPointsKF[realIdxKF];
@@ -833,7 +835,7 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
       int realIdxMap = select_indice[Ftype][matches[Ftype][i].queryIdx];
       int bestIdxF = matches[Ftype][i].trainIdx;
 
-      if (matches[Ftype][i].distance > TH_HIGH)
+      if (matches[Ftype][i].distance > mvTH_HIGH[Ftype])
         continue;
 
       if (F.Channels[Ftype].mvpMapPoints[bestIdxF])
@@ -906,7 +908,7 @@ int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
 
         const cv::Mat &d1 = pKF1->Channels[Ftype].mDescriptors.row(idx1);
 
-        int bestDist = TH_LOW;
+        float bestDist = mvTH_LOW[Ftype];
         int bestIdx2 = -1;
 
         for (size_t i2 = 0, iend2 = f2it->second.size(); i2 < iend2; i2++) {
@@ -926,9 +928,9 @@ int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
 
           const cv::Mat &d2 = pKF2->Channels[Ftype].mDescriptors.row(idx2);
 
-          const int dist = DescriptorDistance(d1, d2);
+          const float dist = DescriptorDistance(d1, d2);
 
-          if (dist > TH_LOW || dist > bestDist)
+          if (dist > mvTH_LOW[Ftype] || dist > bestDist)
             continue;
 
           const cv::KeyPoint &kp2 = pKF2->Channels[Ftype].mvKeysUn[idx2];
@@ -1095,7 +1097,7 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
     // Match to the most similar keypoint in the radius
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    int bestDist = INT_MAX;
+    float bestDist = 3.40282e+38f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
@@ -1107,7 +1109,7 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
 
       const cv::Mat &dKF = pKF2->Channels[Ftype].mDescriptors.row(idx);
 
-      const int dist = DescriptorDistance(dMP, dKF);
+      const float dist = DescriptorDistance(dMP, dKF);
 
       if (dist < bestDist) {
         bestDist = dist;
@@ -1115,7 +1117,7 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
       }
     }
 
-    if (bestDist <= TH_HIGH) {
+    if (bestDist <= mvTH_HIGH[Ftype]) {
       vnMatch1[i1] = bestIdx;
     }
   }
@@ -1171,7 +1173,7 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
     // Match to the most similar keypoint in the radius
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    int bestDist = INT_MAX;
+    float bestDist = 3.40282e+38f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
@@ -1183,7 +1185,7 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
 
       const cv::Mat &dKF = pKF1->Channels[Ftype].mDescriptors.row(idx);
 
-      const int dist = DescriptorDistance(dMP, dKF);
+      const float dist = DescriptorDistance(dMP, dKF);
 
       if (dist < bestDist) {
         bestDist = dist;
@@ -1191,7 +1193,7 @@ int Associater::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> 
       }
     }
 
-    if (bestDist <= TH_HIGH) {
+    if (bestDist <= mvTH_HIGH[Ftype]) {
       vnMatch2[i2] = bestIdx;
     }
   }
@@ -1239,8 +1241,8 @@ int Associater::SearchForInitialization(const int Ftype, Frame &F1, Frame &F2, v
 
     cv::Mat d1 = F1.Channels[Ftype].mDescriptors.row(i1);
 
-    int bestDist = INT_MAX;
-    int bestDist2 = INT_MAX;
+    float bestDist = 3.40282e+38f;
+    float bestDist2 = 3.40282e+38f;
     int bestIdx2 = -1;
 
     for (vector<size_t>::iterator vit = vIndices2.begin(); vit != vIndices2.end(); vit++) {
@@ -1248,7 +1250,7 @@ int Associater::SearchForInitialization(const int Ftype, Frame &F1, Frame &F2, v
 
       cv::Mat d2 = F2.Channels[Ftype].mDescriptors.row(i2);
 
-      int dist = DescriptorDistance(d1, d2);
+      float dist = DescriptorDistance(d1, d2);
 
       if (vMatchedDistance[i2] <= dist)
         continue;
@@ -1262,7 +1264,7 @@ int Associater::SearchForInitialization(const int Ftype, Frame &F1, Frame &F2, v
       }
     }
 
-    if (bestDist <= TH_LOW) {
+    if (bestDist <= mvTH_LOW[Ftype]) {
       if (bestDist < (float)bestDist2 * mfNNratio) {
         if (vnMatches21[bestIdx2] >= 0) {
           vnMatches12[vnMatches21[bestIdx2]] = -1;
@@ -1389,7 +1391,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &v
 
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    int bestDist = 256;
+    float bestDist = 256.0f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
@@ -1426,7 +1428,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &v
 
       const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(idx);
 
-      const int dist = DescriptorDistance(dMP, dKF);
+      const float dist = DescriptorDistance(dMP, dKF);
 
       if (dist < bestDist) {
         bestDist = dist;
@@ -1435,7 +1437,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &v
     }
 
     // If there is already a MapPoint replace otherwise add new measurement
-    if (bestDist <= TH_LOW) {
+    if (bestDist <= mvTH_LOW[Ftype]) {
       MapPoint *pMPinKF = pKF->GetMapPoint(bestIdx, Ftype);
       if (pMPinKF) {
         if (!pMPinKF->isBad()) {
@@ -1536,7 +1538,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, cv::Mat Scw, const vector<M
 
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    int bestDist = INT_MAX;
+    float bestDist = 3.40282e+38f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(); vit != vIndices.end(); vit++) {
       const size_t idx = *vit;
@@ -1547,7 +1549,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, cv::Mat Scw, const vector<M
 
       const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(idx);
 
-      int dist = DescriptorDistance(dMP, dKF);
+      float dist = DescriptorDistance(dMP, dKF);
 
       if (dist < bestDist) {
         bestDist = dist;
@@ -1556,7 +1558,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, cv::Mat Scw, const vector<M
     }
 
     // If there is already a MapPoint replace otherwise add new measurement
-    if (bestDist <= TH_LOW) {
+    if (bestDist <= mvTH_LOW[Ftype]) {
       MapPoint *pMPinKF = pKF->GetMapPoint(bestIdx, Ftype);
       if (pMPinKF) {
         if (!pMPinKF->isBad())
@@ -1606,6 +1608,27 @@ void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, 
   }
 }
 
+
+
+float Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
+  if (a.depth() == CV_8U) {
+	const uchar* pa = a.ptr<uchar>();
+  	const uchar* pb = b.ptr<uchar>();
+  	int dist = 0;
+  	for (int i = 0; i < a.cols; ++i, ++pa, ++pb)
+      dist += __builtin_popcount(*pa ^ *pb);
+  	return static_cast<float>(dist);
+  } else {
+	const float* pa = a.ptr<float>();
+    const float* pb = b.ptr<float>();
+    float dist = 0.f;
+    for (int i = 0; i < a.cols; ++i)
+        dist += (pa[i] - pb[i]) * (pa[i] - pb[i]);
+    return std::sqrt(dist);
+  }
+}
+
+/*
 int Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
 
   const uchar* pa = a.ptr<uchar>();
@@ -1618,22 +1641,10 @@ int Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
 
   dist = int(dist * 32.0f / a.cols + 0.5f); // Normalise to 32B standard
 
-  /*
-  const int *pa = a.ptr<int32_t>();
-  const int *pb = b.ptr<int32_t>();
-
-  int dist = 0;
-
-  for (int i = 0; i < 8; i++, pa++, pb++) {
-    unsigned int v = *pa ^ *pb;
-    v = v - ((v >> 1) & 0x55555555);
-    v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
-    dist += (((v + (v >> 4)) & 0xF0F0F0F) * 0x1010101) >> 24;
-  }
-  */
-
   return dist;
 }
+*/
+
 
 float Associater::RadiusByViewingCos(const float &viewCos) {
   if (viewCos > 0.998)

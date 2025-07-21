@@ -16,7 +16,10 @@ public:
   Associater(float nnratio = 0.6, bool checkOri = true);
 
   // Computes the Hamming distance between two ORB descriptors
-  static int DescriptorDistance(const cv::Mat &a, const cv::Mat &b);
+  // static int DescriptorDistance(const cv::Mat &a, const cv::Mat &b);
+
+  // Computes the Hamming / Euclidean distance between two descriptors
+  static float DescriptorDistance(const cv::Mat &a, const cv::Mat &b);
 
   // Project MapPoints tracked in last frame into the current frame and search matches. Used to track from previous frame (Tracking)
   int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, const float th, const bool bMono, const int Ftype);
@@ -55,8 +58,10 @@ public:
   int Fuse(const int Ftype, KeyFrame *pKF, cv::Mat Scw, const std::vector<MapPoint *> &vpPoints, float th, std::vector<MapPoint *> &vpReplacePoint);
 
 public:
-  static const int TH_LOW;
-  static const int TH_HIGH;
+  // static const int TH_LOW;
+  // static const int TH_HIGH;
+  static std::vector<float> mvTH_LOW;
+  static std::vector<float> mvTH_HIGH;
   static const int HISTO_LENGTH;
 
 protected:

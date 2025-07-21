@@ -509,7 +509,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
   Channels[Ftype].mvuRight = vector<float>(Channels[Ftype].N, -1.0f);
   Channels[Ftype].mvDepth = vector<float>(Channels[Ftype].N, -1.0f);
 
-  const int thOrbDist = (Associater::TH_HIGH + Associater::TH_LOW) / 2;
+  const float thOrbDist = (Associater::mvTH_HIGH[Ftype] + Associater::mvTH_LOW[Ftype]) / 2;
 
   const int nRows = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[0].rows;
 
@@ -557,7 +557,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
     if (maxU < 0)
       continue;
 
-    int bestDist = Associater::TH_HIGH;
+    float bestDist = Associater::mvTH_HIGH[Ftype];
     size_t bestIdxR = 0;
 
     const cv::Mat &dL = Channels[Ftype].mDescriptors.row(iL);
@@ -574,7 +574,7 @@ void Frame::ComputeStereoMatches(const int Ftype) {
 
       if (uR >= minU && uR <= maxU) {
         const cv::Mat &dR = Channels[Ftype].mDescriptorsRight.row(iR);
-        const int dist = Associater::DescriptorDistance(dL, dR);
+        const float dist = Associater::DescriptorDistance(dL, dR);
 
         if (dist < bestDist) {
           bestDist = dist;

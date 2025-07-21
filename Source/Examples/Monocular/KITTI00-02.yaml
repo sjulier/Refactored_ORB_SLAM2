@@ -29,7 +29,7 @@ Camera.RGB: 1
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ BRISK ]
+Extractors: [ ORB, AKAZE, BRISK ]
 
 
 Vocabularies:
@@ -44,6 +44,11 @@ Vocabularies:
 #--------------------------------------------------------------------------------------------
 
 ORB:
+
+  # Essential: Lower/Upper distance threshold for descriptor matching.
+  # Matches with distance below this value are considered high-quality/too-weak.
+  TH_LOW: 50
+  TH_HIGH: 100
 
   # Essential: Number of features per image
   nFeatures: 2000
@@ -66,6 +71,11 @@ ORB:
 #--------------------------------------------------------------------------------------------
 
 AKAZE:
+
+  # Essential: Lower/Upper distance threshold for descriptor matching.
+  # Matches with distance below this value are considered high-quality/too-weak.
+  TH_LOW: 100
+  TH_HIGH: 200
 
   # Essential: Number of features to retain per image
   nFeatures: 5000
@@ -94,6 +104,11 @@ AKAZE:
 
 BRISK:
 
+  # Essential: Lower/Upper distance threshold for descriptor matching.
+  # Matches with distance below this value are considered high-quality/too-weak.
+  TH_LOW: 100
+  TH_HIGH: 200
+
   # Essential: Number of features to retain per image
   nFeatures: 5000
 
@@ -103,18 +118,17 @@ BRISK:
   # Essential: Scale factor between levels in the scale pyramid
   scaleFactor: 2.0
 
-  # AKAZE Extractor: Detector response threshold
-  # The detector's response threshold determines which points are key points
+  # BRISK Extractor: Detector response threshold
+  # The detector's response threshold determines which points are accepted as keypoints.
   threshold: 50
 
-  # AKAZE Extractor: Number of octaves
-  # The number of "octaves" of the multi-scale pyramid (affects the image resolution range)
+  # BRISK Extractor: Number of octaves
+  # The number of pyramid layers for scale-invariance (controls detection resolution range)
   nOctaves: 8
 
-  # AKAZE Extractor: Number of sublevels per octave
-  # How many layers of images are generated in each octave (refinement scale)
+  # BRISK Extractor: Pattern scale
+  # Determines the size of the sampling pattern used around each keypoint.
   patternScale: 1.0
-
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
