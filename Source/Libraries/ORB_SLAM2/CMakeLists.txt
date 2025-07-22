@@ -38,6 +38,7 @@ src/Tracking.cc
 src/Viewer.cc
 src/CorrelationMatcher.cc
 src/BRISKextractor.cc
+src/SIFTextractor.cc
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_DIRECTORY})

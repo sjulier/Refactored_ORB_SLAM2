@@ -24,8 +24,8 @@ namespace ORB_SLAM2 {
 
     private:
         cv::Ptr<cv::BRISK> mpBRISK;
-        int   thresh;
-        int   octaves;
+        int   threshold;
+        int   nOctaves;
         float patternScale;
     };
 

@@ -94,7 +94,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
 
         const cv::Mat dMP = pMP->GetDescriptor();
 
-        float bestDist = 256.0f;
+        float bestDist = 3.40282e+38f;
         int bestIdx2 = -1;
 
         for (vector<size_t>::const_iterator vit = vIndices2.begin(), vend = vIndices2.end(); vit != vend; vit++) {
@@ -194,9 +194,9 @@ int Associater::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 
     const cv::Mat MPdescriptor = pMP->GetDescriptor();
 
-    float bestDist = 256.0f;
+    float bestDist = 3.40282e+38f;
     int bestLevel = -1;
-    float bestDist2 = 256.0f;
+    float bestDist2 = 3.40282e+38f;
     int bestLevel2 = -1;
     int bestIdx = -1;
 
@@ -326,7 +326,7 @@ int Associater::SearchByProjection(KeyFrame *pKF, cv::Mat Scw, const vector<MapP
     // Match to the most similar keypoint in the radius
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    float bestDist = 256.0f;
+    float bestDist = 3.40282e+38f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
@@ -417,7 +417,7 @@ int Associater::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set
 
         const cv::Mat dMP = pMP->GetDescriptor();
 
-        float bestDist = 256.0f;
+        float bestDist = 3.40282e+38f;
         int bestIdx2 = -1;
 
         for (vector<size_t>::const_iterator vit = vIndices2.begin(); vit != vIndices2.end(); vit++) {
@@ -514,9 +514,9 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
 
         const cv::Mat &dKF = pKF->Channels[Ftype].mDescriptors.row(realIdxKF);
 
-        float bestDist1 = 256.0f;
+        float bestDist1 = 3.40282e+38f;
         int bestIdxF = -1;
-        float bestDist2 = 256.0f;
+        float bestDist2 = 3.40282e+38f;
 
         for (size_t iF = 0; iF < vIndicesF.size(); iF++) {
           const unsigned int realIdxF = vIndicesF[iF];
@@ -631,9 +631,9 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 
         const cv::Mat &d1 = Descriptors1.row(idx1);
 
-        float bestDist1 = 256.0f;
+        float bestDist1 = 3.40282e+38f;
         int bestIdx2 = -1;
-        float bestDist2 = 256.0f;
+        float bestDist2 = 3.40282e+38f;
 
         for (size_t i2 = 0, iend2 = f2it->second.size(); i2 < iend2; i2++) {
           const size_t idx2 = f2it->second[i2];
@@ -712,7 +712,9 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 int Associater::SearchByNN(Frame &CurrentFrame, const Frame &LastFrame, const int Ftype) {
   
   std::vector<cv::DMatch> matches;
-  cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  // cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  cv::BFMatcher desc_matcher((LastFrame.Channels[Ftype].mDescriptors.depth() == CV_8U) ?
+                              cv::NORM_HAMMING : cv::NORM_L2, true);
   desc_matcher.match(LastFrame.Channels[Ftype].mDescriptors, CurrentFrame.Channels[Ftype].mDescriptors, matches, cv::Mat());
 
   int nmatches = 0;
@@ -751,7 +753,9 @@ int Associater::SearchByNN(KeyFrame *pKF, Frame &F, std::vector<MapPoint *> &vpM
   vpMapPointMatches = vector<MapPoint *>(F.Channels[FType].N, static_cast<MapPoint *>(NULL));
 
   std::vector<cv::DMatch> matches;
-  cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  // cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  cv::BFMatcher desc_matcher((F.Channels[FType].mDescriptors.depth() == CV_8U) ?
+                              cv::NORM_HAMMING : cv::NORM_L2, true);
   desc_matcher.match(pKF->Channels[FType].mDescriptors, F.Channels[FType].mDescriptors, matches, cv::Mat());
 
   int nmatches = 0;
@@ -810,6 +814,7 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
 
   vector<cv::Mat> MPdescriptors;
   MPdescriptors.resize(F.Ntype);
+
   for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
     MPdescriptors[Ftype].create(MPdescriptorAll[Ftype].size(), 32, CV_8U);
   }
@@ -822,10 +827,26 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
     }
   }
 
+  /*
+  for (int f = 0; f < F.Ntype; ++f) {
+    if (MPdescriptorAll[f].empty()) continue;
+
+    const int dim    = MPdescriptorAll[f][0].cols;   // 32, 64, 128…
+    const int cvType = MPdescriptorAll[f][0].type(); // CV_8U or CV_32F
+
+    MPdescriptors[f].create(MPdescriptorAll[f].size(), dim, cvType);
+
+    for (size_t i = 0; i < MPdescriptorAll[f].size(); ++i)
+        MPdescriptorAll[f][i].copyTo(MPdescriptors[f].row((int)i));
+  }
+*/
+
   vector<vector<cv::DMatch>> matches;
   matches.resize(F.Ntype);
-  cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
+  // cv::BFMatcher desc_matcher(cv::NORM_HAMMING, true);
   for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
+    cv::BFMatcher desc_matcher((MPdescriptors[Ftype].depth() == CV_8U) ?
+                                cv::NORM_HAMMING : cv::NORM_L2, true);
     desc_matcher.match(MPdescriptors[Ftype], F.Channels[Ftype].mDescriptors, matches[Ftype], cv::Mat());
   }
   
@@ -1391,7 +1412,7 @@ int Associater::Fuse(const int Ftype, KeyFrame *pKF, const vector<MapPoint *> &v
 
     const cv::Mat dMP = pMP->GetDescriptor();
 
-    float bestDist = 256.0f;
+    float bestDist = 3.40282e+38f;
     int bestIdx = -1;
     for (vector<size_t>::const_iterator vit = vIndices.begin(), vend = vIndices.end(); vit != vend; vit++) {
       const size_t idx = *vit;
@@ -1611,19 +1632,24 @@ void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, 
 
 
 float Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
+  //std::cout << "111" << std::endl;
   if (a.depth() == CV_8U) {
+    //std::cout << "212" << std::endl;
 	const uchar* pa = a.ptr<uchar>();
   	const uchar* pb = b.ptr<uchar>();
   	int dist = 0;
   	for (int i = 0; i < a.cols; ++i, ++pa, ++pb)
       dist += __builtin_popcount(*pa ^ *pb);
+    //std::cout << static_cast<float>(dist) << std::endl;
   	return static_cast<float>(dist);
   } else {
+    //std::cout << "121" << std::endl;
 	const float* pa = a.ptr<float>();
     const float* pb = b.ptr<float>();
     float dist = 0.f;
     for (int i = 0; i < a.cols; ++i)
         dist += (pa[i] - pb[i]) * (pa[i] - pb[i]);
+    //std::cout << std::sqrt(dist) << std::endl;
     return std::sqrt(dist);
   }
 }

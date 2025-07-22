@@ -13,7 +13,7 @@ FeatureExtractor::FeatureExtractor(int _nfeatures, float _scaleFactor,
 }
 
 FeatureExtractor::FeatureExtractor(const cv::FileNode& config, bool init) {
-  nfeatures   = config["nFeatures"].empty()    ? 1000 : (int)config["nFeatures"];
+  nfeatures   = config["nFeatures"].empty()    ? 2000 : (int)config["nFeatures"];
   scaleFactor = config["scaleFactor"].empty()  ? 1.2f : (float)config["scaleFactor"];
   nlevels     = config["nLevels"].empty()      ? 8    : (int)config["nLevels"];
   iniThFAST   = config["iniThFAST"].empty()    ? 20   : (int)config["iniThFAST"];

@@ -59,6 +59,7 @@ namespace ORB_SLAM2 {
         {
             cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
             raw = raw.rowRange(0, nfeatures).clone();
+            std::cout << "[AKAZE] Keypoint Cap Reached." << std::endl;
         }
 
         const int PAD = 64;

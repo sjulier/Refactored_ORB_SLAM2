@@ -9,28 +9,27 @@ void BRISKextractor::InfoConfigs()
     std::cout << "- Number of Features: " << nfeatures    << std::endl
               << "- Scale Levels: "       << nlevels      << std::endl
               << "- Scale Factor: "       << scaleFactor  << std::endl
-              << "- thresh: "             << thresh       << std::endl
-              << "- octaves: "            << octaves      << std::endl
-              << "- patternScale: "       << patternScale << std::endl;
+              << "- Threshold: "          << threshold    << std::endl
+              << "- Num of Octaves: "     << nOctaves     << std::endl
+              << "- Pattern Scale: "      << patternScale << std::endl;
 }
 
 BRISKextractor::BRISKextractor(int nfeatures_, float scaleFactor_, int nlevels_,
                                int iniThFAST_, int minThFAST_)
     : FeatureExtractor(nfeatures_, scaleFactor_, nlevels_,
-                       iniThFAST_, minThFAST_),
-      thresh(30), octaves(8), patternScale(1.f)
+                       iniThFAST_, minThFAST_), threshold(30), nOctaves(8), patternScale(1.f)
 {
-    mpBRISK = cv::BRISK::create(thresh, octaves, patternScale);
+    mpBRISK = cv::BRISK::create(threshold, nOctaves, patternScale);
 }
 
 BRISKextractor::BRISKextractor(const cv::FileNode& config, bool init)
     : FeatureExtractor(config, init)
 {
-    thresh       = config["thresh"].empty()       ? 50   : (int)config["thresh"];
-    octaves      = config["octaves"].empty()      ? 8    : (int)config["octaves"];
+    threshold    = config["threshold"].empty()    ? 50   : (int)config["threshold"];
+    nOctaves     = config["nOctaves"].empty()     ? 8    : (int)config["nOctaves"];
     patternScale = config["patternScale"].empty() ? 1.f  : (float)config["patternScale"];
 
-    mpBRISK = cv::BRISK::create(thresh, octaves, patternScale);
+    mpBRISK = cv::BRISK::create(threshold, nOctaves, patternScale);
 }
 
 
@@ -49,6 +48,7 @@ void BRISKextractor::operator()(cv::InputArray             image,
  	if(static_cast<int>(keypoints.size()) > nfeatures) {
             cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
             raw = raw.rowRange(0, nfeatures).clone();
+            std::cout << "[BRISK] Keypoint Cap Reached." << std::endl;
     }
 
     const int PAD = 64;

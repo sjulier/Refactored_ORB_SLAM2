@@ -29,7 +29,7 @@ Camera.RGB: 1
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ ORB, AKAZE, BRISK ]
+Extractors: [ SIFT ]
 
 
 Vocabularies:
@@ -38,6 +38,7 @@ Vocabularies:
   AKAZE: "/orb/ORBvoc.bin"
   ORB: "/orb/ORBvoc.bin"
   BRISK: "/orb/ORBvoc.bin"
+  SIFT: "/orb/ORBvoc.bin"
 
 #--------------------------------------------------------------------------------------------
 # ORB Parameters
@@ -78,7 +79,7 @@ AKAZE:
   TH_HIGH: 200
 
   # Essential: Number of features to retain per image
-  nFeatures: 5000
+  nFeatures: 6000
 
   # Essential: Number of levels in the scale pyramid
   nLevels: 4
@@ -110,13 +111,13 @@ BRISK:
   TH_HIGH: 200
 
   # Essential: Number of features to retain per image
-  nFeatures: 5000
+  nFeatures: 6000
 
   # Essential: Number of levels in the scale pyramid
-  nLevels: 8
+  nLevels: 6
 
   # Essential: Scale factor between levels in the scale pyramid
-  scaleFactor: 2.0
+  scaleFactor: 1.414
 
   # BRISK Extractor: Detector response threshold
   # The detector's response threshold determines which points are accepted as keypoints.
@@ -124,11 +125,36 @@ BRISK:
 
   # BRISK Extractor: Number of octaves
   # The number of pyramid layers for scale-invariance (controls detection resolution range)
-  nOctaves: 8
+  nOctaves: 3
 
   # BRISK Extractor: Pattern scale
   # Determines the size of the sampling pattern used around each keypoint.
   patternScale: 1.0
+
+#--------------------------------------------------------------------------------------------
+# ORB Parameters
+#--------------------------------------------------------------------------------------------
+
+SIFT:
+
+  # Essential: Lower/Upper distance threshold for descriptor matching.
+  # Matches with distance below this value are considered high-quality/too-weak.
+  TH_LOW: 300.0
+  TH_HIGH: 500.0
+
+  # Essential: Number of features per image
+  nFeatures: 5000
+
+  # Essential: Number of levels in the scale pyramid
+  nLevels: 1
+
+  # Essential: Scale factor between levels in the scale pyramid
+  scaleFactor: 1.0
+
+  edgeThreshold: 10
+  nOctaves: 3
+  contrastThreshold: 0.1
+  sigma: 1.6
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
@@ -136,7 +162,7 @@ BRISK:
 Viewer.KeyFrameSize: 0.1
 Viewer.KeyFrameLineWidth: 1
 Viewer.GraphLineWidth: 1
-Viewer.PointSize:2
+Viewer.PointSize: 2
 Viewer.CameraSize: 0.15
 Viewer.CameraLineWidth: 2
 Viewer.ViewpointX: 0
