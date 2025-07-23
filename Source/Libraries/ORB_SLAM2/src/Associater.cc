@@ -1632,9 +1632,7 @@ void Associater::ComputeThreeMaxima(vector<int> *histo, const int L, int &ind1, 
 
 
 float Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
-  //std::cout << "111" << std::endl;
   if (a.depth() == CV_8U) {
-    //std::cout << "212" << std::endl;
 	const uchar* pa = a.ptr<uchar>();
   	const uchar* pb = b.ptr<uchar>();
   	int dist = 0;
@@ -1643,7 +1641,6 @@ float Associater::DescriptorDistance(const cv::Mat &a, const cv::Mat &b) {
     //std::cout << static_cast<float>(dist) << std::endl;
   	return static_cast<float>(dist);
   } else {
-    //std::cout << "121" << std::endl;
 	const float* pa = a.ptr<float>();
     const float* pb = b.ptr<float>();
     float dist = 0.f;

@@ -4,6 +4,7 @@
 #include "AKAZEextractor.h"
 #include "BRISKextractor.h"
 #include "SIFTextractor.h"
+#include "KAZEextractor.h"
 
 namespace ORB_SLAM2 {
 
@@ -12,6 +13,7 @@ FeatureExtractorFactory& FeatureExtractorFactory::Instance() {
     ORBextractor::ForceLinking();
     BRISKextractor::ForceLinking();
     SIFTextractor::ForceLinking();
+    KAZEextractor::ForceLinking();
     static FeatureExtractorFactory instance;
     return instance;
 }

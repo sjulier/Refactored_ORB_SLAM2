@@ -44,7 +44,6 @@ void BRISKextractor::operator()(cv::InputArray             image,
     cv::Mat raw;
     mpBRISK->detectAndCompute(image, mask, keypoints, raw, /*useProvidedKeypoints=*/false);
 
-
  	if(static_cast<int>(keypoints.size()) > nfeatures) {
             cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
             raw = raw.rowRange(0, nfeatures).clone();

@@ -30,6 +30,9 @@ src/MapPoint.cc
 src/Optimizer.cc
 src/ORBextractor.cc
 src/AKAZEextractor.cc
+src/BRISKextractor.cc
+src/SIFTextractor.cc
+src/KAZEextractor.cc
 src/ORBVocabulary.cc
 src/PnPsolver.cc
 src/Sim3Solver.cc
@@ -37,8 +40,6 @@ src/System.cc
 src/Tracking.cc
 src/Viewer.cc
 src/CorrelationMatcher.cc
-src/BRISKextractor.cc
-src/SIFTextractor.cc
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_DIRECTORY})

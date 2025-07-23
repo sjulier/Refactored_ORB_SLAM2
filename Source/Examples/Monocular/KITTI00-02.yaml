@@ -29,7 +29,7 @@ Camera.RGB: 1
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ SIFT ]
+Extractors: [ KAZE ]
 
 
 Vocabularies:
@@ -39,6 +39,7 @@ Vocabularies:
   ORB: "/orb/ORBvoc.bin"
   BRISK: "/orb/ORBvoc.bin"
   SIFT: "/orb/ORBvoc.bin"
+  KAZE: "/orb/ORBvoc.bin"
 
 #--------------------------------------------------------------------------------------------
 # ORB Parameters
@@ -155,6 +156,34 @@ SIFT:
   nOctaves: 3
   contrastThreshold: 0.1
   sigma: 1.6
+
+
+#--------------------------------------------------------------------------------------------
+# KAZE Parameters
+#--------------------------------------------------------------------------------------------
+
+KAZE:
+
+  # Essential: Lower/Upper distance threshold for descriptor matching.
+  # Matches with distance below this value are considered high-quality/too-weak.
+  TH_LOW: 0.5
+  TH_HIGH: 1.0
+
+  # Essential: Number of features per image
+  nFeatures: 5000
+
+  # Essential: Number of levels in the scale pyramid
+  nLevels: 4
+
+  # Essential: Scale factor between levels in the scale pyramid
+  scaleFactor: 1.2
+
+  threshold: 1e-3
+  nOctaves: 4
+  nOctaveLayers: 4
+  extended: 0
+  upright: 0
+
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
