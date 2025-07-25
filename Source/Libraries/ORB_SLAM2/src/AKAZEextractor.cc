@@ -51,7 +51,7 @@ namespace ORB_SLAM2 {
         FeatureExtractor::ComputePyramid(im);
 
         cv::Mat raw;
-        mpAKAZE->detectAndCompute(image, mask, keypoints, raw, false);
+        mpAKAZE->detectAndCompute(image, FeatureExtractor::GetEdgedMask(EDGE_THRESHOLD, image, mask), keypoints, raw, false);
 
         //for(auto& kp : keypoints) kp.octave = 0;
 

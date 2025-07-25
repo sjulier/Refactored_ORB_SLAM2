@@ -594,6 +594,13 @@ void Frame::ComputeStereoMatches(const int Ftype) {
 
       // sliding window search
       const int w = 5;
+
+      // Range protection
+	  const cv::Mat& pyrImgL = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[kpL.octave];
+      const cv::Mat& pyrImgR = mpFeatureExtractorRight[Ftype]->mvImagePyramid[kpL.octave];
+	  if (scaledvL - w < 0 || scaledvL + w + 1 > pyrImgL.rows || scaleduL - w < 0 || scaleduL + w + 1 > pyrImgL.cols)
+        continue;
+
       cv::Mat IL = mpFeatureExtractorLeft[Ftype]->mvImagePyramid[kpL.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(scaleduL - w, scaleduL + w + 1);
       IL.convertTo(IL, CV_32F);
       IL = IL - IL.at<float>(w, w) * cv::Mat::ones(IL.rows, IL.cols, CV_32F);
@@ -610,6 +617,11 @@ void Frame::ComputeStereoMatches(const int Ftype) {
         continue;
 
       for (int incR = -L; incR <= +L; incR++) {
+		// Range protection
+		int u = scaleduR0 + incR;
+        if (scaledvL - w < 0 || scaledvL + w + 1 > pyrImgR.rows || u - w < 0 || u + w + 1 > pyrImgR.cols)
+          continue;
+
         cv::Mat IR = mpFeatureExtractorRight[Ftype]->mvImagePyramid[kpL.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
         IR.convertTo(IR, CV_32F);
         IR = IR - IR.at<float>(w, w) * cv::Mat::ones(IR.rows, IR.cols, CV_32F);

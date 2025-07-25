@@ -47,16 +47,10 @@ void KAZEextractor::operator()(cv::InputArray             image,
   FeatureExtractor::ComputePyramid(im);
 
   cv::Mat raw;
-  mpKAZE->detectAndCompute(image, FeatureExtractor::GetMask(image), keypoints, raw, false);
+  mpKAZE->detectAndCompute(image, FeatureExtractor::GetEdgedMask(31, image, mask), keypoints, raw, false);
 
   //for(auto& kp : keypoints) kp.octave = 0;
 
-  std::cout << "[KAZE] detectAndCompute -> "
-              << "kpts=" << keypoints.size()
-              << ", rows=" << raw.rows
-              << ", cols=" << raw.cols
-              << ", type=" << raw.type()
-              << std::endl;
   raw.copyTo(descriptors);
 
   if(static_cast<int>(keypoints.size()) > nfeatures){

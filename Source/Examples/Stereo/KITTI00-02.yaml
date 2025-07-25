@@ -38,15 +38,7 @@ ThDepth: 35
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-#--------------------------------------------------------------------------------------------
-# Multi-Feature System Parameters
-#--------------------------------------------------------------------------------------------
-
-# List of feature extractors to be used in the system
-# You can specify one or more extractors (e.g., [ ORB, AKAZE ])
-# The system will initialize and run each extractor in parallel
-
-Extractors: [ KAZE ]
+Extractors: [ ORB, AKAZE, BRISK, KAZE, SIFT ]
 
 
 Vocabularies:
@@ -61,18 +53,17 @@ Vocabularies:
 #--------------------------------------------------------------------------------------------
 # ORB Parameters
 #--------------------------------------------------------------------------------------------
-
 ORB:
-
   # Essential: Lower/Upper distance threshold for descriptor matching.
   # Matches with distance below this value are considered high-quality/too-weak.
-  TH_LOW: 50
-  TH_HIGH: 100
+  TH_LOW: 300.0       # Low threshold for filtering out poor-quality matches.
+  TH_HIGH: 500.0      # High threshold for accepting confident matches.
 
   # Essential: Number of features per image
   nFeatures: 2000
 
-  # Essential: Number of levels in the scale pyramid
+  # Essential: Number of levels in the scale pyramid.
+  # Number of nonlinear diffusion pyramid levels for scale detection.
   nLevels: 8
 
   # Essential: Scale factor between levels in the scale pyramid
@@ -88,21 +79,22 @@ ORB:
 #--------------------------------------------------------------------------------------------
 # AKAZE Parameters
 #--------------------------------------------------------------------------------------------
-
 AKAZE:
-
   # Essential: Lower/Upper distance threshold for descriptor matching.
   # Matches with distance below this value are considered high-quality/too-weak.
-  TH_LOW: 100
-  TH_HIGH: 200
+  TH_LOW: 300.0       # Low threshold for filtering out poor-quality matches.
+  TH_HIGH: 500.0      # High threshold for accepting confident matches.
 
-  # Essential: Number of features to retain per image
+  # Essential: Number of features per image.
+  # Maximum number of keypoints to retain after detection.
   nFeatures: 6000
 
-  # Essential: Number of levels in the scale pyramid
+  # Essential: Number of levels in the scale pyramid.
+  # Number of nonlinear diffusion pyramid levels for scale detection.
   nLevels: 4
 
-  # Essential: Scale factor between levels in the scale pyramid
+  # Essential: Scale factor between levels in the scale pyramid.
+  # Downscale factor between pyramid levels.
   scaleFactor: 1.2
 
   # AKAZE Extractor: Detector response threshold
@@ -120,21 +112,22 @@ AKAZE:
 #--------------------------------------------------------------------------------------------
 # BRISK Parameters
 #--------------------------------------------------------------------------------------------
-
 BRISK:
-
   # Essential: Lower/Upper distance threshold for descriptor matching.
   # Matches with distance below this value are considered high-quality/too-weak.
-  TH_LOW: 100
-  TH_HIGH: 200
+  TH_LOW: 300.0       # Low threshold for filtering out poor-quality matches.
+  TH_HIGH: 500.0      # High threshold for accepting confident matches.
 
-  # Essential: Number of features to retain per image
+  # Essential: Number of features per image.
+  # Maximum number of keypoints to retain after detection.
   nFeatures: 6000
 
-  # Essential: Number of levels in the scale pyramid
+  # Essential: Number of levels in the scale pyramid.
+  # Number of nonlinear diffusion pyramid levels for scale detection.
   nLevels: 6
 
-  # Essential: Scale factor between levels in the scale pyramid
+  # Essential: Scale factor between levels in the scale pyramid.
+  # Downscale factor between pyramid levels.
   scaleFactor: 1.414
 
   # BRISK Extractor: Detector response threshold
@@ -150,55 +143,82 @@ BRISK:
   patternScale: 1.0
 
 #--------------------------------------------------------------------------------------------
-# ORB Parameters
+# SIFT Parameters
 #--------------------------------------------------------------------------------------------
-
 SIFT:
-
   # Essential: Lower/Upper distance threshold for descriptor matching.
   # Matches with distance below this value are considered high-quality/too-weak.
-  TH_LOW: 300.0
-  TH_HIGH: 500.0
+  TH_LOW: 300.0       # Low threshold for filtering out poor-quality matches.
+  TH_HIGH: 500.0      # High threshold for accepting confident matches.
 
-  # Essential: Number of features per image
+  # Essential: Number of features per image.
+  # Maximum number of keypoints to retain after detection.
   nFeatures: 5000
 
-  # Essential: Number of levels in the scale pyramid
+  # Essential: Number of levels in the scale pyramid.
+  # Number of nonlinear diffusion pyramid levels for scale detection.
   nLevels: 1
 
-  # Essential: Scale factor between levels in the scale pyramid
+  # Essential: Scale factor between levels in the scale pyramid.
+  # Downscale factor between pyramid levels.
   scaleFactor: 1.0
 
-
+  # SIFT Extractor: Edge response threshold.
+  # Suppresses edge-like keypoints; higher values allow more edge points.
   edgeThreshold: 10
+
+  # SIFT Extractor: Number of octave layers.
+  # Number of scale levels per octave for DoG (Difference of Gaussians).
   nOctaves: 3
+
+  # SIFT Extractor: Contrast threshold.
+  # Discards low-contrast keypoints; higher values yield fewer keypoints.
   contrastThreshold: 0.1
+
+  # SIFT Extractor: Initial Gaussian blur sigma.
+  # Applied to the base image before building the scale space.
   sigma: 1.6
 
-#--------------------------------------------------------------------------------------------
-# ORB Parameters
-#--------------------------------------------------------------------------------------------
 
+#--------------------------------------------------------------------------------------------
+# KAZE Parameters
+#--------------------------------------------------------------------------------------------
 KAZE:
-
   # Essential: Lower/Upper distance threshold for descriptor matching.
   # Matches with distance below this value are considered high-quality/too-weak.
-  TH_LOW: 0.5
-  TH_HIGH: 1.0
+  TH_LOW: 0.5         # Lower distance threshold for floating-point descriptors.
+  TH_HIGH: 1.0        # Upper distance threshold for valid matches.
 
-  # Essential: Number of features per image
+  # Essential: Number of features per image.
+  # Maximum number of keypoints retained after detection.
   nFeatures: 5000
 
-  # Essential: Number of levels in the scale pyramid
+  # Essential: Number of levels in the scale pyramid.
+  # Number of nonlinear diffusion pyramid levels for scale detection.
   nLevels: 4
 
-  # Essential: Scale factor between levels in the scale pyramid
+  # Essential: Scale factor between levels in the scale pyramid.
+  # Downscale factor between pyramid levels.
   scaleFactor: 1.2
 
+  # KAZE Extractor: Detector threshold.
+  # Sensitivity threshold for feature detection (based on Hessian response).
   threshold: 1e-3
+
+  # KAZE Extractor: Number of octaves.
+  # Controls the overall scale range covered by the pyramid.
   nOctaves: 4
+
+  # KAZE Extractor: Number of sublevels per octave.
+  # Determines resolution within each octave; higher values = smoother response.
   nOctaveLayers: 4
+
+  # KAZE Extractor: Use extended descriptors.
+  # Set to 1 to use 128D descriptors instead of 64D (better performance, more memory).
   extended: 0
+
+  # KAZE Extractor: Use upright orientation.
+  # Set to 1 to skip orientation estimation (faster, but not rotation-invariant).
   upright: 0
 
 #--------------------------------------------------------------------------------------------

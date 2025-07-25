@@ -50,16 +50,9 @@ void SIFTextractor::operator()(cv::InputArray image, cv::InputArray mask,
     FeatureExtractor::ComputePyramid(im);
 
     cv::Mat raw;
-    mpSIFT->detectAndCompute(image, FeatureExtractor::GetMask(image), keypoints, raw, false);
+    mpSIFT->detectAndCompute(image, FeatureExtractor::GetEdgedMask(EDGE_THRESHOLD, image, mask), keypoints, raw, false);
 
 	for(auto& kp : keypoints) kp.octave = 0;
-
-    std::cout << "[SIFT] detectAndCompute -> "
-              << "kpts=" << keypoints.size()
-              << ", rows=" << raw.rows
-              << ", cols=" << raw.cols
-              << ", type=" << raw.type()
-              << std::endl;
 
     raw.copyTo(descriptors);   // SIFT descriptor: CV_32F 128 dim
 }

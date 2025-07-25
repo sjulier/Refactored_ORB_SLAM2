@@ -29,7 +29,7 @@ public:
                           std::vector<cv::KeyPoint> &keypoints,
                           cv::OutputArray descriptors) = 0;
 
-  cv::Mat GetMask(cv::InputArray image);
+  cv::Mat GetEdgedMask(int edge, cv::InputArray image, cv::InputArray mask);
 
   int GetLevels() const { return nlevels; }
 
