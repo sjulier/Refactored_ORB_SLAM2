@@ -5,7 +5,7 @@
 
 namespace ORB_SLAM2 {
 
-size_t BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px)
+float BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px, size_t th_str)
 {
     const int N = F.Ntype;
     // Check input validity
@@ -32,8 +32,8 @@ size_t BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px)
     collect(chA, vSrc);
     collect(chB, vDst);
 
-    std::cout << "Channel " << chA << " valid points: " << vSrc.size() << std::endl;
-    std::cout << "Channel " << chB << " valid points: " << vDst.size() << std::endl;
+    // std::cout << "Channel " << chA << " valid points: " << vSrc.size() << std::endl;
+    // std::cout << "Channel " << chB << " valid points: " << vDst.size() << std::endl;
 
     if(vSrc.empty() || vDst.empty()) return 0;      // No available points
 
@@ -84,8 +84,7 @@ size_t BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px)
 
     */
 
-    size_t nEdges = 0;
-    size_t totHits = 0, maxHits = 0;
+    size_t nCorr = 0, nEdges = 0, totHits = 0, maxHits = 0;
 
     for(const auto& ns : vSrc){
         int hits = 0;
@@ -94,20 +93,25 @@ size_t BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px)
             float dy = ns.first.y - nd.first.y;
             if(dx*dx + dy*dy <= th_px*th_px){
                 ++hits;
-                if(ns.second != nd.second &&
-                    ns.second->AddEdge(nd.second))
+                if (ns.second != nd.second) {
+                    size_t counts = ns.second->AddEdge(nd.second);
                     ++nEdges;
+                    if (counts >= th_str)
+                        ++nCorr;
+                }
             }
         }
         totHits += hits;
         maxHits  = std::max(maxHits, (size_t)hits);
     }
+
     std::cout << "[CM] totHits=" << totHits
               << " avgHits=" << (double)totHits/vSrc.size()
               << " maxHits=" << maxHits
-              << " validEdges: " << nEdges << '\n';
+              << " validEdges: " << nEdges
+              << " nCorr: " << nCorr << '\n';
 
-    return nEdges;
+    return (2.0f * nCorr) / static_cast<float>(std::min(vSrc.size(), vDst.size()));
 }
 
 } // namespace ORB_SLAM2

@@ -6,7 +6,6 @@
 #include "Frame.h"
 
 namespace ORB_SLAM2 {
-
     /**
      * @brief For a given frame F, perform KD-Tree radius search between two feature channels:
      *        For each successfully matched point in channel chA, search for points in channel chB
@@ -18,13 +17,10 @@ namespace ORB_SLAM2 {
      * @param chB     Target feature channel index (can be greater or less than chA)
      * @param th_px   Pixel radius threshold (default is 2.0f)
      *
-     * @return The number of newly added or updated edges, useful for debugging or statistics
+     * @return The Redundancy Dice Index of the current frame between the two features
      */
 
-    size_t BuildCorrelationEdges(Frame& F,
-                                 int    chA,
-                                 int    chB,
-                                 float  th_px = 2.0f);
+    float BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px = 2.0f, size_t th_str = 3);
 
 } // namespace
 
