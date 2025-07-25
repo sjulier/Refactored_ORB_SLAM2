@@ -50,7 +50,7 @@ void SIFTextractor::operator()(cv::InputArray image, cv::InputArray mask,
     FeatureExtractor::ComputePyramid(im);
 
     cv::Mat raw;
-    mpSIFT->detectAndCompute(image, mask, keypoints, raw, false);
+    mpSIFT->detectAndCompute(image, FeatureExtractor::GetMask(image), keypoints, raw, false);
 
 	for(auto& kp : keypoints) kp.octave = 0;
 

@@ -29,6 +29,8 @@ public:
                           std::vector<cv::KeyPoint> &keypoints,
                           cv::OutputArray descriptors) = 0;
 
+  cv::Mat GetMask(cv::InputArray image);
+
   int GetLevels() const { return nlevels; }
 
   float GetScaleFactor() const { return scaleFactor; }

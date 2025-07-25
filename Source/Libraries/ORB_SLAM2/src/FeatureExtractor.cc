@@ -25,6 +25,16 @@ FeatureExtractor::FeatureExtractor(const cv::FileNode& config, bool init) {
   FeatureExtractor::InitPyramidParameters();
 }
 
+cv::Mat FeatureExtractor::GetMask(cv::InputArray image) {
+  cv::Mat mask;
+  mask = cv::Mat(image.size(), CV_8UC1, cv::Scalar(255));
+  mask.rowRange(0, EDGE_THRESHOLD).setTo(0);
+  mask.rowRange(image.rows() - EDGE_THRESHOLD, image.rows()).setTo(0);
+  mask.colRange(0, EDGE_THRESHOLD).setTo(0);
+  mask.colRange(image.cols() - EDGE_THRESHOLD, image.cols()).setTo(0);
+  return mask;
+}
+
 void FeatureExtractor::InitPyramidParameters() {
 
   mvScaleFactor.resize(nlevels);
