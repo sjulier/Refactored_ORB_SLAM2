@@ -354,6 +354,10 @@ void System::Shutdown() {
 
   // if (mpViewer) pangolin::BindToContext("ORB-SLAM2: Map Viewer");
 
+  // Save Correlation Status to TXT Log
+  cout << endl << "Saving correlation status..." << endl;
+  ORB_SLAM2::Tracking::sMatcher.Finalize();
+  cout << endl << "Correlation status saved!" << endl << endl;
 }
 
 void System::SaveTrajectoryTUM(const string &filename) {

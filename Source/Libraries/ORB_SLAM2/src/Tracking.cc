@@ -52,6 +52,8 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
+CorrelationMatcher Tracking::sMatcher;
+
 // ====================== HDF5 Key Point Output ======================== //
 void Tracking::InitLogFile()
 {
@@ -666,7 +668,7 @@ void Tracking::Track() {
 
       for (int a = 0; a < Ntype; ++a) {
         for (int b = a + 1; b < Ntype; ++b) {
-            float cRI = BuildCorrelationEdges(mCurrentFrame, a, b, th_px, 5);
+            float cRI = sMatcher.BuildEdges(mCurrentFrame, a, b, th_px, 5);
             std::cout << cRI << std::endl;
         }
       }

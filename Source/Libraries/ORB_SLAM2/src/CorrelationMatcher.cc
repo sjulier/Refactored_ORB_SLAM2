@@ -5,7 +5,42 @@
 
 namespace ORB_SLAM2 {
 
-float BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px, size_t th_str)
+CorrelationMatcher::CorrelationMatcher() {
+    mvStats.reserve(5000);
+}
+
+void CorrelationMatcher::Finalize() {
+    if(mvStats.empty()) return;
+
+    std::ofstream log("CorrelationStatus.txt");
+    log << "#frame chA chB RI nCorr nA nB\n";
+
+    double sCorr=0,sA=0,sB=0;
+    for(const auto& s: mvStats){
+        log << s.frameId << ' '<<s.chA<<' '<<s.chB<<' '
+            << s.ri      << ' '<<s.nCorr<<' '
+            << s.nA      << ' '<<s.nB   << '\n';
+
+        sCorr += s.nCorr; sA += s.nA; sB += s.nB;
+    }
+
+    const double F = mvStats.size();
+    const double avgC = sCorr/F, avgA = sA/F, avgB = sB/F;
+    const double RIg_MNR  = avgC / std::min(avgA, avgB);
+    const double RIg_GNR  = avgC / std::sqrt(avgA * avgB);
+    const double RIg_DICE = 2.0 * avgC / (avgA + avgB);
+
+    log << "\n# ---------- Global Summary ----------\n";
+    log << "# CorrFrames: " << F << '\n';
+    log << "avg_CorrEdges: " << avgC << '\n';
+    log << "avg_match_A: " << avgA << '\n';
+    log << "avg_match_B: " << avgB << '\n';
+    log << "global_RI_MNR: " << RIg_MNR << '\n';
+    log << "global_RI_GNR: " << RIg_GNR << '\n';
+    log << "global_RI_DICE: " << RIg_DICE << '\n';
+}
+
+float CorrelationMatcher::BuildEdges(Frame& F, int chA, int chB, float th_px, size_t th_str)
 {
     const int N = F.Ntype;
     // Check input validity
@@ -92,26 +127,34 @@ float BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px, size_t th_s
             float dx = ns.first.x - nd.first.x;
             float dy = ns.first.y - nd.first.y;
             if(dx*dx + dy*dy <= th_px*th_px){
-                ++hits;
+                ++hits; // DEBUG LOGGING
                 if (ns.second != nd.second) {
                     size_t counts = ns.second->AddEdge(nd.second);
-                    ++nEdges;
+                    ++nEdges; // DEBUG LOGGING
                     if (counts >= th_str)
                         ++nCorr;
                 }
             }
         }
-        totHits += hits;
-        maxHits  = std::max(maxHits, (size_t)hits);
+        totHits += hits; // DEBUG LOGGING
+        maxHits  = std::max(maxHits, (size_t)hits); // DEBUG LOGGING
     }
 
+    // DEBUG LOGGING
     std::cout << "[CM] totHits=" << totHits
               << " avgHits=" << (double)totHits/vSrc.size()
               << " maxHits=" << maxHits
               << " validEdges: " << nEdges
               << " nCorr: " << nCorr << '\n';
 
-    return (2.0f * nCorr) / static_cast<float>(std::min(vSrc.size(), vDst.size()));
+    // Save correlation status for evaluation and logging
+    size_t nA    = vSrc.size();
+    size_t nB    = vDst.size();
+    float  RI    = nCorr / std::min(nA,nB);
+    CorrFrameStat cs{F.mnId,chA,chB,nCorr,nA,nB,RI};
+    mvStats.emplace_back(cs);
+
+    return RI;
 }
 
 } // namespace ORB_SLAM2

@@ -20,7 +20,22 @@ namespace ORB_SLAM2 {
      * @return The Redundancy Dice Index of the current frame between the two features
      */
 
-    float BuildCorrelationEdges(Frame& F, int chA, int chB, float th_px = 2.0f, size_t th_str = 3);
+    struct CorrFrameStat{
+        long unsigned int frameId;
+        int chA, chB;
+        size_t nCorr, nA, nB;
+        float  ri;
+    };
+
+    class CorrelationMatcher{
+    public:
+        CorrelationMatcher();
+        void Finalize();
+        float BuildEdges(Frame& F, int chA, int chB, float th_px = 2.0f, size_t th_str = 3);
+
+    private:
+        std::vector<CorrFrameStat> mvStats;
+    };
 
 } // namespace
 

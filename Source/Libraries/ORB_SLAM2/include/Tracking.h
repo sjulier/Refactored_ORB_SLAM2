@@ -34,6 +34,7 @@
 #include "Map.h"
 #include "MapDrawer.h"
 #include "ORBVocabulary.h"
+#include "CorrelationMatcher.h"
 #include "System.h"
 #include "Viewer.h"
 
@@ -52,6 +53,7 @@ class Map;
 class LocalMapping;
 class LoopClosing;
 class System;
+class CorrelationMatcher;
 
 class Tracking {
 
@@ -135,6 +137,7 @@ public:
 
   // THe Initlized frame ID
   long unsigned int mInitlizedID;
+  static ORB_SLAM2::CorrelationMatcher sMatcher;
 
 protected:
   // Main tracking function. It is independent of the input sensor.
