@@ -62,7 +62,9 @@ namespace ORB_SLAM2 {
             std::cout << "[AKAZE] Keypoint Cap Reached." << std::endl;
         }
 
-        const int PAD = 64;
+        if (raw.empty()) return;
+
+        const int PAD = ((raw.cols + 7) & ~7);
         cv::Mat aligned(raw.rows, PAD, CV_8U, cv::Scalar(0));
         raw.copyTo(aligned.colRange(0, raw.cols));
         aligned.copyTo(descriptors);
