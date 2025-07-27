@@ -816,12 +816,12 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
   MPdescriptors.resize(F.Ntype);
 
   for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
-    MPdescriptors[Ftype].create(MPdescriptorAll[Ftype].size(), 32, CV_8U);
+    MPdescriptors[Ftype].create(MPdescriptorAll[Ftype].size(), MPdescriptorAll[Ftype][0].cols, MPdescriptorAll[Ftype][0].type());
   }
   
   for (int Ftype = 0; Ftype < F.Ntype; Ftype++) {
     for (int i = 0; i < static_cast<int>(MPdescriptorAll[Ftype].size()); i++) {
-      for (int j = 0; j < 32; j++) {
+      for (int j = 0; j < MPdescriptorAll[Ftype][0].cols; j++) {
         MPdescriptors[Ftype].at<unsigned char>(i, j) = MPdescriptorAll[Ftype][i].at<unsigned char>(j);
       }
     }

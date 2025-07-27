@@ -44,10 +44,21 @@ void BRISKextractor::operator()(cv::InputArray             image,
     cv::Mat raw;
     mpBRISK->detectAndCompute(image, FeatureExtractor::GetEdgedMask(EDGE_THRESHOLD, image, mask), keypoints, raw, /*useProvidedKeypoints=*/false);
 
- 	if(static_cast<int>(keypoints.size()) > nfeatures) {
-            cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
-            raw = raw.rowRange(0, nfeatures).clone();
-            std::cout << "[BRISK] Keypoint Cap Reached." << std::endl;
+    if (static_cast<int>(keypoints.size()) > nfeatures) {
+
+        for (size_t i = 0; i < keypoints.size(); ++i)
+            keypoints[i].class_id = static_cast<int>(i);
+
+        cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
+
+        cv::Mat raw_sorted(static_cast<int>(keypoints.size()), raw.cols, raw.type());
+        for (size_t i = 0; i < keypoints.size(); ++i) {
+            int oldIdx = keypoints[i].class_id;
+            raw.row(oldIdx).copyTo(raw_sorted.row(static_cast<int>(i)));
+        }
+        raw = raw_sorted;
+
+        // std::cout << "[BRISK] Keypoint Cap Reached." << std::endl;
     }
 
     if (raw.empty()) return;

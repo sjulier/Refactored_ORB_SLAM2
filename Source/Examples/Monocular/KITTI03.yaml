@@ -78,7 +78,7 @@ AKAZE:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 6000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -111,7 +111,7 @@ BRISK:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 6000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -144,7 +144,7 @@ SIFT:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 5000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -182,7 +182,7 @@ KAZE:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints retained after detection.
-  nFeatures: 5000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.

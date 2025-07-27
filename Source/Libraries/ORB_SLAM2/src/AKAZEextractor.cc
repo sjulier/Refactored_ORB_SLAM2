@@ -55,10 +55,20 @@ namespace ORB_SLAM2 {
 
         //for(auto& kp : keypoints) kp.octave = 0;
 
-        if(static_cast<int>(keypoints.size()) > nfeatures)
-        {
+        if (static_cast<int>(keypoints.size()) > nfeatures) {
+
+            for (size_t i = 0; i < keypoints.size(); ++i)
+                keypoints[i].class_id = static_cast<int>(i);
+
             cv::KeyPointsFilter::retainBest(keypoints, nfeatures);
-            raw = raw.rowRange(0, nfeatures).clone();
+
+            cv::Mat raw_sorted(static_cast<int>(keypoints.size()), raw.cols, raw.type());
+            for (size_t i = 0; i < keypoints.size(); ++i) {
+                int oldIdx = keypoints[i].class_id;
+                raw.row(oldIdx).copyTo(raw_sorted.row(static_cast<int>(i)));
+            }
+            raw = raw_sorted;
+
             std::cout << "[AKAZE] Keypoint Cap Reached." << std::endl;
         }
 

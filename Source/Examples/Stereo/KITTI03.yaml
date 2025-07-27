@@ -38,7 +38,7 @@ ThDepth: 40
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ ORB, AKAZE, BRISK, KAZE, SIFT ]
+Extractors: [ ORB, AKAZE ]
 
 
 Vocabularies:
@@ -87,7 +87,7 @@ AKAZE:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 6000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -120,7 +120,7 @@ BRISK:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 6000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -153,7 +153,7 @@ SIFT:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 5000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -191,7 +191,7 @@ KAZE:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints retained after detection.
-  nFeatures: 5000
+  nFeatures: 2000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -227,7 +227,7 @@ KAZE:
 Viewer.KeyFrameSize: 0.6
 Viewer.KeyFrameLineWidth: 2
 Viewer.GraphLineWidth: 1
-Viewer.PointSize:2
+Viewer.PointSize: 2
 Viewer.CameraSize: 0.7
 Viewer.CameraLineWidth: 3
 Viewer.ViewpointX: 0
