@@ -52,7 +52,7 @@ ORB:
   TH_HIGH: 200.0      # High threshold for accepting confident matches.
 
   # Essential: Number of features per image
-  nFeatures: 2000
+  nFeatures: 1000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -79,7 +79,7 @@ AKAZE:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 6000
+  nFeatures: 1000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -112,7 +112,7 @@ BRISK:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 6000
+  nFeatures: 1000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -124,7 +124,7 @@ BRISK:
 
   # BRISK Extractor: Detector response threshold
   # The detector's response threshold determines which points are accepted as keypoints.
-  threshold: 50
+  threshold: 30
 
   # BRISK Extractor: Number of octaves
   # The number of pyramid layers for scale-invariance (controls detection resolution range)
@@ -145,7 +145,7 @@ SIFT:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints to retain after detection.
-  nFeatures: 5000
+  nFeatures: 1000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.
@@ -183,7 +183,7 @@ KAZE:
 
   # Essential: Number of features per image.
   # Maximum number of keypoints retained after detection.
-  nFeatures: 5000
+  nFeatures: 1000
 
   # Essential: Number of levels in the scale pyramid.
   # Number of nonlinear diffusion pyramid levels for scale detection.

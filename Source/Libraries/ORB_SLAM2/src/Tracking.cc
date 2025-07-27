@@ -669,7 +669,7 @@ void Tracking::Track() {
       for (int a = 0; a < Ntype; ++a) {
         for (int b = a + 1; b < Ntype; ++b) {
             float cRI = sMatcher.BuildEdges(mCurrentFrame, a, b, th_px, 5);
-            std::cout << cRI << std::endl;
+            // std::cout << cRI << std::endl;
         }
       }
 
