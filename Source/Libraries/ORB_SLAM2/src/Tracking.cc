@@ -1176,7 +1176,7 @@ void Tracking::MonocularInitializationMultiChannels() {
       mpInitializer = new Initializer(mCurrentFrame, Ntype, 1.0, 200);
       
       for (int Ftype = 0; Ftype < Ntype; Ftype++)
-        fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1); 
+        fill(mvIniMatches[Ftype].begin(), mvIniMatches[Ftype].end(), -1);
       
       return;
     }
@@ -1215,7 +1215,7 @@ void Tracking::MonocularInitializationMultiChannels() {
     cv::Mat Rcw;                 // Current Camera Rotation
     cv::Mat tcw;                 // Current Camera Translation
     vector<vector<bool>> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
-    vbTriangulated.resize(Ntype); 
+    vbTriangulated.resize(Ntype);
 
     // vector<bool> tryInit;
     // tryInit.resize(Ntype);

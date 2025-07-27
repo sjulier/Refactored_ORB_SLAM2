@@ -371,6 +371,8 @@ void LocalMapping::CreateNewMapPoints(const int Ftype) {
     } else {
       
       const float medianDepthKF2 = pKF2->ComputeSceneMedianDepth(2, Ftype);
+      if(medianDepthKF2 < 0)
+        continue;
       const float ratioBaselineDepth = baseline / medianDepthKF2;
 
       if (ratioBaselineDepth < 0.01)

@@ -55,6 +55,8 @@ namespace ORB_SLAM2 {
 
         //for(auto& kp : keypoints) kp.octave = 0;
 
+        if (raw.empty()) return;
+
         if (static_cast<int>(keypoints.size()) > nfeatures) {
 
             for (size_t i = 0; i < keypoints.size(); ++i)
@@ -69,16 +71,13 @@ namespace ORB_SLAM2 {
             }
             raw = raw_sorted;
 
-            std::cout << "[AKAZE] Keypoint Cap Reached." << std::endl;
+            // std::cout << "[AKAZE] Keypoint Cap Reached." << std::endl;
         }
-
-        if (raw.empty()) return;
 
         const int PAD = ((raw.cols + 7) & ~7);
         cv::Mat aligned(raw.rows, PAD, CV_8U, cv::Scalar(0));
         raw.copyTo(aligned.colRange(0, raw.cols));
         aligned.copyTo(descriptors);
-
     }
 
 void AKAZEextractor::ForceLinking() {}

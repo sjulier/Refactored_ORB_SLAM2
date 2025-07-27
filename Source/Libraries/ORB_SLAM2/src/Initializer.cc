@@ -73,9 +73,13 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
     }
   }
 
+  // Check if a channel have enough points for RANSAC
   int N[Ntype];
-  for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    N[Ftype] = mvMatches12[Ftype].size();
+  bool valid[Ntype];
+  for(int Ftype=0; Ftype<Ntype; ++Ftype){
+    N[Ftype]     = mvMatches12[Ftype].size();
+    valid[Ftype] = (N[Ftype] >= 8);
+  }
 
   // Indices for minimum set selection
   std::vector<std::size_t> vAllIndices[Ntype];
@@ -101,8 +105,12 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
 
     // Select a minimum set
     for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+      if(!valid[Ftype]) continue;
       for (std::size_t j = 0; j < 8; j++) {
-        int randi = DUtils::Random::RandomInt(0, vAvailableIndices[Ftype].size() - 1);
+        if(vAvailableIndices[Ftype].empty()) break;
+        int randi = DUtils::Random::RandomInt(0, vAvailableIndices[Ftype].size()-1);
+        if (vAvailableIndices[Ftype].empty())
+          continue;
         int idx = vAvailableIndices[Ftype][randi];
 
         mvSets[Ftype][it][j] = idx;
@@ -115,27 +123,41 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
 
   // Launch threads to compute in parallel a fundamental matrix and a homography
   std::vector<bool> vbMatchesInliersH[Ntype], vbMatchesInliersF[Ntype];
-  float SH[Ntype], SF[Ntype];
+  float SH[Ntype] = {0}, SF[Ntype] = {0};
   cv::Mat H[Ntype], F[Ntype];
 
-  thread findThreadH[Ntype];
-  for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    findThreadH[Ftype] = thread(&Initializer::FindHomography, this, mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], ref(vbMatchesInliersH[Ftype]), ref(SH[Ftype]), ref(H[Ftype]), mvSets[Ftype]);
-  
-  thread findThreadF[Ntype];
-  for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    findThreadF[Ftype] = thread(&Initializer::FindFundamental, this, mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], ref(vbMatchesInliersF[Ftype]), ref(SF[Ftype]), ref(F[Ftype]), mvSets[Ftype]);
+  std::thread findThreadH[Ntype], findThreadF[Ntype];
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    if(!valid[Ftype])
+      continue;
+
+    findThreadH[Ftype] = std::thread(
+        &Initializer::FindHomography, this,
+        mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype],
+        std::ref(vbMatchesInliersH[Ftype]), std::ref(SH[Ftype]),
+        std::ref(H[Ftype]),  mvSets[Ftype]);
+
+    findThreadF[Ftype] = std::thread(
+        &Initializer::FindFundamental, this,
+        mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype],
+        std::ref(vbMatchesInliersF[Ftype]), std::ref(SF[Ftype]),
+        std::ref(F[Ftype]),  mvSets[Ftype]);
+  }
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    findThreadH[Ftype].join();
+    if (findThreadH[Ftype].joinable())
+      findThreadH[Ftype].join();
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    findThreadF[Ftype].join();
+    if (findThreadF[Ftype].joinable())
+      findThreadF[Ftype].join();
 
   // Compute ratio of scores
   float RH[Ntype];
-  for (int Ftype = 0; Ftype < Ntype; Ftype++)
-    RH[Ftype] = SH[Ftype] / (SH[Ftype] + SF[Ftype]);
+  for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+    float denom = SH[Ftype] + SF[Ftype];
+    RH[Ftype] = denom > 0 ? SH[Ftype] / denom : 0.0f;
+  }
 
   // Try to reconstruct from homography or fundamental depending on the ratio
   // (0.40-0.45)
@@ -145,6 +167,12 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
 
   // Method 0ne : if one channel initlize successfully, use that channel to estimate rotation and translation
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+
+    if (!valid[Ftype]) {
+      flag[Ftype] = false;
+      continue;
+    }
+
     if (RH[Ftype] > 0.40) {
       flag[Ftype] = ReconstructH(mvKeys1[Ftype], mvKeys2[Ftype], mvMatches12[Ftype], vbMatchesInliersH[Ftype], H[Ftype], mK, R[Ftype], t[Ftype], vP3D[Ftype], vbTriangulated[Ftype], 1.0, 50);
     } else {
@@ -153,6 +181,12 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const std::vector<std::v
   }
 
   for (int Ftype = 0; Ftype < Ntype; Ftype++) {
+
+    if (!valid[Ftype]) {
+      flag[Ftype] = false;
+      continue;
+    }
+
     if (flag[Ftype] == true) {
 
       cout << Ftype << endl;
@@ -339,6 +373,12 @@ void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const 
   // Number of putative matches
   const int N = vMatches12.size();
 
+  if(N < 8){           // Quit any channel with less than 8 keypoints
+    score = 0.0;
+    vbMatchesInliers.clear();
+    return;
+  }
+
   // Normalize coordinates
   std::vector<cv::Point2f> vPn1, vPn2;
   cv::Mat T1, T2;
@@ -384,7 +424,12 @@ void Initializer::FindHomography(const std::vector<cv::KeyPoint> &vKeys1, const 
 void Initializer::FindFundamental(const std::vector<cv::KeyPoint> &vKeys1, const std::vector<cv::KeyPoint> &vKeys2, const std::vector<Match> &vMatches12,
                                   std::vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21, std::vector<std::vector<std::size_t>> vSets) {
   // Number of putative matches
-  const int N = vbMatchesInliers.size();
+  const int N = vMatches12.size();
+  if(N < 8){
+    score = 0.0;
+    vbMatchesInliers.clear();
+    return;
+  }
 
   // Normalize coordinates
   std::vector<cv::Point2f> vPn1, vPn2;

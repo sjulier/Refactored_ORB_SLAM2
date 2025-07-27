@@ -646,6 +646,10 @@ float KeyFrame::ComputeSceneMedianDepth(const int q, const int Ftype) {
     }
   }
 
+ // If no mappoint, return invalid depth
+  if(vDepths.empty())
+    return -1.0f;
+
   sort(vDepths.begin(), vDepths.end());
 
   return vDepths[(vDepths.size() - 1) / q];

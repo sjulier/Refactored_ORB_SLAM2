@@ -54,6 +54,8 @@ void SIFTextractor::operator()(cv::InputArray image, cv::InputArray mask,
 
 	for(auto& kp : keypoints) kp.octave = 0;
 
+    if (raw.empty()) return;
+
     if (static_cast<int>(keypoints.size()) > nfeatures) {
 
         for (size_t i = 0; i < keypoints.size(); ++i)
