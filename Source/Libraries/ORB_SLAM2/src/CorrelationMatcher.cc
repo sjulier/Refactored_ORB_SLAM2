@@ -52,13 +52,14 @@ void CorrelationMatcher::Finalize() {
 
     std::ostream& log_and_cout = std::cout;
 
-    log << "#frame chA chB nCorr nA nB RI_MNR\n";
+    log << "#frame chA chB nCorr nA nB MNR GNR DICE\n";
 
-    double sCorr = 0, sA = 0, sB = 0;
-    const double F = mvStats.size();
+    float sCorr = 0, sA = 0, sB = 0;
+    const float F = mvStats.size();
 
     struct Stat {
-        double sumCorr = 0, sumA = 0, sumB = 0;
+        float sumCorr = 0, sumA = 0, sumB = 0;
+		float sumMNR = 0, sumGNR = 0, sumDICE = 0;
         int count = 0;
     };
     std::map<std::pair<int, int>, Stat> channelStats;
@@ -66,7 +67,7 @@ void CorrelationMatcher::Finalize() {
     for (const auto& s : mvStats) {
         log << s.frameId << ' ' << s.chA << ' ' << s.chB << ' '
             << s.nCorr << ' ' << s.nA << ' ' << s.nB << ' '
-            << s.ri << '\n';
+            << s.MNR << ' ' << s.GNR << ' ' << s.DICE << '\n';
 
         sCorr += s.nCorr;
         sA += s.nA;
@@ -77,6 +78,9 @@ void CorrelationMatcher::Finalize() {
         cs.sumCorr += s.nCorr;
         cs.sumA += s.nA;
         cs.sumB += s.nB;
+		cs.sumMNR += s.MNR;
+		cs.sumGNR += s.GNR;
+		cs.sumDICE += s.DICE;
         cs.count++;
     }
 
@@ -109,8 +113,8 @@ void CorrelationMatcher::Finalize() {
     std::cout << "\n========== Per-Channel Summary ==========\n";
     std::cout << std::setw(6) << "chA" << std::setw(6) << "chB"
               << std::setw(12) << "avgCorr" << std::setw(12) << "avgA"
-              << std::setw(12) << "avgB" << std::setw(12) << "RI_MNR"
-              << std::setw(12) << "RI_GNR" << std::setw(12) << "RI_DICE" << "\n";
+              << std::setw(12) << "avgB" << std::setw(12) << "avgRI_MNR"
+              << std::setw(12) << "avgRI_GNR" << std::setw(12) << "avgRI_DICE" << "\n";
 
     for (const auto& [key, stat] : channelStats) {
         const float f = stat.count;
@@ -219,7 +223,7 @@ float CorrelationMatcher::BuildEdges(Frame& F, int chA, int chB, float th_px, si
     */
 
     size_t nCorr = 0;
-    size_t nEdges = 0, totHits = 0, maxHits = 0;
+    // size_t nEdges = 0, totHits = 0, maxHits = 0;
 
     for(const auto& ns : vSrc){
         int hits = 0;
@@ -241,22 +245,26 @@ float CorrelationMatcher::BuildEdges(Frame& F, int chA, int chB, float th_px, si
     }
 
     // DEBUG LOGGING
-    /*
+	/*
     std::cout << "[CM] totHits=" << totHits
               << " avgHits=" << (double)totHits/vSrc.size()
               << " maxHits=" << maxHits
               << " validEdges: " << nEdges
               << " nCorr: " << nCorr << '\n';
-    */
+	*/
 
     // Save correlation status for evaluation and logging
-    size_t nA    = vSrc.size();
-    size_t nB    = vDst.size();
-    float  RI    = nCorr / std::min(nA,nB);
-    CorrFrameStat cs{F.mnId,chA,chB,nCorr,nA,nB,RI};
+    size_t nA = vSrc.size();
+    size_t nB = vDst.size();
+	float fnA = (float) nA;
+	float fnB = (float) nB;
+    float MNR = (float) nCorr / std::min(fnA, fnB);
+	float GNR = (float) nCorr / std::sqrt(fnA * fnB);
+	float DICE = 2.0f * (float) nCorr / (fnA + fnB);
+    CorrFrameStat cs{F.mnId, chA, chB, nCorr, nA, nB, MNR, GNR, DICE};
     mvStats.emplace_back(cs);
 
-    return RI;
+    return MNR;
 }
 
 } // namespace ORB_SLAM2

@@ -24,7 +24,7 @@ namespace ORB_SLAM2 {
         long unsigned int frameId;
         int chA, chB;
         size_t nCorr, nA, nB;
-        float  ri;
+        float MNR, GNR, DICE;
     };
 
     class CorrelationMatcher{
