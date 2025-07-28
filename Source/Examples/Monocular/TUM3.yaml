@@ -29,7 +29,7 @@ Camera.RGB: 1
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ ORB, KAZE, AKAZE, BRISK, SIFT ]
+Extractors: [ ORB, BRISK, AKAZE, KAZE, SIFT ]
 
 
 Vocabularies:

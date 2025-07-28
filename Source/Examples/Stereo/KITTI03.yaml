@@ -38,7 +38,7 @@ ThDepth: 40
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ ORB, AKAZE ]
+Extractors: [ ORB, BRISK, AKAZE, KAZE, SIFT ]
 
 
 Vocabularies:

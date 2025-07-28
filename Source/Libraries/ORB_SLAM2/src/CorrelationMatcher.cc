@@ -175,7 +175,6 @@ float CorrelationMatcher::BuildEdges(Frame& F, int chA, int chB, float th_px, si
 
     if(vSrc.empty() || vDst.empty()) return 0;      // No available points
 
-    /*
 
     // ---------- 2) Create KD-Tree on target channel ---------- //
     cv::Mat data(vDst.size(), 2, CV_32F);
@@ -188,39 +187,36 @@ float CorrelationMatcher::BuildEdges(Frame& F, int chA, int chB, float th_px, si
     cv::flann::Index kd(data, cv::flann::KDTreeIndexParams(1));
 
     // ---------- 3) Radius search and accumulate edges ---------- //
-    std::vector<int>   idxs;
-    std::vector<float> dists;
-    size_t nEdges = 0;
+	std::vector<int>   idxs;
+	std::vector<float> dists;
+	size_t nCorr = 0;
+	const float radius = th_px * th_px;
 
-    // DEBUG
-    size_t totHits = 0;
-    size_t maxHits = 0;
+	for (const auto& ns : vSrc) {
+    	float q[2] = { ns.first.x, ns.first.y };
+    	cv::Mat query(1, 2, CV_32F, q);
 
-    for(const auto& ns : vSrc){
-        float q[2] = { ns.first.x, ns.first.y };
-        idxs.clear(); dists.clear();
+    	idxs.clear();  dists.clear();
+    	int nFound = kd.radiusSearch(query,
+                                     idxs,
+                                 	 dists,
+                                 	 radius,
+                                 	 vDst.size(),
+                                 	 cv::flann::SearchParams(INT_MAX, 0, false));
+    	MapPoint* pSrc = ns.second;
+    	for (int k = 0; k < nFound; ++k) {
+        	int id = idxs[k];
+        	MapPoint* pDst = idmap[id];
+        	if (pSrc == pDst) continue;
 
-        cv::Mat query(1, 2, CV_32F, q);
-        kd.radiusSearch(query,
-                idxs,
-                dists,
-                th_px,
-                static_cast<int>(vDst.size()),
-                cv::flann::SearchParams(-1, 0, false));
+        	size_t cnt = pSrc->AddEdge(pDst);
+        	if (cnt >= th_str)
+            	++nCorr;
+    	}
+	}
 
-        // DEBUG
-        totHits += idxs.size();
-        maxHits  = std::max(maxHits, idxs.size());
-
-        MapPoint* pSrc = ns.second;
-        for(int id : idxs){
-            if(pSrc == idmap[id]) continue;             // Skip the same point
-            pSrc->AddEdge(idmap[id]);                   // Symmetric increatment count
-            ++nEdges;
-        }
-    }
-
-    */
+	/*
+	// --------------- Brute force exhaustive matching -------------- //
 
     size_t nCorr = 0;
     // size_t nEdges = 0, totHits = 0, maxHits = 0;
@@ -243,6 +239,8 @@ float CorrelationMatcher::BuildEdges(Frame& F, int chA, int chB, float th_px, si
         //totHits += hits; // DEBUG LOGGING
         //maxHits  = std::max(maxHits, (size_t)hits); // DEBUG LOGGING
     }
+
+	*/
 
     // DEBUG LOGGING
 	/*
