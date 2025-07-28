@@ -47,7 +47,7 @@ void KAZEextractor::operator()(cv::InputArray             image,
   FeatureExtractor::ComputePyramid(im);
 
   cv::Mat raw;
-  mpKAZE->detectAndCompute(image, FeatureExtractor::GetEdgedMask(19, image, mask), keypoints, raw, false);
+  mpKAZE->detectAndCompute(image, FeatureExtractor::GetEdgedMask(EDGE_THRESHOLD, image, mask), keypoints, raw, false);
 
   //for(auto& kp : keypoints) kp.octave = 0;
 

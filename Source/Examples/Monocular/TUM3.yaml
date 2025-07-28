@@ -29,7 +29,7 @@ Camera.RGB: 1
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ ORB, AKAZE ]
+Extractors: [ ORB, KAZE, AKAZE, BRISK, SIFT ]
 
 
 Vocabularies:
@@ -86,7 +86,7 @@ AKAZE:
 
   # Essential: Scale factor between levels in the scale pyramid.
   # Downscale factor between pyramid levels.
-  scaleFactor: 1.2
+  scaleFactor: 1.4
 
   # AKAZE Extractor: Detector response threshold
   # The detector's response threshold determines which points are key points
@@ -123,7 +123,7 @@ BRISK:
 
   # BRISK Extractor: Detector response threshold
   # The detector's response threshold determines which points are accepted as keypoints.
-  threshold: 5
+  threshold: 4
 
   # BRISK Extractor: Number of octaves
   # The number of pyramid layers for scale-invariance (controls detection resolution range)
@@ -156,7 +156,7 @@ SIFT:
 
   # SIFT Extractor: Edge response threshold.
   # Suppresses edge-like keypoints; higher values allow more edge points.
-  edgeThreshold: 5
+  edgeThreshold: 10
 
   # SIFT Extractor: Number of octave layers.
   # Number of scale levels per octave for DoG (Difference of Gaussians).
@@ -164,7 +164,7 @@ SIFT:
 
   # SIFT Extractor: Contrast threshold.
   # Discards low-contrast keypoints; higher values yield fewer keypoints.
-  contrastThreshold: 0.01
+  contrastThreshold: 0.001
 
   # SIFT Extractor: Initial Gaussian blur sigma.
   # Applied to the base image before building the scale space.
@@ -190,11 +190,11 @@ KAZE:
 
   # Essential: Scale factor between levels in the scale pyramid.
   # Downscale factor between pyramid levels.
-  scaleFactor: 1.2
+  scaleFactor: 1.4
 
   # KAZE Extractor: Detector threshold.
   # Sensitivity threshold for feature detection (based on Hessian response).
-  threshold: 1e-3
+  threshold: 1e-5
 
   # KAZE Extractor: Number of octaves.
   # Controls the overall scale range covered by the pyramid.

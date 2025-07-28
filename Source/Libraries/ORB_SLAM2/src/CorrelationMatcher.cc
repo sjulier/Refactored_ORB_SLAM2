@@ -52,13 +52,11 @@ void CorrelationMatcher::Finalize() {
 
     std::ostream& log_and_cout = std::cout;
 
-    log << "#frame chA chB RI nCorr nA nB\n";
+    log << "#frame chA chB nCorr nA nB RI_MNR\n";
 
-    // 用于全局统计
     double sCorr = 0, sA = 0, sB = 0;
     const double F = mvStats.size();
 
-    // 用于每个channel pair的统计
     struct Stat {
         double sumCorr = 0, sumA = 0, sumB = 0;
         int count = 0;
@@ -67,8 +65,8 @@ void CorrelationMatcher::Finalize() {
 
     for (const auto& s : mvStats) {
         log << s.frameId << ' ' << s.chA << ' ' << s.chB << ' '
-            << s.ri << ' ' << s.nCorr << ' '
-            << s.nA << ' ' << s.nB << '\n';
+            << s.nCorr << ' ' << s.nA << ' ' << s.nB << ' '
+            << s.ri << '\n';
 
         sCorr += s.nCorr;
         sA += s.nA;
@@ -82,12 +80,12 @@ void CorrelationMatcher::Finalize() {
         cs.count++;
     }
 
-    const double avgC = sCorr / F;
-    const double avgA = sA / F;
-    const double avgB = sB / F;
-    const double RIg_MNR = avgC / std::min(avgA, avgB);
-    const double RIg_GNR = avgC / std::sqrt(avgA * avgB);
-    const double RIg_DICE = 2.0 * avgC / (avgA + avgB);
+    const float avgC = sCorr / F;
+    const float avgA = sA / F;
+    const float avgB = sB / F;
+    const float RIg_MNR = avgC / std::min(avgA, avgB);
+    const float RIg_GNR = avgC / std::sqrt(avgA * avgB);
+    const float RIg_DICE = 2.0 * avgC / (avgA + avgB);
 
     log << "\n# ---------- Global Summary ----------\n";
     log << "# CorrFrames: " << F << '\n';
@@ -115,13 +113,13 @@ void CorrelationMatcher::Finalize() {
               << std::setw(12) << "RI_GNR" << std::setw(12) << "RI_DICE" << "\n";
 
     for (const auto& [key, stat] : channelStats) {
-        const double f = stat.count;
-        const double avgC = stat.sumCorr / f;
-        const double avgA = stat.sumA / f;
-        const double avgB = stat.sumB / f;
-        const double RIm_MNR = avgC / std::min(avgA, avgB);
-        const double RIm_GNR = avgC / std::sqrt(avgA * avgB);
-        const double RIm_DICE = 2.0 * avgC / (avgA + avgB);
+        const float f = stat.count;
+        const float avgC = stat.sumCorr / f;
+        const float avgA = stat.sumA / f;
+        const float avgB = stat.sumB / f;
+        const float RIm_MNR = avgC / std::min(avgA, avgB);
+        const float RIm_GNR = avgC / std::sqrt(avgA * avgB);
+        const float RIm_DICE = 2.0 * avgC / (avgA + avgB);
 
         log << "chA: " << key.first << " chB: " << key.second
             << " | avgC: " << avgC
