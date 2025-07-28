@@ -124,7 +124,7 @@ BRISK:
 
   # BRISK Extractor: Detector response threshold
   # The detector's response threshold determines which points are accepted as keypoints.
-  threshold: 30
+  threshold: 10
 
   # BRISK Extractor: Number of octaves
   # The number of pyramid layers for scale-invariance (controls detection resolution range)
@@ -165,7 +165,7 @@ SIFT:
 
   # SIFT Extractor: Contrast threshold.
   # Discards low-contrast keypoints; higher values yield fewer keypoints.
-  contrastThreshold: 0.01
+  contrastThreshold: 0.001
 
   # SIFT Extractor: Initial Gaussian blur sigma.
   # Applied to the base image before building the scale space.
@@ -195,7 +195,7 @@ KAZE:
 
   # KAZE Extractor: Detector threshold.
   # Sensitivity threshold for feature detection (based on Hessian response).
-  threshold: 1e-3
+  threshold: 5e-4
 
   # KAZE Extractor: Number of octaves.
   # Controls the overall scale range covered by the pyramid.
