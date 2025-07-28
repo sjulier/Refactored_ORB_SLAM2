@@ -121,9 +121,14 @@ void CorrelationMatcher::Finalize() {
         const float avgC = stat.sumCorr / f;
         const float avgA = stat.sumA / f;
         const float avgB = stat.sumB / f;
+		// Averaged Index Version
         const float RIm_MNR = avgC / std::min(avgA, avgB);
         const float RIm_GNR = avgC / std::sqrt(avgA * avgB);
         const float RIm_DICE = 2.0 * avgC / (avgA + avgB);
+		// Index Averaged Version
+		// const float RIm_MNR = stat.sumMNR / f;
+        // const float RIm_GNR = stat.sumGNR / f;
+        // const float RIm_DICE = stat.sumDICE / f;
 
         log << "chA: " << key.first << " chB: " << key.second
             << " | avgC: " << avgC
