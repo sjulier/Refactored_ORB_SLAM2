@@ -29,17 +29,17 @@ Camera.RGB: 1
 # You can specify one or more extractors (e.g., [ ORB, AKAZE ])
 # The system will initialize and run each extractor in parallel
 
-Extractors: [ ORB, BRISK, AKAZE, KAZE, SIFT ]
+Extractors: [ ORB ]
 
 
 Vocabularies:
   # Vocabulary paths are relative to the DEFAULT_RESOURCE_BASE defined in CMake:
   # /Install/var/lib/orbslam2  ("/" is required at start of the voc file path)
-  AKAZE: "/orb/ORBvoc.bin"
-  ORB: "/orb/ORBvoc.bin"
-  BRISK: "/orb/ORBvoc.bin"
-  SIFT: "/orb/ORBvoc.bin"
-  KAZE: "/orb/ORBvoc.bin"
+  AKAZE: "/voc/akaze_cv.fbow"
+  ORB: "/voc/orb_mur.fbow"
+  BRISK: "/voc/brisk_cv.fbow"
+  SIFT: "/voc/sift_cv.fbow"
+  KAZE: "/voc/kaze_cv.fbow"
 
 #--------------------------------------------------------------------------------------------
 # ORB Parameters
