@@ -32,27 +32,20 @@ using namespace ::std;
 namespace ORB_SLAM2 {
 
 KeyFrameDatabase::KeyFrameDatabase(const FbowVocabulary &voc) : mpVoc(&voc) {
-  mvInvertedFile.resize(voc.size());
+  // mvInvertedFile.resize(voc.size());
 }
 
 //TO-DO add Ftype
 void KeyFrameDatabase::add(KeyFrame *pKF, const int Ftype) {
   unique_lock<mutex> lock(mMutex);
 
-  for (const auto& kv : pKF->Channels[Ftype].mBowVec) {
-    if (kv.first >= mvInvertedFile.size()) {
-      std::cerr << "[KeyFrameDB] wordId " << kv.first
-                << " >= invertedFile.size(" << mvInvertedFile.size()
-                << ")  Ftype=" << Ftype << "  KF=" << pKF->mnId << std::endl;
-      std::terminate();
-    }
-  }
-
-
-  for (fbow::fBow::const_iterator vit = pKF->Channels[Ftype].mBowVec.begin(), vend = pKF->Channels[Ftype].mBowVec.end(); vit != vend; vit++)
-    mvInvertedFile[vit->first].push_back(pKF);
+  // for (fbow::fBow::const_iterator vit = pKF->Channels[Ftype].mBowVec.begin(), vend = pKF->Channels[Ftype].mBowVec.end(); vit != vend; vit++)
+  //   mvInvertedFile[vit->first].push_back(pKF);
+  for (auto const& kv : pKF->Channels[Ftype].mBowVec)
+        mInvertedFile[kv.first].push_back(pKF);
 }
 
+/*
 //TO-DO add Ftype
 void KeyFrameDatabase::erase(KeyFrame *pKF, const int Ftype) {
   unique_lock<mutex> lock(mMutex);
@@ -70,10 +63,28 @@ void KeyFrameDatabase::erase(KeyFrame *pKF, const int Ftype) {
     }
   }
 }
+*/
+void KeyFrameDatabase::erase(KeyFrame* pKF, int Ftype)
+{
+    std::unique_lock<std::mutex> lock(mMutex);
 
+    for (auto const& kv : pKF->Channels[Ftype].mBowVec) {
+        auto& lst = mInvertedFile[kv.first];
+        lst.remove(pKF);
+    }
+}
+
+/*
 void KeyFrameDatabase::clear() {
   mvInvertedFile.clear();
   mvInvertedFile.resize(mpVoc->size());
+}
+*/
+void KeyFrameDatabase::clear()
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    for (auto &kv : mInvertedFile)
+        kv.second.clear();
 }
 
 std::vector<KeyFrame *> KeyFrameDatabase::DetectLoopCandidates(KeyFrame *pKF, float minScore, const int Ftype) {
@@ -85,7 +96,8 @@ std::vector<KeyFrame *> KeyFrameDatabase::DetectLoopCandidates(KeyFrame *pKF, fl
     unique_lock<mutex> lock(mMutex);
 
     for (fbow::fBow::const_iterator vit = pKF->Channels[Ftype].mBowVec.begin(), vend = pKF->Channels[Ftype].mBowVec.end(); vit != vend; vit++) {
-      std::list<KeyFrame *> &lKFs = mvInvertedFile[vit->first];
+      // std::list<KeyFrame *> &lKFs = mvInvertedFile[vit->first];
+      auto& lKFs = mInvertedFile[vit->first];
 
       for (std::list<KeyFrame *>::iterator lit = lKFs.begin(), lend = lKFs.end(); lit != lend; lit++) {
         KeyFrame *pKFi = *lit;
@@ -190,7 +202,8 @@ std::vector<KeyFrame *> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *
     unique_lock<mutex> lock(mMutex);
 
     for (fbow::fBow::const_iterator vit = F->Channels[Ftype].mBowVec.begin(), vend = F->Channels[Ftype].mBowVec.end(); vit != vend; vit++) {
-      std::list<KeyFrame *> &lKFs = mvInvertedFile[vit->first];
+      // std::list<KeyFrame *> &lKFs = mvInvertedFile[vit->first];
+      auto& lKFs = mInvertedFile[vit->first];
 
       for (std::list<KeyFrame *>::iterator lit = lKFs.begin(), lend = lKFs.end(); lit != lend; lit++) {
         KeyFrame *pKFi = *lit;

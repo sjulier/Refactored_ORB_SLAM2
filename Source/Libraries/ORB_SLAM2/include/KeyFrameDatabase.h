@@ -30,6 +30,7 @@
 // #include "ORBVocabulary.h"
 #include "FbowVocabulary.h"
 #include <fbow.h>
+#include <unordered_map>
 
 #include <mutex>
 
@@ -61,7 +62,7 @@ protected:
   const FbowVocabulary *mpVoc;
 
   // Inverted file
-  std::vector<std::list<KeyFrame *>> mvInvertedFile;
+  std::unordered_map<uint32_t, std::list<KeyFrame*>> mInvertedFile;
 
   // Mutex
   std::mutex mMutex;

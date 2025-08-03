@@ -82,6 +82,7 @@ private:
     void createLevel(const std::vector<uint32_t> &findices,  int parent=0, int curL=0);
     void createLevel(int parent=0, int curL=0, bool recursive=true);
     std::vector<uint32_t> getInitialClusterCenters(const std::vector<uint32_t> &findices);
+	std::vector<uint32_t> initialClusterCentersKmpp(const std::vector<uint32_t> &findices);
 
     std::size_t vhash(const std::vector<std::vector<uint32_t> >& v_vec)  ;
 
