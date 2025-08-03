@@ -101,7 +101,8 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 # Find the required packages; these are from ThirdParty
 find_package(Pangolin REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
 
-find_package(DBoW2 REQUIRED)
+#find_package(DBoW2 REQUIRED)
+find_package(fbow REQUIRED)
 find_package(DLib REQUIRED)
 find_package(g2o REQUIRED HINTS "${THIRD_PARTY_BUILT_LIBRARY_PREFIX}" NO_DEFAULT_PATH)
 

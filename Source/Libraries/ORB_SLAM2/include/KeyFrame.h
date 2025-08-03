@@ -21,13 +21,16 @@
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
-#include "DBoW2/BowVector.h"
-#include "DBoW2/FeatureVector.h"
+// #include "DBoW2/BowVector.h"
+// #include "DBoW2/FeatureVector.h"
 #include "Frame.h"
 #include "KeyFrameDatabase.h"
 #include "MapPoint.h"
-#include "ORBVocabulary.h"
+// #include "ORBVocabulary.h"
 #include "ORBextractor.h"
+
+#include <fbow.h>
+#include "FbowVocabulary.h"
 
 #include <mutex>
 
@@ -193,7 +196,8 @@ protected:
 
   // BoW
   std::vector<KeyFrameDatabase *> mpKeyFrameDB;
-  std::vector<ORBVocabulary *> mpVocabulary;
+  //std::vector<ORBVocabulary *> mpVocabulary;
+  std::vector<FbowVocabulary *> mpVocabulary;
 
   // Connected keyframe variables
   std::map<KeyFrame *, int> mConnectedKeyFrameWeights;

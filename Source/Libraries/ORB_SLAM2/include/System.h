@@ -31,7 +31,9 @@
 #include "LoopClosing.h"
 #include "Map.h"
 #include "MapDrawer.h"
-#include "ORBVocabulary.h"
+// #include "ORBVocabulary.h"
+#include "FbowVocabulary.h"
+#include <fbow.h>
 #include "Tracking.h"
 #include "Viewer.h"
 
@@ -149,7 +151,7 @@ private:
   eSensor mSensor;
 
   // Vocabulary used for place recognition and feature matching.
-  std::vector<ORBVocabulary *> mpVocabulary;
+  std::vector<FbowVocabulary *> mpVocabulary;
 
   // KeyFrame database for place recognition (relocalization and loop
   // detection).

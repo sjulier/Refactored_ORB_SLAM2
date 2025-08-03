@@ -93,10 +93,21 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, vector<KeyFrameDatabase *> pKFDB, int Nt
   SetPose(F.mTcw);
 }
 
+/*
 void KeyFrame::ComputeBoW(const int Ftype) {
   if (Channels[Ftype].mBowVec.empty() || Channels[Ftype].mFeatVec.empty()) {
     std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
     mpVocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
+  }
+}
+*/
+
+void KeyFrame::ComputeBoW(const int Ftype) {
+  if (Channels[Ftype].mBowVec.empty() || Channels[Ftype].mFeatVec.empty()) {
+    mpVocabulary[Ftype]->transform (
+        Channels[Ftype].mDescriptors,
+        Channels[Ftype].mBowVec,
+        Channels[Ftype].mFeatVec, 4);
   }
 }
 

@@ -3,8 +3,10 @@
 
 #include <vector>
 
-#include "DBoW2/BowVector.h"
-#include "DBoW2/FeatureVector.h"
+//#include "DBoW2/BowVector.h"
+//#include "DBoW2/FeatureVector.h"
+
+#include <fbow.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -39,8 +41,10 @@ public:
   std::vector<std::vector<std::vector<std::size_t>>> mGrid;
 
   // Bag of Words std::vector structures.
-  DBoW2::BowVector mBowVec;
-  DBoW2::FeatureVector mFeatVec;
+  // DBoW2::BowVector mBowVec;
+  // DBoW2::FeatureVector mFeatVec;
+  fbow::fBow mBowVec;
+  fbow::fBow2 mFeatVec;
 };
     
 }

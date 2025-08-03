@@ -2,7 +2,8 @@
 
 #include <limits.h>
 
-#include "DBoW2/FeatureVector.h"
+// #include "DBoW2/FeatureVector.h"
+#include <fbow.h>
 
 #include <stdint.h>
 
@@ -482,7 +483,7 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
   vpMapPointMatches = vector<MapPoint *>(F.Channels[Ftype].N, static_cast<MapPoint *>(NULL));
 
   // suppose the featvec equals the featvec in frame.featdata, mybe it was not updated
-  const DBoW2::FeatureVector &vFeatVecKF = pKF->Channels[Ftype].mFeatVec;
+  const fbow::fBow2 &vFeatVecKF = pKF->Channels[Ftype].mFeatVec;
 
   int nmatches = 0;
 
@@ -491,10 +492,10 @@ int Associater::SearchByBoW(KeyFrame *pKF, Frame &F, vector<MapPoint *> &vpMapPo
     rotHist[i].reserve(500);
   const float factor = 1.0f / HISTO_LENGTH;
 
-  DBoW2::FeatureVector::const_iterator KFit = vFeatVecKF.begin();
-  DBoW2::FeatureVector::const_iterator Fit = F.Channels[Ftype].mFeatVec.begin();
-  DBoW2::FeatureVector::const_iterator KFend = vFeatVecKF.end();
-  DBoW2::FeatureVector::const_iterator Fend = F.Channels[Ftype].mFeatVec.end();
+  fbow::fBow2::const_iterator KFit = vFeatVecKF.begin();
+  fbow::fBow2::const_iterator Fit = F.Channels[Ftype].mFeatVec.begin();
+  fbow::fBow2::const_iterator KFend = vFeatVecKF.end();
+  fbow::fBow2::const_iterator Fend = F.Channels[Ftype].mFeatVec.end();
 
   while (KFit != KFend && Fit != Fend) {
     if (KFit->first == Fit->first) {
@@ -593,12 +594,12 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
   
   // step 1 : get key points of two channels
   const vector<cv::KeyPoint> &vKeysUn1 = pKF1->Channels[Ftype].mvKeysUn;
-  const DBoW2::FeatureVector &vFeatVec1 = pKF1->Channels[Ftype].mFeatVec;
+  const fbow::fBow2 &vFeatVec1 = pKF1->Channels[Ftype].mFeatVec;
   const vector<MapPoint *> vpMapPoints1 = pKF1->GetMapPointMatches(Ftype);
   const cv::Mat &Descriptors1 = pKF1->Channels[Ftype].mDescriptors;
 
   const vector<cv::KeyPoint> &vKeysUn2 = pKF2->Channels[Ftype].mvKeysUn;
-  const DBoW2::FeatureVector &vFeatVec2 = pKF2->Channels[Ftype].mFeatVec;
+  const fbow::fBow2 &vFeatVec2 = pKF2->Channels[Ftype].mFeatVec;
   const vector<MapPoint *> vpMapPoints2 = pKF2->GetMapPointMatches(Ftype);
   const cv::Mat &Descriptors2 = pKF2->Channels[Ftype].mDescriptors;
 
@@ -613,10 +614,10 @@ int Associater::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 
   int nmatches = 0;
 
-  DBoW2::FeatureVector::const_iterator f1it = vFeatVec1.begin();
-  DBoW2::FeatureVector::const_iterator f2it = vFeatVec2.begin();
-  DBoW2::FeatureVector::const_iterator f1end = vFeatVec1.end();
-  DBoW2::FeatureVector::const_iterator f2end = vFeatVec2.end();
+  fbow::fBow2::const_iterator f1it = vFeatVec1.begin();
+  fbow::fBow2::const_iterator f2it = vFeatVec2.begin();
+  fbow::fBow2::const_iterator f1end = vFeatVec1.end();
+  fbow::fBow2::const_iterator f2end = vFeatVec2.end();
 
   while (f1it != f1end && f2it != f2end) {
     if (f1it->first == f2it->first) {
@@ -879,8 +880,8 @@ int Associater::SearchByNN(Frame &F, const vector<MapPoint *> &vpMapPoints) {
 int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F12, std::vector<std::pair<size_t, size_t>> &vMatchedPairs, 
                                        const bool bOnlyStereo, const int Ftype) {
 
-  const DBoW2::FeatureVector &vFeatVec1 = pKF1->Channels[Ftype].mFeatVec;
-  const DBoW2::FeatureVector &vFeatVec2 = pKF2->Channels[Ftype].mFeatVec;
+  const fbow::fBow2 &vFeatVec1 = pKF1->Channels[Ftype].mFeatVec;
+  const fbow::fBow2 &vFeatVec2 = pKF2->Channels[Ftype].mFeatVec;
 
   // Compute epipole in second image
   cv::Mat Cw = pKF1->GetCameraCenter();
@@ -903,10 +904,10 @@ int Associater::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
 
   const float factor = 1.0f / HISTO_LENGTH;
 
-  DBoW2::FeatureVector::const_iterator f1it = vFeatVec1.begin();
-  DBoW2::FeatureVector::const_iterator f2it = vFeatVec2.begin();
-  DBoW2::FeatureVector::const_iterator f1end = vFeatVec1.end();
-  DBoW2::FeatureVector::const_iterator f2end = vFeatVec2.end();
+  fbow::fBow2::const_iterator f1it = vFeatVec1.begin();
+  fbow::fBow2::const_iterator f2it = vFeatVec2.begin();
+  fbow::fBow2::const_iterator f1end = vFeatVec1.end();
+  fbow::fBow2::const_iterator f2end = vFeatVec2.end();
 
   while (f1it != f1end && f2it != f2end) {
     if (f1it->first == f2it->first) {

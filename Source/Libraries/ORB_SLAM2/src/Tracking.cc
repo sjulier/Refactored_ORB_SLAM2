@@ -158,7 +158,7 @@ void Tracking::CloseLogFile(){
 // ====================== HDF5 Key Point Output ======================== //
 
 
-Tracking::Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer,
+Tracking::Tracking(System *pSys, std::vector<FbowVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer,
                    MapDrawer *pMapDrawer, Map *pMap, std::vector<KeyFrameDatabase *> pKFDB,
                    const string &strSettingPath, const int sensor, int Ntype)
     : mState(NO_IMAGES_YET), 

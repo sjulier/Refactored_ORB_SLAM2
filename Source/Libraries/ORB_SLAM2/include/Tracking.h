@@ -33,7 +33,9 @@
 #include "LoopClosing.h"
 #include "Map.h"
 #include "MapDrawer.h"
-#include "ORBVocabulary.h"
+// #include "ORBVocabulary.h"
+#include "FbowVocabulary.h"
+#include <fbow.h>
 #include "CorrelationMatcher.h"
 #include "System.h"
 #include "Viewer.h"
@@ -74,7 +76,7 @@ public:
 // ====================== HDF5 Key Point Output ======================== //
 
 public:
-  Tracking(System *pSys, std::vector<ORBVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
+  Tracking(System *pSys, std::vector<FbowVocabulary *> pVoc, std::vector<FrameDrawer *> pFrameDrawer, MapDrawer *pMapDrawer,
            Map *pMap, std::vector<KeyFrameDatabase *> pKFDB, const std::string &strSettingPath, const int sensor, int Ntype);
 
   // Preprocess the input and call Track(). Extract features and performs stereo matching.
@@ -197,7 +199,7 @@ protected:
   //FeatureExtractor *mpFeatureExtractor[Ntype];
 
   // BoW
-  std::vector<ORBVocabulary *> mpVocabulary;
+  std::vector<FbowVocabulary *> mpVocabulary;
   std::vector<KeyFrameDatabase *> mpKeyFrameDB;
 
   // Time used to record initlize starting time

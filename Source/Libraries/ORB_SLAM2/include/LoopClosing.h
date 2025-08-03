@@ -24,7 +24,9 @@
 #include "KeyFrame.h"
 #include "LocalMapping.h"
 #include "Map.h"
-#include "ORBVocabulary.h"
+// #include "ORBVocabulary.h"
+#include <fbow.h>
+#include "FbowVocabulary.h"
 #include "Tracking.h"
 
 #include "KeyFrameDatabase.h"
@@ -48,7 +50,7 @@ public:
 public:
   int Ntype;
 
-  LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::vector<ORBVocabulary *> pVoc,
+  LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::vector<FbowVocabulary *> pVoc,
               const bool bFixScale, int Ntype);
 
   void SetTracker(Tracking *pTracker);
@@ -103,7 +105,7 @@ protected:
   Tracking *mpTracker;
 
   std::vector<KeyFrameDatabase *> mpKeyFrameDB;
-  std::vector<ORBVocabulary *> mpVocabulary;
+  std::vector<FbowVocabulary *> mpVocabulary;
 
   LocalMapping *mpLocalMapper;
 

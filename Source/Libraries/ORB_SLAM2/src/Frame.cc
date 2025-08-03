@@ -19,7 +19,7 @@
  */
 
 #include "Frame.h"
-#include "Converter.h"
+// #include "Converter.h"
 #include "Associater.h"
 #include <thread>
 
@@ -76,7 +76,7 @@ Frame::Frame(const Frame &frame)
 // Stereo
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, 
              std::vector<FeatureExtractor *> extractorLeft, std::vector<FeatureExtractor *> extractorRight,
-             vector<ORBVocabulary *> voc, cv::Mat &K,
+             vector<FbowVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth, int Ntype)
     : mpVocabulary(voc), 
       mTimeStamp(timeStamp),
@@ -137,7 +137,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
              const double &timeStamp, 
              std::vector<FeatureExtractor *> extractor,
-             vector<ORBVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
+             vector<FbowVocabulary *> voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth, int Ntype)
     : mpVocabulary(voc), 
       mTimeStamp(timeStamp), 
@@ -201,7 +201,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 // Mono
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
              std::vector<FeatureExtractor *> extractor,
-             vector<ORBVocabulary *> voc, cv::Mat &K,
+             vector<FbowVocabulary *> voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth, int Ntype)
     : mpVocabulary(voc),
       mTimeStamp(timeStamp), 
@@ -442,8 +442,8 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY) {
 
 void Frame::ComputeBoW(const int Ftype) {
   if (Channels[Ftype].mBowVec.empty()) {
-    vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
-    mpVocabulary[Ftype]->transform(vCurrentDesc, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
+    // vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(Channels[Ftype].mDescriptors);
+    mpVocabulary[Ftype]->transform(Channels[Ftype].mDescriptors, Channels[Ftype].mBowVec, Channels[Ftype].mFeatVec, 4);
   }
 }
 

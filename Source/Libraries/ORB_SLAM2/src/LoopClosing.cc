@@ -35,7 +35,7 @@ using namespace ::std;
 
 namespace ORB_SLAM2 {
 
-LoopClosing::LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::vector<ORBVocabulary *> pVoc,
+LoopClosing::LoopClosing(Map *pMap, std::vector<KeyFrameDatabase *> pDB, std::vector<FbowVocabulary *> pVoc,
                          const bool bFixScale, int Ntype)
     : mbResetRequested(false), mbFinishRequested(false), mbFinished(true),
       mpMap(pMap), mpMatchedKF(NULL),
@@ -173,13 +173,13 @@ bool LoopClosing::DetectLoop(const int Ftype) {
   // step 3 : Compute reference BoW similarity score. This is the lowest score to a connected keyframe in the covisibility graph
   // We will impose loop candidates to have a higher similarity than this
   const std::vector<KeyFrame *> vpConnectedKeyFrames = mpCurrentKF->GetVectorCovisibleKeyFrames();
-  const DBoW2::BowVector &CurrentBowVec = mpCurrentKF->Channels[Ftype].mBowVec;
+  const fbow::fBow &CurrentBowVec = mpCurrentKF->Channels[Ftype].mBowVec;
   float minScore = 1;
   for (std::size_t i = 0; i < vpConnectedKeyFrames.size(); i++) {
     KeyFrame *pKF = vpConnectedKeyFrames[i];
     if (pKF->isBad())
       continue;
-    const DBoW2::BowVector &BowVec = pKF->Channels[Ftype].mBowVec;
+    const fbow::fBow &BowVec = pKF->Channels[Ftype].mBowVec;
 
     float score = mpVocabulary[Ftype]->score(CurrentBowVec, BowVec);
 

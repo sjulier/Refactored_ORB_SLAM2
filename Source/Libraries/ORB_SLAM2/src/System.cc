@@ -94,10 +94,11 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
          << "This could take a while..." << endl;
 
     clock_t tStart = clock();
-    mpVocabulary[i] = new ORBVocabulary();
+    mpVocabulary[i] = new FbowVocabulary();
 
     // bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
 
+  /*
     bool bVocLoad = false;
 
     if (has_suffix(vocPath, ".txt")) {
@@ -107,6 +108,9 @@ System::System(const string &strSettingsFile, const eSensor sensor, const bool b
       bVocLoad = mpVocabulary[i]->loadFromBinaryFile(vocPath);
       cout << "Loading " << ExtractorNames[i] << " Vocabulary in binary mode." << endl;
     }
+*/
+    bool bVocLoad = mpVocabulary[i]->load(vocPath);   // FbowVocabulary::load()
+    cout << "Loading " << ExtractorNames[i] << " Vocabulary in FBoW." << endl;
     if (!bVocLoad) {
       cerr << "Wrong path to " << ExtractorNames[i] <<" vocabulary. " << endl;
       cerr << "Falied to open " << ExtractorNames[i] << " at: " << vocPath << endl;

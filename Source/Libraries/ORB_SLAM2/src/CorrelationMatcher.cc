@@ -1,6 +1,7 @@
 // CorrelationMatcher.cc
 #include "CorrelationMatcher.h"
 #include "CorrelationEdge.h"
+#include <fstream>
 #include <opencv2/flann.hpp>
 #include <map>
 #include <iomanip>
