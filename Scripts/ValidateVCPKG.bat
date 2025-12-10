@@ -25,7 +25,30 @@ rem Check VCPKG directory set up
 if "%VCPKG_ROOT%"=="" (
     echo.
     echo Please set VCPKG_ROOT to the vcpkg installation directory.
+    echo Please make sure to use a version configured for classic
+    echo mode and NOT the one shipped with Visual Studio.
     echo.
+    exit /b 1
+)
+
+rem Check if CLASSIC mode is supported
+if exist "%VCPKG_ROOT%\ports" (
+    echo.
+    echo This vcpkg installation supports classic mode.
+    echo.
+    exit /b 0
+) else (
+    echo.
+    echo This vcpkg installation does NOT support classic mode.
+    echo It is likely the minimal 'artifact' vcpkg client.
+    echo.
+    echo To obtain a classic-mode vcpkg, run:
+    echo.
+    echo   git clone https://github.com/microsoft/vcpkg.git
+    echo   cd vcpkg
+    echo   bootstrap-vcpkg.bat
+    echo.
+    echo Then set VCPKG_ROOT to the vcpkg installation directory.
     exit /b 1
 )
 
