@@ -14,5 +14,13 @@ then
   exit 1
 fi
 
+if [ "$CONDA_DEFAULT_ENV" != "" ]
+then
+    echo It appears you are running from within a conda environment:
+    echo    \$CONDA_DEFAULT_ENV=${CONDA_DEFAULT_ENV}
+    echo Please deactivate all environments.
+    exit 1
+fi
+
 ./Scripts/Build_ThirdParty.sh ${build_type}
 ./Scripts/Build_Source.sh ${build_type}
