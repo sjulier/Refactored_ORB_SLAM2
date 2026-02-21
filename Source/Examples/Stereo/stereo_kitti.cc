@@ -39,9 +39,9 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
 string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
-  if (argc != 3) {
+  if (argc != 4) {
     cerr << endl
-         << "Usage: ./stereo_kitti settings_file path_to_sequence" << endl;
+          << "Usage: " << argv[0] << " settings_files path_to_sequence results_file" << endl;
     return EX_USAGE;
   }
 
@@ -144,15 +144,31 @@ int main(int argc, char **argv) {
   cout << "mean tracking time: " << totaltime / nImages << endl;
 
   // Save camera trajectory
-  SLAM.SaveTrajectoryKITTI("CameraTrajectory.txt");
+  SLAM.SaveTrajectoryTUM(string(argv[3]));
+  //SLAM.SaveTrajectoryKITTI("CameraTrajectory.txt");
 
   return main_error;
 }
 
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps) {
+
+  // Check the file exists
+  if (fs::exists(strPathToSequence) == false) {
+    cerr << "FATAL: Could not find the sequence directory " << strPathToSequence
+         << endl;
+    exit(EX_DATAERR);
+  }
+  
   ifstream fTimes;
   string strPathTimeFile = strPathToSequence + "/times.txt";
+
+  if (fs::exists(strPathTimeFile) == false) {
+    cerr << "FATAL: Could not find the timestamp file " << strPathTimeFile
+         << endl;
+    exit(EX_DATAERR);
+  }
+  
   fTimes.open(strPathTimeFile.c_str());
   while (!fTimes.eof()) {
     string s;
@@ -167,7 +183,20 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
   }
 
   string strPrefixLeft = strPathToSequence + "/image_0/";
+
+  if (fs::exists(strPrefixLeft) == false) {
+    cerr << "FATAL: Could not find the left image sequence " << strPrefixLeft
+         << endl;
+    exit(EX_DATAERR);
+  }
+  
   string strPrefixRight = strPathToSequence + "/image_1/";
+
+  if (fs::exists(strPrefixRight) == false) {
+    cerr << "FATAL: Could not find the right image sequence " << strPrefixRight
+         << endl;
+    exit(EX_DATAERR);
+  }
 
   const int nTimes = vTimestamps.size();
   vstrImageLeft.resize(nTimes);
