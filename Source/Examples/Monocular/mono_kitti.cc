@@ -146,7 +146,7 @@ void LoadImages(const string &strPathToSequence,
 
   // Check the file exists
   if (fs::exists(strPathToSequence) == false) {
-    cerr << "FATAL: Could not find the timestamp file " << strPathToSequence
+    cerr << "FATAL: Could not find the sequence directory " << strPathToSequence
          << endl;
     exit(EX_DATAERR);
   }
@@ -173,6 +173,12 @@ void LoadImages(const string &strPathToSequence,
 
   string strPrefixLeft = strPathToSequence + "/image_0/";
 
+  if (fs::exists(strPrefixLeft) == false) {
+    cerr << "FATAL: Could not find the image sequence " << strPrefixLeft
+         << endl;
+    exit(EX_DATAERR);
+  }
+  
   const int nTimes = vTimestamps.size();
   vstrImageFilenames.resize(nTimes);
 
