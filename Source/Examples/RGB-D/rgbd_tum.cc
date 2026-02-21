@@ -40,8 +40,8 @@ void LoadImages(const string &strAssociationFilename,
 string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
-  if (argc != 4) {
-    cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence path_to_association" << endl;
+  if (argc != 5) {
+    cerr << endl << "Usage: " << argv[0] << " settings_files path_to_sequence path_to_association results_file" << endl;
     return EX_USAGE;
   }
 
@@ -85,9 +85,6 @@ int main(int argc, char **argv) {
         // Read image and depthmap from file
         imRGB = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesRGB[ni],
                            cv::IMREAD_UNCHANGED);
-        imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
-                         cv::IMREAD_UNCHANGED);
-        double tframe = vTimestamps[ni];
 
         if (imRGB.empty()) {
           cerr << endl
@@ -96,11 +93,24 @@ int main(int argc, char **argv) {
           main_error = EX_DATAERR;
           break;
         }
+	
+        imD = cv::imread(string(argv[2]) + "/" + vstrImageFilenamesD[ni],
+                         cv::IMREAD_UNCHANGED);
+
+        if (imD.empty()) {
+          cerr << endl
+               << "Failed to load image at: " << string(argv[2]) << "/"
+               << vstrImageFilenamesD[ni] << endl;
+          main_error = EX_DATAERR;
+          break;
+        }
 
       if (SLAM.isFinished() == true) {
 	  break;
       }
 
+      double tframe = vTimestamps[ni];
+	
       chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
         
       // Pass the image to the SLAM system
@@ -151,8 +161,9 @@ int main(int argc, char **argv) {
   cout << "mean tracking time: " << totaltime / nImages << endl;
 
   // Save camera trajectory
-  SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
-  SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+  //SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
+  SLAM.SaveTrajectoryTUM(argv[4]);
+  //SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
   return main_error;
 }
