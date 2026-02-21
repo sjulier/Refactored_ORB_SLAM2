@@ -174,7 +174,8 @@ Note that `mono_kitti` only uses the images from the `image_0` directory, which 
 
 #### EuRoC Dataset
 
-The [EuRoC dataset](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) is a challenging one which was collected for drone navigation. It consists of data collected from the drone (including camera and depth data) as well as very sophisticated ground-truth data from stand off outside-in tracking systems. There are two main sets of sequences: the machine hall (prefix MH) and the Vicon Room (prefix V).
+
+The [EuRoC dataset](https://projects.asl.ethz.ch/datasets/euroc-mav/) is a challenging one which was collected for drone navigation. It consists of data collected from the drone (including camera and depth data) as well as very sophisticated ground-truth data from stand off outside-in tracking systems. There are two main sets of sequences: the machine hall (prefix MH) and the Vicon Room (prefix V).
 
 All runs should be downloaded using the ASL format.
 
@@ -192,7 +193,7 @@ For example, for MH01 installed in the checkout directory, the command is:
 
 For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
 
- `mono_euroc EuRoC.yaml ${your_euroc_folder}/cam0/data ${mh_sequence}.txt`
+ `mono_euroc EuRoC.yaml ${your_euroc_folder}/mav0/cam0/data ${mh_sequence}.txt`
 
 ### RGBD SLAM
 
@@ -208,19 +209,18 @@ The associations file is used to link RGB and D files together. The files start 
 
 ### Stereo SLAM
 
-Add down here (need directories for left and right frames).
-
-#### EuRoC Dataset
-
-All the EuRoC datasets actually include two sets of camera data (`cam0` and `cam1`) already. To run the code, you have to specify the directories containing both the left and right image streams. For example, for MH01 run
-
-`stereo_euroc EuRoC.yaml MH_01/mav0/cam0/data MH_01/mav0/cam1/data MH01.txt`
-
 #### KITTI Dataset
 
-Because of the way the data is structured, stereo is run in a very similar way to mono:
+By design, running KITTI with a stereo camera is very to running it with a mono camera. The command is of the form:
 
 `stereo_kitti KITTI${kitti_yaml_code}.yaml ${your_kitti_dataset_folder}/sequences/${kitti_sequence} ${result_file_name}`
 
 Note that `stereo_kitti` draws the left images from the `image_0` directory, and the right images from the `image_1` directory.
+
+#### EuRoC Dataset
+
+All the EuRoC datasets actually include two sets of camera data (`cam0` and `cam1`) and the calibration data already. The argument is similar to that for mono, but needs to specify the directories for both of the image sequences. For example, for the Machine Hall Datasets use:
+
+`stereo_euroc EuRoC.yaml ${your_euroc_folder}/mav0/cam0/data ${your_euroc_folder}/mav1/cam0/data ${mh_sequence}.txt`
+
 
