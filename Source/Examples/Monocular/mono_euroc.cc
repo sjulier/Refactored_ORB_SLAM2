@@ -37,9 +37,9 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
 string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
-  if (argc != 4) {
+  if (argc != 5) {
     cerr << endl
-          << "Usage: " << argv[0] << " settings_files path_to_image_folder path_to_times_file" << endl;
+          << "Usage: " << argv[0] << " settings_files path_to_image_folder path_to_times_file  results_file" << endl;
     return EX_USAGE;
   }
 
@@ -138,7 +138,8 @@ int main(int argc, char **argv) {
   cout << "mean tracking time: " << totaltime / nImages << endl;
 
   // Save camera trajectory
-  SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+  //SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+  SLAM.SaveTrajectoryTUM(string(argv[4]));
 
   return main_error;
 }

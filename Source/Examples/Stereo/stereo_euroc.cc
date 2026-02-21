@@ -40,10 +40,10 @@ void LoadImages(const string &strPathLeft, const string &strPathRight,
 string FindFile(const string& baseFileName, const string& pathHint);
 
 int main(int argc, char **argv) {
-  if (argc != 5) {
+  if (argc != 6) {
     cerr << endl
-         << "Usage: ./stereo_euroc settings_file path_to_left_folder "
-            "path_to_right_folder path_to_times_file"
+         << "Usage: " << argv[0] << " settings_file path_to_left_folder "
+         << "path_to_right_folder path_to_times_file results_file"
          << endl;
     return EX_USAGE;
   }
@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
   cout << "mean tracking time: " << totaltime / nImages << endl;
 
   // Save camera trajectory
-  SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
+  SLAM.SaveTrajectoryTUM(argv[5]);
 
   return main_error;
 }
