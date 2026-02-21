@@ -160,8 +160,7 @@ KITTI sequences are numbered 0,...,21. For run `${kitti_sequence}`, ORB-SLAM is 
 
  `mono_kitti KITTI${kitti_yaml_code}.yaml ${your_kitti_dataset_folder}/sequences/${kitti_sequence} ${result_file_name}`
 
-In the 22 sequences, the first 11 (00-10) has ground truth for comparison. And ORB-SLAM embedded the lens calibration parameters for the first 13 sequences (00-12) in the yaml file it provided.
-The `${kitti_yaml_code}` is determined as follows:
+In the 22 sequences, the first 11 (00-10) have ground truth. ORB-SLAM supplies the lens calibration parameters for the first 13 sequences (00-12). The `${kitti_yaml_code}` is determined as follows:
 
 * For KITTI runs `00-02`: `00-02`
 * For KITTI run `03`: `03`
@@ -170,6 +169,8 @@ The `${kitti_yaml_code}` is determined as follows:
 For example, if you want to run KITTI sequence 05 and write the results in `kitti05_results.txt`, you would use the command:
 
  `mono_kitti KITTI04-12.yaml ${your_kitti_dataset_folder}/sequences/05 kitti05_results.txt`
+
+Note that `mono_kitti` only uses the images from the `image_0` directory, which is the left frame from a stereo camera.
 
 #### EuRoC Dataset
 
@@ -217,4 +218,9 @@ All the EuRoC datasets actually include two sets of camera data (`cam0` and `cam
 
 #### KITTI Dataset
 
-To do
+Because of the way the data is structured, stereo is run in a very similar way to mono:
+
+`stereo_kitti KITTI${kitti_yaml_code}.yaml ${your_kitti_dataset_folder}/sequences/${kitti_sequence} ${result_file_name}`
+
+Note that `stereo_kitti` draws the left images from the `image_0` directory, and the right images from the `image_1` directory.
+
