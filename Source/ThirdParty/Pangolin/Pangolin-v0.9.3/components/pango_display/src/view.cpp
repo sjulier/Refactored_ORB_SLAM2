@@ -302,7 +302,7 @@ void View::ActivateIdentity() const
 GLfloat View::GetClosestDepth([[maybe_unused]] int x, [[maybe_unused]] int y, int radius) const
 {
     // TODO: Get to work on android
-
+  /*
 #ifdef _MSC_VER
     // MSVC Requires fixed sized arrays on stack
     radius = 5;
@@ -313,7 +313,7 @@ GLfloat View::GetClosestDepth([[maybe_unused]] int x, [[maybe_unused]] int y, in
 
     const int zsize = zl*zl;
     GLfloat zs[zsize];
-
+    
 #ifndef HAVE_GLES
     glReadBuffer(GL_FRONT);
     glReadPixels(x-radius,y-radius,zl,zl,GL_DEPTH_COMPONENT,GL_FLOAT,zs);
@@ -323,6 +323,16 @@ GLfloat View::GetClosestDepth([[maybe_unused]] int x, [[maybe_unused]] int y, in
 
     const GLfloat mindepth = *(std::min_element(zs,zs+zsize));
     return mindepth;
+  */
+#ifdef HAVE_GLES
+  return 0.8;
+#endif
+  const int zl = (radius*2+1);
+  const int zsize = zl*zl;
+  std::vector<GLfloat> zs(zsize);
+  glReadBuffer(GL_FRONT);
+  glReadPixels(x-radius,y-radius,zl,zl,GL_DEPTH_COMPONENT,GL_FLOAT,zs.data());
+  return *std::min_element(std::begin(zs), std::end(zs));
 }
 
 void View::GetObjectCoordinates(const OpenGlRenderState& cam_state, double winx, double winy, double winzdepth, GLdouble& x, GLdouble& y, GLdouble& z) const
