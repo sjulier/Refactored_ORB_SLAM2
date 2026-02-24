@@ -146,7 +146,7 @@ You can then run the code using:
 
 `mono_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr01_results.txt` 
 
-This will open the GUI, run the example, and write out a text file called `fr01_results.txt` which contains a time set of estiamtes of the camera pose.
+This will open the GUI, run the example, and write out a text file called `fr01_results.txt` which contains a time set of estimates of the camera pose.
    
 #### KITTI Dataset
 
@@ -199,11 +199,13 @@ For a Vicon Room-related run  with sequence `${v_sequence}`, the command is:
 
 #### TUM Dataset
 
-This TUM mono dataset contains RGB as well. It can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
+The TUM mono dataset automatically contains RGB data as well - the only difference is that `mono_tum` doesn't use it. Therefore the download instructions are identical to those for Mono TUM.
 
-`mono_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} {associations_file_name}`
+The datasets can be downloaded from [here](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download). Each dataset has a name of the form `fr_${fr_code}/${dataset_name}` on the webpage. When you download and uncompress it, you'll end up with a different folder name `${tum_dataset_folder}`. The command to run it is:
 
-The associations file is used to link RGB and D files together. The files start with `fr_${fr_code}`, but there isn't a standard suffix that's used and has to be checked individuall. To run the basic set, an example would be:
+`rgbd_tum TUM${fr_code}.yaml ${your_tum_dataset_folder} {associations_file_name}`
+
+The associations file is used to link RGB and D files together. The files start with `fr_${fr_code}`, but there isn't a standard suffix that's used and has to be checked individually. To run the basic set, an example would be:
 
 `rgbd_tum TUM1.yaml rgbd_dataset_freiburg1_xyz fr1_xyz.txt`
 
