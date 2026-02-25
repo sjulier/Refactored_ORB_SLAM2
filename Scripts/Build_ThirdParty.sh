@@ -27,5 +27,7 @@ root_dir=`pwd`
 mkdir -p Build/${build_type}/Source/ThirdParty
 pushd Build/${build_type}/Source/ThirdParty > /dev/null
 cmake "${root_dir}/Source/ThirdParty" -DCMAKE_BUILD_TYPE=${build_type}
+# Add this argument above to build shard libraries:
+#-DBUILD_SHARED_LIBRARIES=YES
 make -j${num_jobs}
 popd
