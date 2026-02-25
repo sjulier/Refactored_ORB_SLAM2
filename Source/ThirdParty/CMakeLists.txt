@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 project(ThirdParty)
 
 # Set the language support level
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_C_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 
 # Set where intermediate builds end up
 cmake_path(SET BUILD_INSTALL_PREFIX NORMALIZE ${ThirdParty_SOURCE_DIR}/../../Develop/${CMAKE_BUILD_TYPE})
@@ -95,7 +95,6 @@ list(APPEND pangolin_cmake_args
   -DBUILD_EXAMPLES=NO
   -DBUILD_PANGOLIN_PYTHON=NO
   -DBUILD_PANGOLIN_FFMPEG=NO
-  -DBUILD_SHARED_LIBS=NO
   -DBUILD_EXTERN_GLEW=NO
   -DBUILD_EXTERN_LIBPNG=NO
   -DBUILD_EXTERN_LIBJPEG=NO
