@@ -40,7 +40,7 @@ The build instructions are deliberately designed to be similar on all supported 
 
 Install the dependencies:
 
-`sudo apt install cmake build-essential libeigen3-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libepoxy-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
+`sudo apt install cmake build-essential libeigen3-dev libsuitesparse-dev libboost-dev libboost-filesystem-dev libblas-dev liblapack-dev libepoxy-dev libopencv-dev libglew-dev mesa-utils libgl1-mesa-glx unzip`
 
 The default (Release) version of the library is built by running:
 
