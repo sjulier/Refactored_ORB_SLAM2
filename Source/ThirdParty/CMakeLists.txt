@@ -103,6 +103,12 @@ list(APPEND pangolin_cmake_args
   -DBUILD_PANGOLIN_LZ4=NO
   -DBUILD_PANGOLIN_LIBOPENEXR=NO
   -DBUILD_PANGOLIN_LIBRAW=NO
+  # Disable RealSense support; the shipped Pangolin's realsense2 driver
+  # fails to compile against modern librealsense2 under Apple clang's
+  # -Werror settings (deprecated-copy, sign-compare). ORB-SLAM2 does not
+  # use Pangolin as a video source, so this is safe to disable.
+  -DBUILD_PANGOLIN_REALSENSE=NO
+  -DBUILD_PANGOLIN_REALSENSE2=NO
   )
 
 ExternalProject_Add(Pangolin

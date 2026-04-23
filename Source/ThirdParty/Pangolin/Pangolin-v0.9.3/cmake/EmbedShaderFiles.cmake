@@ -18,8 +18,10 @@ function(embed_shader_files_now output escaped_shader_files project_prefix)
 
     # Iterate through input files
     foreach(shader ${shader_files})
-        # Get short filename
-        STRING(REGEX REPLACE "^${project_prefix}" "" filename ${shader})
+        # Get short filename. Use a plain (non-regex) replace because
+        # project_prefix is a filesystem path that may contain characters
+        # (e.g. '+') that regex compilers reject as invalid quantifiers.
+        STRING(REPLACE "${project_prefix}" "" filename ${shader})
 
         # Read data from file
         file(READ ${shader} filedata)
