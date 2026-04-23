@@ -42,13 +42,28 @@ Vector3 EdgeStereoSE3ProjectXYZ::cam_project(const Vector3& trans_xyz,
 }
 
 bool EdgeStereoSE3ProjectXYZ::read(std::istream& is) {
-  internal::readVector(is, _measurement);
-  return readInformationMatrix(is);
+  bool state = true;
+  state &= internal::readVector(is, _measurement);
+  state &= readInformationMatrix(is);
+
+  // Optional trailing camera intrinsics (fx, fy, cx, cy, bf). Legacy files
+  // that omit these keep the default values set at construction time.
+  int c = is.peek();
+  while (c == ' ' || c == '\t') {
+    is.get();
+    c = is.peek();
+  }
+  if (state && c != '\n' && c != '\r' && c != EOF) {
+    state &= static_cast<bool>(is >> fx >> fy >> cx >> cy >> bf);
+  }
+  return state;
 }
 
 bool EdgeStereoSE3ProjectXYZ::write(std::ostream& os) const {
   internal::writeVector(os, measurement());
-  return writeInformationMatrix(os);
+  bool state = writeInformationMatrix(os);
+  os << " " << fx << " " << fy << " " << cx << " " << cy << " " << bf;
+  return state && os.good();
 }
 
 void EdgeStereoSE3ProjectXYZ::linearizeOplus() {

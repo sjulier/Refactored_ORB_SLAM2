@@ -32,13 +32,28 @@ EdgeSE3ProjectXYZ::EdgeSE3ProjectXYZ()
     : BaseBinaryEdge<2, Vector2, VertexPointXYZ, VertexSE3Expmap>() {}
 
 bool EdgeSE3ProjectXYZ::read(std::istream& is) {
-  internal::readVector(is, _measurement);
-  return readInformationMatrix(is);
+  bool state = true;
+  state &= internal::readVector(is, _measurement);
+  state &= readInformationMatrix(is);
+
+  // Optional trailing camera intrinsics (fx, fy, cx, cy). Legacy files that
+  // omit these keep the default values set at construction time.
+  int c = is.peek();
+  while (c == ' ' || c == '\t') {
+    is.get();
+    c = is.peek();
+  }
+  if (state && c != '\n' && c != '\r' && c != EOF) {
+    state &= static_cast<bool>(is >> fx >> fy >> cx >> cy);
+  }
+  return state;
 }
 
 bool EdgeSE3ProjectXYZ::write(std::ostream& os) const {
   internal::writeVector(os, measurement());
-  return writeInformationMatrix(os);
+  bool state = writeInformationMatrix(os);
+  os << " " << fx << " " << fy << " " << cx << " " << cy;
+  return state && os.good();
 }
 
 void EdgeSE3ProjectXYZ::computeError() {

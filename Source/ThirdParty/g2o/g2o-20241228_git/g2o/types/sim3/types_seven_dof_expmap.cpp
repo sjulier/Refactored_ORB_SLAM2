@@ -65,6 +65,23 @@ bool VertexSim3Expmap::read(std::istream& is) {
   state &= internal::readVector(is, _focal_length1);
   state &= internal::readVector(is, _principle_point1);
   setEstimate(Sim3(cam2world).inverse());
+
+  // Optional trailing fields added later: focal_length2, principle_point2,
+  // fix_scale. Skip inline whitespace but stop at newline/EOF so legacy
+  // single-line records (with only focal_length1/principle_point1) still
+  // parse correctly.
+  int c = is.peek();
+  while (c == ' ' || c == '\t') {
+    is.get();
+    c = is.peek();
+  }
+  if (state && c != '\n' && c != '\r' && c != EOF) {
+    state &= internal::readVector(is, _focal_length2);
+    state &= internal::readVector(is, _principle_point2);
+    int fs = 0;
+    state &= static_cast<bool>(is >> fs);
+    _fix_scale = (fs != 0);
+  }
   return state;
 }
 
@@ -74,6 +91,9 @@ bool VertexSim3Expmap::write(std::ostream& os) const {
   internal::writeVector(os, lv);
   internal::writeVector(os, _focal_length1);
   internal::writeVector(os, _principle_point1);
+  internal::writeVector(os, _focal_length2);
+  internal::writeVector(os, _principle_point2);
+  os << (_fix_scale ? 1 : 0) << " ";
   return os.good();
 }
 
