@@ -47,6 +47,34 @@ class G2O_TYPES_SBA_API VertexSE3Expmap : public BaseVertex<6, SE3Quat> {
   bool write(std::ostream& os) const;
   void setToOriginImpl();
   void oplusImpl(const double* update_);
+
+  virtual bool setEstimateDataImpl(const double* est) {
+    Eigen::Map<const Vector7> v(est);
+    _estimate = SE3Quat(v);
+    return true;
+  }
+
+  virtual bool getEstimateData(double* est) const {
+    Eigen::Map<Vector7> v(est);
+    v = _estimate.toVector();
+    return true;
+  }
+
+  virtual int estimateDimension() const { return 7; }
+
+  virtual bool setMinimalEstimateDataImpl(const double* est) {
+    Eigen::Map<const Vector6> v(est);
+    _estimate.fromMinimalVector(v);
+    return true;
+  }
+
+  virtual bool getMinimalEstimateData(double* est) const {
+    Eigen::Map<Vector6> v(est);
+    v = _estimate.toMinimalVector();
+    return true;
+  }
+
+  virtual int minimalEstimateDimension() const { return 6; }
 };
 
 }  // namespace g2o

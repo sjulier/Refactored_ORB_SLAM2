@@ -83,6 +83,30 @@ class G2O_TYPES_SIM3_API VertexSim3Expmap : public BaseVertex<7, Sim3> {
     setEstimate(s * estimate());
   }
 
+  virtual bool setEstimateDataImpl(const double* est) {
+    Eigen::Map<const Vector7> v(est);
+    _estimate = Sim3(Vector7(v));
+    return true;
+  }
+
+  virtual bool getEstimateData(double* est) const {
+    Eigen::Map<Vector7> v(est);
+    v = _estimate.log();
+    return true;
+  }
+
+  virtual int estimateDimension() const { return 7; }
+
+  virtual bool setMinimalEstimateDataImpl(const double* est) {
+    return setEstimateDataImpl(est);
+  }
+
+  virtual bool getMinimalEstimateData(double* est) const {
+    return getEstimateData(est);
+  }
+
+  virtual int minimalEstimateDimension() const { return 7; }
+
   Vector2 _principle_point1, _principle_point2;
   Vector2 _focal_length1, _focal_length2;
 
