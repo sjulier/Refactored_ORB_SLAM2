@@ -8,9 +8,13 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <utility>
+
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 
 #include "g2o/core/optimizable_graph.h"
 #include "g2o/core/sparse_optimizer.h"
@@ -63,9 +67,15 @@ void serialiseGraph(g2o::SparseOptimizer& optimizer,
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-AsyncGraphWriter::AsyncGraphWriter(std::string prefix)
+AsyncGraphWriter::AsyncGraphWriter(std::string prefix,
+                                   int         localIntervalKF,
+                                   int         essentialMinSpacingKF,
+                                   bool        compress)
     : mEnabled(!prefix.empty())
     , mPrefix(std::move(prefix))
+    , mLocalIntervalKF(localIntervalKF)
+    , mEssentialMinSpacingKF(essentialMinSpacingKF)
+    , mCompress(compress)
 {
   if (!mEnabled)
     return;
@@ -105,7 +115,7 @@ bool AsyncGraphWriter::checkLocalThrottle(int kfId)
   // the same KF id is allowed unconditionally.
   if (kfId == mPendingLocalKf)
     return true;
-  if (kfId - mLastLocalKf < kLocalIntervalKF)
+  if (kfId - mLastLocalKf < mLocalIntervalKF)
     return false;
   mLastLocalKf      = kfId;
   mPendingLocalKf   = kfId;
@@ -116,7 +126,7 @@ bool AsyncGraphWriter::checkEssentialThrottle(int kfId)
 {
   if (kfId == mPendingEssentialKf)
     return true;
-  if (kfId - mLastEssentialKf < kEssentialMinSpacingKF)
+  if (kfId - mLastEssentialKf < mEssentialMinSpacingKF)
     return false;
   mLastEssentialKf      = kfId;
   mPendingEssentialKf   = kfId;
@@ -130,8 +140,12 @@ bool AsyncGraphWriter::tryDumpLocal(g2o::SparseOptimizer& optimizer,
   if (!mEnabled || !checkLocalThrottle(kfId))
     return false;
 
+  // 6-digit zero-pad so names sort lexicographically as well as
+  // numerically (kf000007 < kf000012 etc.).
   std::ostringstream name;
-  name << "local_kf" << kfId << '_' << phaseSuffix(phase) << ".g2o";
+  name << "local_kf"
+       << std::setw(6) << std::setfill('0') << kfId
+       << '_' << phaseSuffix(phase) << ".g2o";
   snapshotAndEnqueue(optimizer, name.str());
   return true;
 }
@@ -145,8 +159,9 @@ bool AsyncGraphWriter::tryDumpEssential(g2o::SparseOptimizer& optimizer,
     return false;
 
   std::ostringstream name;
-  name << "essential_" << essentialKindStr(kind)
-       << "_kf" << kfId << '_' << phaseSuffix(phase) << ".g2o";
+  name << "essential_" << essentialKindStr(kind) << "_kf"
+       << std::setw(6) << std::setfill('0') << kfId
+       << '_' << phaseSuffix(phase) << ".g2o";
   snapshotAndEnqueue(optimizer, name.str());
   return true;
 }
@@ -155,7 +170,11 @@ bool AsyncGraphWriter::tryDumpEssential(g2o::SparseOptimizer& optimizer,
 
 std::string AsyncGraphWriter::buildPath(const std::string& filename) const
 {
-  return (fs::path(mPrefix) / filename).string();
+  // Append .gz only at the path level (not in the in-memory `filename`
+  // we receive from try*Dump) so the snapshot/serialise stage stays
+  // unaware of compression.
+  std::string suffixed = mCompress ? (filename + ".gz") : filename;
+  return (fs::path(mPrefix) / suffixed).string();
 }
 
 void AsyncGraphWriter::snapshotAndEnqueue(g2o::SparseOptimizer& optimizer,
@@ -182,6 +201,8 @@ void AsyncGraphWriter::snapshotAndEnqueue(g2o::SparseOptimizer& optimizer,
 
 void AsyncGraphWriter::writerMain()
 {
+  namespace io = boost::iostreams;
+
   for (;;)
   {
     PendingWrite job;
@@ -199,14 +220,30 @@ void AsyncGraphWriter::writerMain()
       mQueue.pop_front();
     }
 
-    std::ofstream out(job.path);
-    if (!out)
+    // Open binary regardless of compression: gzip-compressed bytes are
+    // binary, and even uncompressed g2o-text we want to write byte-for-
+    // byte (no CRLF translation surprises on cross-platform repros).
+    std::ofstream raw(job.path, std::ios::binary);
+    if (!raw)
     {
       std::cerr << "[AsyncGraphWriter] failed to open '" << job.path
                 << "' for writing\n";
       continue;
     }
-    out << job.content;
+
+    if (mCompress)
+    {
+      io::filtering_ostream out;
+      out.push(io::gzip_compressor());
+      out.push(raw);
+      out << job.content;
+      // filtering_ostream's destructor flushes the gzip filter and the
+      // underlying ofstream, in that order.
+    }
+    else
+    {
+      raw << job.content;
+    }
   }
 }
 

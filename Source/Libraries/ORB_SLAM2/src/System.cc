@@ -38,9 +38,7 @@ System::System(const string &strVocFile, const string &strSettingsFile,
                const string &strLogPrefix)
     : mSensor(sensor), mpViewer(static_cast<Viewer *>(NULL)), mbReset(false),
       mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false),
-      mpAsyncGraphWriter(strLogPrefix.empty()
-                         ? nullptr
-                         : new AsyncGraphWriter(strLogPrefix)) {
+      mpAsyncGraphWriter(nullptr) {
   // Output welcome message
   cout << endl
        << "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of "
@@ -67,6 +65,30 @@ System::System(const string &strVocFile, const string &strSettingsFile,
   if (!fsSettings.isOpened()) {
     cerr << "Failed to open settings file at: " << strSettingsFile << endl;
     exit(-1);
+  }
+
+  // ── Optional g2o-graph dump configuration ────────────────────────────
+  // Read overrides from the settings file's `Dump` node.  All keys are
+  // optional; missing values fall back to the AsyncGraphWriter defaults
+  // (5 / 30 / true).  Compress is read as int (0/1) since cv::FileStorage
+  // doesn't have a native bool reader.
+  if (!strLogPrefix.empty()) {
+    int  localIntervalKF       = 5;
+    int  essentialMinSpacingKF = 30;
+    bool compress              = true;
+
+    cv::FileNode dumpNode = fsSettings["Dump"];
+    if (!dumpNode.empty()) {
+      if (!dumpNode["LocalIntervalKF"].empty())
+        localIntervalKF = (int)dumpNode["LocalIntervalKF"];
+      if (!dumpNode["EssentialMinSpacingKF"].empty())
+        essentialMinSpacingKF = (int)dumpNode["EssentialMinSpacingKF"];
+      if (!dumpNode["Compress"].empty())
+        compress = ((int)dumpNode["Compress"] != 0);
+    }
+
+    mpAsyncGraphWriter = new AsyncGraphWriter(
+        strLogPrefix, localIntervalKF, essentialMinSpacingKF, compress);
   }
 
   // Load ORB Vocabulary

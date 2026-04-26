@@ -47,6 +47,7 @@ g2o::types_sba
 g2o::types_sim3
 g2o::core
 Boost::filesystem
+Boost::iostreams
 )
 
 # For some reason this isn't propagating over; I think this might be related to a LIST issue,

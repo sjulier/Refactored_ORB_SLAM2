@@ -20,19 +20,29 @@
  *
  * Throttling
  * ----------
- *   tryDumpLocal     — emits at most once every kLocalIntervalKF KFs
- *                      (default 5).  Both pre and post phases for a
- *                      given KF id count as one trigger event.
- *   tryDumpEssential — emits at most once every kEssentialMinSpacingKF
- *                      KFs (default 30).  Loop-closure attempts can
- *                      fire close together; this avoids spam.
+ *   tryDumpLocal     — emits at most once every localIntervalKF KFs
+ *                      (default 5; configurable).  Both pre and post
+ *                      phases for a given KF id count as one trigger
+ *                      event.
+ *   tryDumpEssential — emits at most once every essentialMinSpacingKF
+ *                      KFs (default 30; configurable).  Loop-closure
+ *                      attempts can fire close together; this avoids
+ *                      spam.
  *
  * Filename schema
  * ---------------
- *   <prefix>/local_kf<N>_<phase>.{g2o,levels}
- *   <prefix>/essential_<kind>_kf<N>_<phase>.{g2o,levels}
- *      <kind>  — "sim3" (mono path) or "se3" (stereo / RGB-D path)
- *      <phase> — "pre" (input graph before optimize) or "post"
+ *   <prefix>/local_kf<NNNNNN>_<phase>.<ext>
+ *   <prefix>/essential_<kind>_kf<NNNNNN>_<phase>.<ext>
+ *      <NNNNNN> — six-digit zero-padded KF id (so files sort
+ *                 lexicographically and numerically)
+ *      <kind>   — "sim3" (mono path) or "se3" (stereo / RGB-D path)
+ *      <phase>  — "pre" (input graph before optimize) or "post"
+ *      <ext>    — "g2o" or "g2o.levels" when compress=false
+ *                 "g2o.gz" or "g2o.levels.gz" when compress=true
+ *                 (default: true).  The .levels sidecar is gzipped
+ *                 alongside the main g2o for consistency; absolute
+ *                 saving is small but it keeps everything on the
+ *                 same on/off switch.
  *
  * Disabled mode
  * -------------
@@ -69,7 +79,24 @@ class AsyncGraphWriter
   /// background thread is started, every tryDump* call is a no-op).
   /// Otherwise, @p prefix is treated as a directory path relative to
   /// cwd; the directory is created if missing.
-  explicit AsyncGraphWriter(std::string prefix);
+  ///
+  /// @param localIntervalKF        Minimum KF id spacing between
+  ///                               consecutive LocalBA dumps.  Default 5.
+  /// @param essentialMinSpacingKF  Minimum KF id spacing between
+  ///                               consecutive essential-graph dumps.
+  ///                               Loop-closure attempts can fire close
+  ///                               together so this is the de-spammer.
+  ///                               Default 30.
+  /// @param compress               If true (default), every output file
+  ///                               passes through a gzip filter and
+  ///                               gets a `.gz` suffix.  Roughly halves
+  ///                               disk for ~free CPU on the writer
+  ///                               thread.  Inspect with `zcat` or have
+  ///                               the loader detect the suffix.
+  explicit AsyncGraphWriter(std::string prefix,
+                            int         localIntervalKF       = 5,
+                            int         essentialMinSpacingKF = 30,
+                            bool        compress              = true);
 
   /// Drains any queued writes and joins the background thread.
   ~AsyncGraphWriter();
@@ -123,11 +150,11 @@ class AsyncGraphWriter
   bool checkEssentialThrottle(int kfId);
 
   // ── config ──────────────────────────────────────────────────────────────
-  static constexpr int kLocalIntervalKF       = 5;
-  static constexpr int kEssentialMinSpacingKF = 30;
-
   bool                    mEnabled;
   std::string             mPrefix;
+  int                     mLocalIntervalKF;
+  int                     mEssentialMinSpacingKF;
+  bool                    mCompress;
 
   // ── throttle state (only touched on producer thread) ────────────────────
   int                     mLastLocalKf      = -1000000;
