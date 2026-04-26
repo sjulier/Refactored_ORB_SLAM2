@@ -31,6 +31,7 @@ add_library(${PROJECT_NAME} ${LIB_TYPE}
   src/Sim3Solver.cc
   src/Initializer.cc
   src/Viewer.cc
+  src/AsyncGraphWriter.cc
   )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_DIRECTORY})

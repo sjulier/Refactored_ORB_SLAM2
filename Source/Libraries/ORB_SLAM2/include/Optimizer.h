@@ -32,6 +32,7 @@
 namespace ORB_SLAM2 {
 
 class LoopClosing;
+class AsyncGraphWriter;
 
 class Optimizer {
 public:
@@ -44,17 +45,22 @@ public:
                                      bool *pbStopFlag = NULL,
                                      const unsigned long nLoopKF = 0,
                                      const bool bRobust = true);
-  void static LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
+  // The optional pWriter pointer triggers off-thread g2o graph dumps
+  // before and after the local-BA optimization for offline analysis.
+  // nullptr (the default) preserves the original behaviour exactly.
+  void static LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap,
+                                    AsyncGraphWriter *pWriter = nullptr);
   int static PoseOptimization(Frame *pFrame);
 
   // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise
-  // (mono)
+  // (mono).  pWriter as in LocalBundleAdjustment.
   void static OptimizeEssentialGraph(
       Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF,
       const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
       const LoopClosing::KeyFrameAndPose &CorrectedSim3,
       const std::map<KeyFrame *, std::set<KeyFrame *>> &LoopConnections,
-      const bool &bFixScale);
+      const bool &bFixScale,
+      AsyncGraphWriter *pWriter = nullptr);
 
   // if bFixScale is true, optimize SE3 (stereo,rgbd), Sim3 otherwise (mono)
   static int OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2,

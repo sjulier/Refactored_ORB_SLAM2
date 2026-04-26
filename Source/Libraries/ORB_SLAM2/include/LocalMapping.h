@@ -34,6 +34,7 @@ namespace ORB_SLAM2 {
 class Tracking;
 class LoopClosing;
 class Map;
+class AsyncGraphWriter;
 
 class LocalMapping {
 public:
@@ -42,6 +43,10 @@ public:
   void SetLoopCloser(LoopClosing *pLoopCloser);
 
   void SetTracker(Tracking *pTracker);
+
+  /// Optional graph dumper passed in by System.  nullptr disables
+  /// dumps in this thread.  See AsyncGraphWriter.
+  void SetGraphWriter(AsyncGraphWriter *pWriter) { mpGraphWriter = pWriter; }
 
   // Main function
   void Run();
@@ -99,6 +104,9 @@ protected:
 
   LoopClosing *mpLoopCloser;
   Tracking *mpTracker;
+
+  // Optional g2o graph dumper.  nullptr in production runs.
+  AsyncGraphWriter *mpGraphWriter = nullptr;
 
   std::list<KeyFrame *> mlNewKeyFrames;
 

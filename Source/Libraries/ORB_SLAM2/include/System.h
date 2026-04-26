@@ -43,6 +43,7 @@ class Map;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
+class AsyncGraphWriter;
 
 class System {
 public:
@@ -52,8 +53,20 @@ public:
 public:
   // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and
   // Viewer threads.
+  //
+  // @param strLogPrefix  Optional output directory (relative to cwd, will be
+  //                      created if missing) where the AsyncGraphWriter dumps
+  //                      LocalBA and OptimizeEssentialGraph snapshots for
+  //                      offline analysis.  Empty string (the default)
+  //                      disables all dumps; the writer thread is not
+  //                      started and existing third-party callers are
+  //                      unaffected.  Each example launcher derives this
+  //                      from its dataset arg (e.g. "kitti_07").
   System(const std::string &strVocFile, const std::string &strSettingsFile,
-         const eSensor sensor, const bool bUseViewer = true);
+         const eSensor sensor, const bool bUseViewer = true,
+         const std::string &strLogPrefix = "");
+
+  ~System();
 
   // Proccess the given stereo frame. Images must be synchronized and rectified.
   // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to
@@ -128,6 +141,11 @@ public:
 
   bool isFinished();
 
+  // Off-thread dump of LocalBA / OptimizeEssentialGraph optimizers for
+  // offline analysis.  Returns nullptr when the System was constructed
+  // without a strLogPrefix (i.e. dumps disabled).
+  AsyncGraphWriter* graphWriter() { return mpAsyncGraphWriter; }
+
 private:
   // Input sensor
   eSensor mSensor;
@@ -183,6 +201,10 @@ private:
   std::vector<MapPoint *> mTrackedMapPoints;
   std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
   std::mutex mMutexState;
+
+  // Off-thread g2o graph dumper (LocalBA + OptimizeEssentialGraph).
+  // Owned by System; nullptr when constructed with empty strLogPrefix.
+  AsyncGraphWriter *mpAsyncGraphWriter;
 };
 
 } // namespace ORB_SLAM2

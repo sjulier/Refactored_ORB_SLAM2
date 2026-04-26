@@ -541,7 +541,8 @@ void LoopClosing::CorrectLoop() {
   // Optimize graph
   Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF,
                                     NonCorrectedSim3, CorrectedSim3,
-                                    LoopConnections, mbFixScale);
+                                    LoopConnections, mbFixScale,
+                                    mpGraphWriter);
 
   mpMap->InformNewBigChange();
 

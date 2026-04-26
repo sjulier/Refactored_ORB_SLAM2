@@ -30,6 +30,7 @@
 
 #include <Eigen/StdVector>
 
+#include "AsyncGraphWriter.h"
 #include "Converter.h"
 
 #include <mutex>
@@ -435,7 +436,7 @@ int Optimizer::PoseOptimization(Frame *pFrame) {
 }
 
 void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag,
-                                      Map *pMap) {
+                                      Map *pMap, AsyncGraphWriter *pWriter) {
   // Local KeyFrames: First Breath Search from Current Keyframe
   list<KeyFrame *> lLocalKeyFrames;
 
@@ -647,6 +648,15 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag,
     if (*pbStopFlag)
       return;
 
+  // Off-thread snapshot of the input graph (pre-multi-pass robust BA).
+  // Pre-dump must precede initializeOptimization so the saved graph
+  // contains the freshly-built edges before any outlier flagging.
+  bool dumpedPre = false;
+  if (pWriter)
+    dumpedPre = pWriter->tryDumpLocal(
+        optimizer, static_cast<int>(pKF->mnId),
+        AsyncGraphWriter::Phase::Pre);
+
   optimizer.initializeOptimization();
   optimizer.optimize(5);
 
@@ -692,6 +702,15 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag,
     optimizer.initializeOptimization(0);
     optimizer.optimize(10);
   }
+
+  // Post-dump after the second optimization pass.  At this point edges
+  // have their final levels (inliers at 0, outliers at 1); the
+  // companion .levels sidecar preserves that for downstream
+  // reproduction by the g2o_sampling library.
+  if (dumpedPre)
+    pWriter->tryDumpLocal(
+        optimizer, static_cast<int>(pKF->mnId),
+        AsyncGraphWriter::Phase::Post);
 
   vector<pair<KeyFrame *, MapPoint *>> vToErase;
   vToErase.reserve(vpEdgesMono.size() + vpEdgesStereo.size());
@@ -768,7 +787,8 @@ static void optimizeEssentialGraphSim3Impl(
     Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF,
     const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
     const LoopClosing::KeyFrameAndPose &CorrectedSim3,
-    const map<KeyFrame *, set<KeyFrame *>> &LoopConnections) {
+    const map<KeyFrame *, set<KeyFrame *>> &LoopConnections,
+    AsyncGraphWriter *pWriter) {
   // Setup optimizer
   g2o::SparseOptimizer optimizer;
   optimizer.setVerbose(false);
@@ -984,9 +1004,26 @@ static void optimizeEssentialGraphSim3Impl(
     }
   }
 
+  // Off-thread snapshot of the loop-corrupted Sim3 essential graph
+  // before optimization (mono path).  The keyframe id used for
+  // throttling is pCurKF->mnId — the keyframe that triggered the
+  // loop-closure attempt.
+  bool dumpedPre = false;
+  if (pWriter)
+    dumpedPre = pWriter->tryDumpEssential(
+        optimizer, static_cast<int>(pCurKF->mnId),
+        AsyncGraphWriter::EssentialKind::Sim3,
+        AsyncGraphWriter::Phase::Pre);
+
   // Optimize!
   optimizer.initializeOptimization();
   optimizer.optimize(20);
+
+  if (dumpedPre)
+    pWriter->tryDumpEssential(
+        optimizer, static_cast<int>(pCurKF->mnId),
+        AsyncGraphWriter::EssentialKind::Sim3,
+        AsyncGraphWriter::Phase::Post);
 
   unique_lock<mutex> lock(pMap->mMutexMapUpdate);
 
@@ -1053,7 +1090,8 @@ static void optimizeEssentialGraphSE3Impl(
     Map *pMap, KeyFrame *pLoopKF, KeyFrame *pCurKF,
     const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
     const LoopClosing::KeyFrameAndPose &CorrectedSim3,
-    const map<KeyFrame *, set<KeyFrame *>> &LoopConnections) {
+    const map<KeyFrame *, set<KeyFrame *>> &LoopConnections,
+    AsyncGraphWriter *pWriter) {
   constexpr double kScaleTol = 1e-3;
   auto checkUnitScale = [](double s, const string &where) {
     if (std::abs(s - 1.0) > kScaleTol) {
@@ -1300,9 +1338,24 @@ static void optimizeEssentialGraphSE3Impl(
     }
   }
 
+  // Off-thread snapshot of the loop-corrupted SE3 essential graph
+  // before optimization (stereo / RGB-D path).
+  bool dumpedPre = false;
+  if (pWriter)
+    dumpedPre = pWriter->tryDumpEssential(
+        optimizer, static_cast<int>(pCurKF->mnId),
+        AsyncGraphWriter::EssentialKind::SE3,
+        AsyncGraphWriter::Phase::Pre);
+
   // Optimize!
   optimizer.initializeOptimization();
   optimizer.optimize(20);
+
+  if (dumpedPre)
+    pWriter->tryDumpEssential(
+        optimizer, static_cast<int>(pCurKF->mnId),
+        AsyncGraphWriter::EssentialKind::SE3,
+        AsyncGraphWriter::Phase::Post);
 
   unique_lock<mutex> lock(pMap->mMutexMapUpdate);
 
@@ -1368,13 +1421,13 @@ void Optimizer::OptimizeEssentialGraph(
     const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
     const LoopClosing::KeyFrameAndPose &CorrectedSim3,
     const map<KeyFrame *, set<KeyFrame *>> &LoopConnections,
-    const bool &bFixScale) {
+    const bool &bFixScale, AsyncGraphWriter *pWriter) {
   if (bFixScale) {
     optimizeEssentialGraphSE3Impl(pMap, pLoopKF, pCurKF, NonCorrectedSim3,
-                                  CorrectedSim3, LoopConnections);
+                                  CorrectedSim3, LoopConnections, pWriter);
   } else {
     optimizeEssentialGraphSim3Impl(pMap, pLoopKF, pCurKF, NonCorrectedSim3,
-                                   CorrectedSim3, LoopConnections);
+                                   CorrectedSim3, LoopConnections, pWriter);
   }
 }
 

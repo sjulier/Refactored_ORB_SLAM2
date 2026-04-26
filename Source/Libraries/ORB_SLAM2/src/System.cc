@@ -19,6 +19,7 @@
  */
 
 #include "System.h"
+#include "AsyncGraphWriter.h"
 #include "Converter.h"
 #include <boost/filesystem.hpp>
 #include <chrono>
@@ -33,9 +34,13 @@ using namespace ::std;
 namespace ORB_SLAM2 {
 
 System::System(const string &strVocFile, const string &strSettingsFile,
-               const eSensor sensor, const bool bUseViewer)
+               const eSensor sensor, const bool bUseViewer,
+               const string &strLogPrefix)
     : mSensor(sensor), mpViewer(static_cast<Viewer *>(NULL)), mbReset(false),
-      mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false) {
+      mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false),
+      mpAsyncGraphWriter(strLogPrefix.empty()
+                         ? nullptr
+                         : new AsyncGraphWriter(strLogPrefix)) {
   // Output welcome message
   cout << endl
        << "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of "
@@ -160,6 +165,11 @@ System::System(const string &strVocFile, const string &strSettingsFile,
 
   mpLocalMapper->SetTracker(mpTracker);
   mpLocalMapper->SetLoopCloser(mpLoopCloser);
+
+  // Hand the optional graph dumper to whichever threads will trigger
+  // optimisation events worth dumping.  Both setters tolerate nullptr.
+  mpLocalMapper->SetGraphWriter(mpAsyncGraphWriter);
+  mpLoopCloser->SetGraphWriter(mpAsyncGraphWriter);
 
   mpLoopCloser->SetTracker(mpTracker);
   mpLoopCloser->SetLocalMapper(mpLocalMapper);
@@ -326,6 +336,15 @@ bool System::MapChanged() {
     return true;
   } else
     return false;
+}
+
+System::~System() {
+  // The graph writer's destructor drains its queue and joins the
+  // background thread, so any in-flight dumps complete before the
+  // System object is torn down.  Other ORB-SLAM2 pointers are
+  // intentionally leaked here, matching the upstream pattern (the
+  // process is expected to exit shortly after Shutdown).
+  delete mpAsyncGraphWriter;
 }
 
 void System::Reset() {
