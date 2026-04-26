@@ -60,8 +60,14 @@ int main(int argc, char **argv) {
   // process frames.
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
 
+  // Off-thread g2o-graph dump prefix derived from the images-dir basename
+  // (e.g. "/.../MH_01/cam0/data" → "euroc_data" — coarse but unique-per-run
+  // assuming the user re-uses this launcher with one path at a time;
+  // override by editing this line if you need a finer prefix).
+  string logPrefix = "euroc_" + fs::path(argv[2]).filename().string();
+
   ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::MONOCULAR, true);
+                         ORB_SLAM2::System::MONOCULAR, true, logPrefix);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

@@ -56,8 +56,12 @@ int main(int argc, char **argv) {
   // process frames.
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
   
+  // Off-thread g2o-graph dump prefix derived from the sequence basename
+  // (e.g. "/.../rgbd_dataset_freiburg1_room" → "tum_rgbd_dataset_freiburg1_room").
+  string logPrefix = "tum_" + fs::path(argv[2]).filename().string();
+
   ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::MONOCULAR, true);
+                         ORB_SLAM2::System::MONOCULAR, true, logPrefix);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

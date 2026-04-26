@@ -116,8 +116,13 @@ int main(int argc, char **argv) {
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
 
+  // Off-thread g2o-graph dump prefix derived from the times-file basename
+  // (e.g. "MH01.txt" → "euroc_MH01"), which is the most concise unique
+  // identifier in EuRoC's stereo CLI args.
+  string logPrefix = "euroc_" + fs::path(argv[4]).stem().string();
+
   ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::STEREO, true);
+                         ORB_SLAM2::System::STEREO, true, logPrefix);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

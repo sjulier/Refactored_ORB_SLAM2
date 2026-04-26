@@ -56,8 +56,13 @@ int main(int argc, char **argv) {
   // process frames.
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
 
+  // Off-thread g2o-graph dump prefix derived from the sequence basename
+  // (e.g. "/.../sequences/07" → "kitti_07").  The System creates and
+  // owns the AsyncGraphWriter; an empty prefix would disable dumps.
+  string logPrefix = "kitti_" + fs::path(argv[2]).filename().string();
+
   ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::MONOCULAR, true);
+                         ORB_SLAM2::System::MONOCULAR, true, logPrefix);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;
