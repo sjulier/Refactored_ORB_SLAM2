@@ -11,7 +11,7 @@ cmake_path(SET BUILD_INSTALL_PREFIX NORMALIZE ${ThirdParty_SOURCE_DIR}/../../Dev
 
 # Build shared libraries or not?
 if(NOT DEFINED BUILD_SHARED_LIBRARIES)
-  set(BUILD_SHARED_LIBRARIES NO)
+  set(BUILD_SHARED_LIBRARIES YES)
 endif()
 
 # Set common cmake arguments for all external projects
@@ -52,8 +52,8 @@ list(APPEND g2o_cmake_args
   -DTEST_FLAG=ON)
 
 ExternalProject_Add(g2o
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/g2o/g2o-20241228_git  
-  BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/g2o/g2o-20241228_git  
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/g2o/sjulier-g2o-HEAD
+  BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/g2o/sjulier-g2o-HEAD
   INSTALL_DIR ${BUILD_INSTALL_PREFIX}
   CMAKE_ARGS ${g2o_cmake_args}
 )

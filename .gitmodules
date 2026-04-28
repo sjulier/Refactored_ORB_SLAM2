@@ -1,0 +1,3 @@
+[submodule "Source/ThirdParty/g2o/sjulier-g2o-HEAD"]
+	path = Source/ThirdParty/g2o/sjulier-g2o-HEAD
+	url = git@github.com:sjulier/g2o.git
