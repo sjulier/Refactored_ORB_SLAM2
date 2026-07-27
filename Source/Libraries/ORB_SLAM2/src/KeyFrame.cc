@@ -444,6 +444,21 @@ void KeyFrame::SetBadFlag() {
   for (size_t i = 0; i < mvpMapPoints.size(); i++)
     if (mvpMapPoints[i])
       mvpMapPoints[i]->EraseObservation(this);
+  // Break the parent->child half of the mMutexConnections lock-order cycle
+  // (potential deadlock, flagged by ThreadSanitizer).
+  //     The stock code held THIS keyframe's mMutexConnections
+  //     across the whole spanning-tree repair while calling child/parent methods
+  //     that each lock their OWN mMutexConnections ("hold parent.conn, acquire
+  //     child.conn") -- the inverse of UpdateConnections' "hold child.conn,
+  //     acquire parent.conn". Instead: snapshot this KF's tree state under our
+  //     lock, RELEASE it, then reassign children while holding no conn of our
+  //     own. Each child is re-validated (isBad) at use; ChangeParent re-locks
+  //     only the child's/parent's conn. mbBad timing (set at the end) is
+  //     preserved. Residual TOCTOU (a child added to this dying KF after the
+  //     snapshot) is no worse than stock, which orphans an after-return child
+  //     the same way; the isBad() gate skips a child that went bad meanwhile.
+  set<KeyFrame *> sChildren;
+  KeyFrame *pParent;
   {
     unique_lock<mutex> lock(mMutexConnections);
     unique_lock<mutex> lock1(mMutexFeatures);
@@ -451,64 +466,74 @@ void KeyFrame::SetBadFlag() {
     mConnectedKeyFrameWeights.clear();
     mvpOrderedConnectedKeyFrames.clear();
 
-    // Update Spanning Tree
-    set<KeyFrame *> sParentCandidates;
-    sParentCandidates.insert(mpParent);
+    sChildren = mspChildrens;
+    pParent = mpParent;
+  }
 
-    // Assign at each iteration one children with a parent (the pair with
-    // highest covisibility weight) Include that children as new parent
-    // candidate for the rest
-    while (!mspChildrens.empty()) {
-      bool bContinue = false;
+  const cv::Mat Tcw = GetPose();
 
-      int max = -1;
-      KeyFrame *pC;
-      KeyFrame *pP;
+  // Update Spanning Tree (operate on the snapshot; no this->conn held here)
+  set<KeyFrame *> sParentCandidates;
+  sParentCandidates.insert(pParent);
 
-      for (set<KeyFrame *>::iterator sit = mspChildrens.begin(),
-                                     send = mspChildrens.end();
-           sit != send; sit++) {
-        KeyFrame *pKF = *sit;
-        if (pKF->isBad())
-          continue;
+  // Assign at each iteration one children with a parent (the pair with
+  // highest covisibility weight) Include that children as new parent
+  // candidate for the rest
+  while (!sChildren.empty()) {
+    bool bContinue = false;
 
-        // Check if a parent candidate is connected to the keyframe
-        vector<KeyFrame *> vpConnected = pKF->GetVectorCovisibleKeyFrames();
-        for (size_t i = 0, iend = vpConnected.size(); i < iend; i++) {
-          for (set<KeyFrame *>::iterator spcit = sParentCandidates.begin(),
-                                         spcend = sParentCandidates.end();
-               spcit != spcend; spcit++) {
-            if (vpConnected[i]->mnId == (*spcit)->mnId) {
-              int w = pKF->GetWeight(vpConnected[i]);
-              if (w > max) {
-                pC = pKF;
-                pP = vpConnected[i];
-                max = w;
-                bContinue = true;
-              }
+    int max = -1;
+    KeyFrame *pC = nullptr;
+    KeyFrame *pP = nullptr;
+
+    for (set<KeyFrame *>::iterator sit = sChildren.begin(),
+                                   send = sChildren.end();
+         sit != send; sit++) {
+      KeyFrame *pKF = *sit;
+      if (pKF->isBad())
+        continue;
+
+      // Check if a parent candidate is connected to the keyframe
+      vector<KeyFrame *> vpConnected = pKF->GetVectorCovisibleKeyFrames();
+      for (size_t i = 0, iend = vpConnected.size(); i < iend; i++) {
+        for (set<KeyFrame *>::iterator spcit = sParentCandidates.begin(),
+                                       spcend = sParentCandidates.end();
+             spcit != spcend; spcit++) {
+          if (vpConnected[i]->mnId == (*spcit)->mnId) {
+            int w = pKF->GetWeight(vpConnected[i]);
+            if (w > max) {
+              pC = pKF;
+              pP = vpConnected[i];
+              max = w;
+              bContinue = true;
             }
           }
         }
       }
-
-      if (bContinue) {
-        pC->ChangeParent(pP);
-        sParentCandidates.insert(pC);
-        mspChildrens.erase(pC);
-      } else
-        break;
     }
 
-    // If a children has no covisibility links with any parent candidate, assign
-    // to the original parent of this KF
-    if (!mspChildrens.empty())
-      for (set<KeyFrame *>::iterator sit = mspChildrens.begin();
-           sit != mspChildrens.end(); sit++) {
-        (*sit)->ChangeParent(mpParent);
-      }
+    if (bContinue) {
+      pC->ChangeParent(pP);
+      sParentCandidates.insert(pC);
+      sChildren.erase(pC);
+    } else
+      break;
+  }
 
-    mpParent->EraseChild(this);
-    mTcp = Tcw * mpParent->GetPoseInverse();
+  // If a children has no covisibility links with any parent candidate, assign
+  // to the original parent of this KF
+  if (!sChildren.empty())
+    for (set<KeyFrame *>::iterator sit = sChildren.begin();
+         sit != sChildren.end(); sit++) {
+      (*sit)->ChangeParent(pParent);
+    }
+
+  pParent->EraseChild(this);
+
+  {
+    unique_lock<mutex> lock(mMutexConnections);
+    mspChildrens.clear();
+    mTcp = Tcw * pParent->GetPoseInverse();
     mbBad = true;
   }
 
