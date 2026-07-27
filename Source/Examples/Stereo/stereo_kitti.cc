@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -59,7 +60,8 @@ int main(int argc, char **argv) {
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_STEREO_SETTINGS_DIR));
 
   ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::STEREO, true);
+                         ORB_SLAM2::System::STEREO,
+                         std::getenv("ORBSLAM_NO_VIEWER") == nullptr);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

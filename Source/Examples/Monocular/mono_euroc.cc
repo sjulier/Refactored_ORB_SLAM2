@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -61,7 +62,8 @@ int main(int argc, char **argv) {
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_MONO_SETTINGS_DIR));
 
   ORB_SLAM2::System SLAM(DEFAULT_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::MONOCULAR, true);
+                         ORB_SLAM2::System::MONOCULAR,
+                         std::getenv("ORBSLAM_NO_VIEWER") == nullptr);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

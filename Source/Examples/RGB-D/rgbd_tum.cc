@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sysexits.h>
@@ -67,7 +68,8 @@ int main(int argc, char **argv) {
   // process frames.
   string settingsFile = FindFile(string(argv[1]), string(DEFAULT_RGBD_SETTINGS_DIR));
   ORB_SLAM2::System SLAM(DEFAULT_BINARY_ORB_VOCABULARY, settingsFile,
-                         ORB_SLAM2::System::RGBD, true);
+                         ORB_SLAM2::System::RGBD,
+                         std::getenv("ORBSLAM_NO_VIEWER") == nullptr);
 
   // Vector for tracking time statistics
   vector<float> vTimesTrack;

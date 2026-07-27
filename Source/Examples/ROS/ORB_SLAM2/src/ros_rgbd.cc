@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 
@@ -59,7 +60,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::RGBD, true);
+  ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::RGBD,
+                         std::getenv("ORBSLAM_NO_VIEWER") == nullptr);
 
   ImageGrabber igb(&SLAM);
 
