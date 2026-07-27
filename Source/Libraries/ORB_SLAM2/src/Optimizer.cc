@@ -41,7 +41,7 @@ using namespace ::std;
 namespace ORB_SLAM2 {
 
 void Optimizer::GlobalBundleAdjustemnt(Map *pMap, int nIterations,
-                                       bool *pbStopFlag,
+                                       std::atomic<bool> *pbStopFlag,
                                        const unsigned long nLoopKF,
                                        const bool bRobust) {
   vector<KeyFrame *> vpKFs = pMap->GetAllKeyFrames();
@@ -51,9 +51,18 @@ void Optimizer::GlobalBundleAdjustemnt(Map *pMap, int nIterations,
 
 void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs,
                                  const vector<MapPoint *> &vpMP,
-                                 int nIterations, bool *pbStopFlag,
+                                 int nIterations, std::atomic<bool> *pbStopFlag,
                                  const unsigned long nLoopKF,
                                  const bool bRobust) {
+  // The stop flag is std::atomic<bool> so cross-thread accesses (Tracking's
+  // InterruptBA / LoopClosing's abort vs the BA thread's reads) are race-free.
+  // g2o's setForceStopFlag still wants a bool*; this bridge is only valid if the
+  // two are layout-compatible, which is true for a lock-free atomic<bool>.
+  static_assert(sizeof(std::atomic<bool>) == sizeof(bool) &&
+                    alignof(std::atomic<bool>) == alignof(bool),
+                "atomic<bool> must be layout-compatible with bool for the "
+                "g2o setForceStopFlag bridge");
+
   vector<bool> vbNotIncludedMP;
   vbNotIncludedMP.resize(vpMP.size());
 
@@ -70,7 +79,13 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs,
   optimizer.setAlgorithm(solver);
 
   if (pbStopFlag)
-    optimizer.setForceStopFlag(pbStopFlag);
+    // g2o's setForceStopFlag takes a bool*; our flag is std::atomic<bool> so
+    // that every OTHER accessor (Tracking's InterruptBA writer, our *pbStopFlag
+    // reads below) is race-free. std::atomic<bool> is lock-free and
+    // layout-compatible with bool here (static_assert in BundleAdjustment), and
+    // g2o only ever reads it as a monotone "stop now" flag, so the bridging cast
+    // is safe.
+    optimizer.setForceStopFlag(reinterpret_cast<bool *>(pbStopFlag));
 
   long unsigned int maxKFid = 0;
 
@@ -434,8 +449,8 @@ int Optimizer::PoseOptimization(Frame *pFrame) {
   return nInitialCorrespondences - nBad;
 }
 
-void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag,
-                                      Map *pMap) {
+void Optimizer::LocalBundleAdjustment(KeyFrame *pKF,
+                                      std::atomic<bool> *pbStopFlag, Map *pMap) {
   // Local KeyFrames: First Breath Search from Current Keyframe
   list<KeyFrame *> lLocalKeyFrames;
 
@@ -500,7 +515,13 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag,
   optimizer.setAlgorithm(solver);
 
   if (pbStopFlag)
-    optimizer.setForceStopFlag(pbStopFlag);
+    // g2o's setForceStopFlag takes a bool*; our flag is std::atomic<bool> so
+    // that every OTHER accessor (Tracking's InterruptBA writer, our *pbStopFlag
+    // reads below) is race-free. std::atomic<bool> is lock-free and
+    // layout-compatible with bool here (static_assert in BundleAdjustment), and
+    // g2o only ever reads it as a monotone "stop now" flag, so the bridging cast
+    // is safe.
+    optimizer.setForceStopFlag(reinterpret_cast<bool *>(pbStopFlag));
 
   unsigned long maxKFid = 0;
 

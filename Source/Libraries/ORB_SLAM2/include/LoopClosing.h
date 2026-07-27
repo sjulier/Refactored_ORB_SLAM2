@@ -30,6 +30,7 @@
 #include "KeyFrameDatabase.h"
 
 #include "g2o/types/sim3/types_seven_dof_expmap.h"
+#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -132,7 +133,9 @@ protected:
   // Variables related to Global Bundle Adjustment
   bool mbRunningGBA;
   bool mbFinishedGBA;
-  bool mbStopGBA;
+  // Atomic: written by this thread (CorrectLoop abort / reset) and read by the
+  // GBA thread via *pbStopFlag. Was a plain bool -> benign data race (TSan).
+  std::atomic<bool> mbStopGBA;
   std::mutex mMutexGBA;
   std::thread *mpThreadGBA;
 

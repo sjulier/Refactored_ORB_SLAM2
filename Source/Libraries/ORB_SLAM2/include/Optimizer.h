@@ -29,6 +29,8 @@
 
 #include "g2o/types/sim3/types_seven_dof_expmap.h"
 
+#include <atomic>
+
 namespace ORB_SLAM2 {
 
 class LoopClosing;
@@ -37,14 +39,16 @@ class Optimizer {
 public:
   void static BundleAdjustment(const std::vector<KeyFrame *> &vpKF,
                                const std::vector<MapPoint *> &vpMP,
-                               int nIterations = 5, bool *pbStopFlag = NULL,
+                               int nIterations = 5,
+                               std::atomic<bool> *pbStopFlag = nullptr,
                                const unsigned long nLoopKF = 0,
                                const bool bRobust = true);
   void static GlobalBundleAdjustemnt(Map *pMap, int nIterations = 5,
-                                     bool *pbStopFlag = NULL,
+                                     std::atomic<bool> *pbStopFlag = nullptr,
                                      const unsigned long nLoopKF = 0,
                                      const bool bRobust = true);
-  void static LocalBundleAdjustment(KeyFrame *pKF, bool *pbStopFlag, Map *pMap);
+  void static LocalBundleAdjustment(KeyFrame *pKF,
+                                    std::atomic<bool> *pbStopFlag, Map *pMap);
   int static PoseOptimization(Frame *pFrame);
 
   // if bFixScale is true, 6DoF optimization (stereo,rgbd), 7DoF otherwise

@@ -27,6 +27,7 @@
 #include "Map.h"
 #include "Tracking.h"
 
+#include <atomic>
 #include <mutex>
 
 namespace ORB_SLAM2 {
@@ -108,7 +109,9 @@ protected:
 
   std::mutex mMutexNewKFs;
 
-  bool mbAbortBA;
+  // Atomic: written by Tracking (InterruptBA) and this thread (reset), read by
+  // the BA thread via *pbStopFlag. Was a plain bool -> benign data race (TSan).
+  std::atomic<bool> mbAbortBA;
 
   bool mbStopped;
   bool mbStopRequested;
