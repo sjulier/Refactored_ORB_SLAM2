@@ -170,6 +170,13 @@ void Viewer::Run() {
       break;
   }
 
+  // Destroy the Pangolin window HERE, in the viewer thread, while its GL context
+  // and libepoxy dispatch are still valid. Otherwise the PangolinGl lingers in
+  // Pangolin's process-global window map and is destroyed at exit() on the main
+  // thread after the GL context/epoxy/X11 are gone -- GlFont::~GlFont() then
+  // calls into torn-down libepoxy and SIGSEGVs at process exit.
+  pangolin::DestroyWindow("ORB-SLAM2: Map Viewer");
+
   cout << "Viewer thread finished." << endl;
   SetFinish();
 }
