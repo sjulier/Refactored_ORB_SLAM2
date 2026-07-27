@@ -212,12 +212,24 @@ void KeyFrame::EraseMapPointMatch(const size_t &idx) {
 }
 
 void KeyFrame::EraseMapPointMatch(MapPoint *pMP) {
+  // GetIndexInKeyFrame locks mMutexFeatures internally, so compute idx FIRST
+  // and take the lock only around the write to avoid re-locking a
+  // non-recursive mutex.
   int idx = pMP->GetIndexInKeyFrame(this);
-  if (idx >= 0)
+  if (idx >= 0) {
+    unique_lock<mutex> lock(mMutexFeatures);
     mvpMapPoints[idx] = static_cast<MapPoint *>(NULL);
+  }
 }
 
 void KeyFrame::ReplaceMapPointMatch(const size_t &idx, MapPoint *pMP) {
+  // Lock mMutexFeatures: this write races the mMutexFeatures-guarded readers
+  // (GetMapPointMatches / GetMapPoint / TrackedMapPoints) run from the tracking
+  // thread. A torn read returns a stale MapPoint* -> segfault on dereference;
+  // because nothing is freed (the pointer is only replaced) it is invisible to
+  // leak/use-after-free checkers. The race concentrates during loop-closure
+  // fusion, which spikes the call rate of this method.
+  unique_lock<mutex> lock(mMutexFeatures);
   mvpMapPoints[idx] = pMP;
 }
 
