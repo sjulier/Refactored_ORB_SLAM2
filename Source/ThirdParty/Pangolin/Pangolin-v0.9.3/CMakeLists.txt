@@ -86,7 +86,9 @@ if(BUILD_ASAN)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Werror)
+    # -Werror dropped: Pangolin 0.9.3 does not compile under GCC 13's stricter
+    # -Wmaybe-uninitialized false positives in libstdc++ <regex>.
+    add_compile_options(-Wall -Wextra)
     # error: ISO C++ prohibits anonymous structs
     # add_compile_options(-Wpedantic)
     # ignore "parentheses" warning for custom "picojson" fork
