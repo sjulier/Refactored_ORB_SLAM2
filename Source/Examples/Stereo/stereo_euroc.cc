@@ -52,8 +52,26 @@ int main(int argc, char **argv) {
   vector<string> vstrImageLeft;
   vector<string> vstrImageRight;
   vector<double> vTimeStamp;
-  string timeStampsFile = string(DEFAULT_STEREO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[4]);
-  
+  // Same resolution as the settings file (FindFile), not blind concatenation:
+  // concatenation accepted ONLY a bare filename and spliced anything else into
+  // a nonsensical path. Identical defect to mono_euroc.cc -- one bug, written
+  // twice, which is the argument for a single shared front end.
+  const string timesHint =
+      string(DEFAULT_STEREO_SETTINGS_DIR) + string("EuRoC_TimeStamps/");
+  string timeStampsFile = FindFile(string(argv[4]), timesHint);
+
+  // FindFile returns its input unchanged when nothing resolves, so be explicit
+  // about what was requested, where it was sought, and what form is expected.
+  if (fs::exists(timeStampsFile) == false) {
+    cerr << "FATAL: could not find the EuRoC timestamp file." << endl
+         << "  requested: " << argv[4] << endl
+         << "  looked in: the path as given, then " << timesHint << endl
+         << "  expected:  a bare name such as MH01.txt, or a path to one"
+         << endl;
+    return EX_DATAERR;
+  }
+
+
   LoadImages(string(argv[2]), string(argv[3]), timeStampsFile, vstrImageLeft,
              vstrImageRight, vTimeStamp);
 

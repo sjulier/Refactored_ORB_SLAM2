@@ -46,7 +46,27 @@ int main(int argc, char **argv) {
   // Retrieve paths to images
   vector<string> vstrImageFilenames;
   vector<double> vTimestamps;
-  string timeStampsFile = string(DEFAULT_MONO_SETTINGS_DIR) + string("EuRoC_TimeStamps/") + string(argv[3]);
+  // Resolve the timestamp file the SAME way the settings file is resolved
+  // (FindFile), rather than blindly concatenating the installed settings
+  // directory onto argv[3]. Concatenation accepted ONLY a bare filename and
+  // silently produced a spliced, nonsensical path for anything else -- so
+  // passing a perfectly good absolute path failed with a confusing error.
+  const string timesHint =
+      string(DEFAULT_MONO_SETTINGS_DIR) + string("EuRoC_TimeStamps/");
+  string timeStampsFile = FindFile(string(argv[3]), timesHint);
+
+  // FindFile hands back its input unchanged when it resolves nothing, so say
+  // exactly what was asked for, where it was looked for, and what form is
+  // expected. "File not found" alone leaves the reader with nowhere to go.
+  if (fs::exists(timeStampsFile) == false) {
+    cerr << "FATAL: could not find the EuRoC timestamp file." << endl
+         << "  requested: " << argv[3] << endl
+         << "  looked in: the path as given, then " << timesHint << endl
+         << "  expected:  a bare name such as MH01.txt, or a path to one"
+         << endl;
+    return EX_DATAERR;
+  }
+
   LoadImages(string(argv[2]), timeStampsFile, vstrImageFilenames, vTimestamps);
 
   int nImages = vstrImageFilenames.size();
